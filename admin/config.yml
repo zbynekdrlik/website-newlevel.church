@@ -1,0 +1,660 @@
+backend:
+  name: github
+  repo: zbynekdrlik/newlevel-church-website
+  branch: main
+  base_url: https://newlevel-church-oauth.milostsnvtech.workers.dev
+  auth_endpoint: /auth
+
+media_folder: "public/images/uploads"
+public_folder: "/images/uploads"
+
+locale: "sk"
+
+collections:
+  # ===== TÉMA A FARBY =====
+  - name: "theme"
+    label: "Téma a farby"
+    files:
+      - name: "colors"
+        label: "Farby stránky"
+        file: "src/content/settings/theme.json"
+        fields:
+          - label: "Farby"
+            name: "colors"
+            widget: "object"
+            fields:
+              - {
+                  label: "Hlavná farba",
+                  name: "primary",
+                  widget: "color",
+                  default: "#dc2626",
+                }
+              - {
+                  label: "Hlavná svetlá",
+                  name: "primaryLight",
+                  widget: "color",
+                  default: "#fef2f2",
+                }
+              - {
+                  label: "Hlavná tmavá",
+                  name: "primaryDark",
+                  widget: "color",
+                  default: "#b91c1c",
+                }
+              - {
+                  label: "Akcentová farba",
+                  name: "accent",
+                  widget: "color",
+                  default: "#2563eb",
+                }
+              - {
+                  label: "Akcent svetlý",
+                  name: "accentLight",
+                  widget: "color",
+                  default: "#dbeafe",
+                }
+              - {
+                  label: "Akcent tmavý",
+                  name: "accentDark",
+                  widget: "color",
+                  default: "#1d4ed8",
+                }
+              - {
+                  label: "Pozadie",
+                  name: "background",
+                  widget: "color",
+                  default: "#ffffff",
+                }
+              - {
+                  label: "Pozadie alternatívne",
+                  name: "backgroundAlt",
+                  widget: "color",
+                  default: "#f5f5f4",
+                }
+              - {
+                  label: "Pozadie hlavičky",
+                  name: "headerBackground",
+                  widget: "color",
+                  default: "#dbeafe",
+                }
+              - {
+                  label: "Farba textu",
+                  name: "text",
+                  widget: "color",
+                  default: "#1c1917",
+                }
+              - {
+                  label: "Text svetlý",
+                  name: "textLight",
+                  widget: "color",
+                  default: "#57534e",
+                }
+              - {
+                  label: "Text tlmený",
+                  name: "textMuted",
+                  widget: "color",
+                  default: "#a8a29e",
+                }
+
+  # ===== NASTAVENIA =====
+  - name: "settings"
+    label: "Nastavenia stránky"
+    files:
+      - name: "general"
+        label: "Všeobecné"
+        file: "src/content/settings/general.json"
+        fields:
+          - {
+              label: "Názov cirkvi",
+              name: "churchName",
+              widget: "string",
+              default: "New Level Church",
+            }
+          - { label: "Slogan", name: "tagline", widget: "text" }
+          - { label: "Email", name: "email", widget: "string" }
+          - {
+              label: "Telefón",
+              name: "phone",
+              widget: "string",
+              required: false,
+            }
+
+      - name: "navigation"
+        label: "Navigácia"
+        file: "src/content/settings/navigation.json"
+        fields:
+          - label: "Logo"
+            name: "logo"
+            widget: "image"
+            required: false
+          - label: "Hlavné menu"
+            name: "mainNav"
+            widget: "list"
+            fields:
+              - { label: "Text", name: "label", widget: "string" }
+              - { label: "Odkaz", name: "href", widget: "string" }
+              - {
+                  label: "Aktívne",
+                  name: "enabled",
+                  widget: "boolean",
+                  default: true,
+                }
+          - label: "CTA tlačidlo"
+            name: "ctaButton"
+            widget: "object"
+            fields:
+              - { label: "Text", name: "text", widget: "string" }
+              - { label: "Odkaz", name: "href", widget: "string" }
+              - {
+                  label: "Aktívne",
+                  name: "enabled",
+                  widget: "boolean",
+                  default: true,
+                }
+
+      - name: "social"
+        label: "Sociálne siete"
+        file: "src/content/settings/social.json"
+        fields:
+          - { label: "YouTube", name: "youtube", widget: "string" }
+          - {
+              label: "Facebook",
+              name: "facebook",
+              widget: "string",
+              required: false,
+            }
+          - {
+              label: "Instagram",
+              name: "instagram",
+              widget: "string",
+              required: false,
+            }
+          - {
+              label: "TikTok",
+              name: "tiktok",
+              widget: "string",
+              required: false,
+            }
+
+      - name: "contact"
+        label: "Kontaktné údaje"
+        file: "src/content/settings/contact.json"
+        fields:
+          - label: "Časy bohoslužieb"
+            name: "serviceTimes"
+            widget: "list"
+            fields:
+              - { label: "Deň", name: "day", widget: "string" }
+              - { label: "Čas", name: "time", widget: "string" }
+              - {
+                  label: "Popis",
+                  name: "description",
+                  widget: "string",
+                  required: false,
+                }
+          - label: "Adresa"
+            name: "address"
+            widget: "object"
+            fields:
+              - { label: "Ulica", name: "street", widget: "string" }
+              - { label: "Mesto", name: "city", widget: "string" }
+              - {
+                  label: "Kraj",
+                  name: "state",
+                  widget: "string",
+                  required: false,
+                }
+              - { label: "PSČ", name: "zip", widget: "string" }
+          - {
+              label: "Google Maps URL",
+              name: "mapEmbed",
+              widget: "string",
+              required: false,
+              hint: "Vložte embed URL z Google Maps",
+            }
+          - label: "Sekcia Pridajte sa k nám"
+            name: "serviceTimesSection"
+            widget: "object"
+            fields:
+              - {
+                  label: "Nadpis",
+                  name: "title",
+                  widget: "string",
+                  default: "Pridajte sa k nám",
+                }
+              - { label: "Popis", name: "description", widget: "text" }
+              - {
+                  label: "Text tlačidla",
+                  name: "buttonText",
+                  widget: "string",
+                  default: "Navigácia",
+                }
+              - {
+                  label: "Odkaz tlačidla",
+                  name: "buttonLink",
+                  widget: "string",
+                  default: "/contact",
+                }
+              - { label: "Obrázok", name: "image", widget: "image" }
+
+      - name: "footer"
+        label: "Päta stránky"
+        file: "src/content/settings/footer.json"
+        fields:
+          - { label: "Slogan", name: "tagline", widget: "text" }
+          - {
+              label: "Zobraziť časy bohoslužieb",
+              name: "showServiceTimes",
+              widget: "boolean",
+              default: true,
+            }
+          - { label: "Copyright text", name: "copyright", widget: "string" }
+          - label: "Rýchle odkazy"
+            name: "quickLinks"
+            widget: "list"
+            fields:
+              - { label: "Text", name: "label", widget: "string" }
+              - { label: "Odkaz", name: "href", widget: "string" }
+
+  # ===== DOMOVSKÁ STRÁNKA =====
+  - name: "homepage"
+    label: "Domovská stránka"
+    files:
+      - name: "hero"
+        label: "Hlavná sekcia (Hero)"
+        file: "src/content/homepage/hero.json"
+        fields:
+          - {
+              label: "Aktívna",
+              name: "enabled",
+              widget: "boolean",
+              default: true,
+            }
+          - { label: "Nadpis", name: "title", widget: "string" }
+          - { label: "Podnadpis", name: "subtitle", widget: "text" }
+          - {
+              label: "Text hlavného tlačidla",
+              name: "ctaText",
+              widget: "string",
+            }
+          - {
+              label: "Odkaz hlavného tlačidla",
+              name: "ctaLink",
+              widget: "string",
+            }
+          - {
+              label: "Text druhého tlačidla",
+              name: "secondaryCtaText",
+              widget: "string",
+            }
+          - {
+              label: "Odkaz druhého tlačidla",
+              name: "secondaryCtaLink",
+              widget: "string",
+            }
+          - { label: "Obrázok pozadia", name: "heroImage", widget: "image" }
+          - {
+              label: "Zobraziť video sekciu",
+              name: "showVideo",
+              widget: "boolean",
+              default: true,
+            }
+          - label: "Rozloženie"
+            name: "layout"
+            widget: "select"
+            options:
+              - { label: "Rozdelené (text + obrázok)", value: "split" }
+              - { label: "Na stred", value: "centered" }
+              - { label: "Celá šírka", value: "fullwidth" }
+            default: "split"
+
+      - name: "welcome"
+        label: "Uvítacia sekcia"
+        file: "src/content/homepage/welcome.json"
+        fields:
+          - {
+              label: "Aktívna",
+              name: "enabled",
+              widget: "boolean",
+              default: true,
+            }
+          - { label: "Štítok", name: "badge", widget: "string" }
+          - { label: "Nadpis", name: "heading", widget: "string" }
+          - { label: "Popis", name: "description", widget: "text" }
+          - label: "Hlavné tlačidlo"
+            name: "primaryButton"
+            widget: "object"
+            fields:
+              - { label: "Text", name: "text", widget: "string" }
+              - { label: "Odkaz", name: "link", widget: "string" }
+              - {
+                  label: "Aktívne",
+                  name: "enabled",
+                  widget: "boolean",
+                  default: true,
+                }
+          - label: "Druhé tlačidlo"
+            name: "secondaryButton"
+            widget: "object"
+            fields:
+              - { label: "Text", name: "text", widget: "string" }
+              - { label: "Odkaz", name: "link", widget: "string" }
+              - {
+                  label: "Aktívne",
+                  name: "enabled",
+                  widget: "boolean",
+                  default: true,
+                }
+
+      - name: "values"
+        label: "Sekcia hodnôt"
+        file: "src/content/homepage/values.json"
+        fields:
+          - {
+              label: "Aktívna",
+              name: "enabled",
+              widget: "boolean",
+              default: true,
+            }
+          - { label: "Nadpis", name: "heading", widget: "string" }
+          - { label: "Popis", name: "description", widget: "text" }
+          - label: "Hodnoty"
+            name: "items"
+            widget: "list"
+            fields:
+              - { label: "Názov", name: "title", widget: "string" }
+              - { label: "Popis", name: "description", widget: "text" }
+              - label: "Ikona"
+                name: "icon"
+                widget: "select"
+                options:
+                  - { label: "Srdce", value: "heart" }
+                  - { label: "Kniha", value: "book" }
+                  - { label: "Hudba", value: "music" }
+                  - { label: "Ľudia", value: "users" }
+                  - { label: "Hviezda", value: "star" }
+                  - { label: "Kríž", value: "cross" }
+              - label: "Farba"
+                name: "color"
+                widget: "select"
+                options:
+                  - { label: "Hlavná", value: "primary" }
+                  - { label: "Akcentová", value: "accent" }
+                  - { label: "Neutrálna", value: "neutral" }
+
+      - name: "youtube"
+        label: "YouTube sekcia"
+        file: "src/content/homepage/youtube.json"
+        fields:
+          - {
+              label: "Aktívna",
+              name: "enabled",
+              widget: "boolean",
+              default: true,
+            }
+          - {
+              label: "YouTube handle",
+              name: "channelHandle",
+              widget: "string",
+              hint: "Názov kanála bez @ (napr. NEWLEVELCHURCH)",
+            }
+          - { label: "Nadpis", name: "title", widget: "string" }
+          - { label: "Popis", name: "description", widget: "text" }
+          - { label: "Text tlačidla", name: "buttonText", widget: "string" }
+          - {
+              label: "Náhľadový obrázok",
+              name: "thumbnailImage",
+              widget: "image",
+            }
+
+      - name: "sections"
+        label: "Poradie sekcií"
+        file: "src/content/homepage/sections.json"
+        fields:
+          - label: "Sekcie"
+            name: "sections"
+            widget: "list"
+            hint: "Zoraďte sekcie podľa poradia. Nižšie číslo = vyššie na stránke."
+            fields:
+              - label: "Sekcia"
+                name: "id"
+                widget: "select"
+                options:
+                  - { label: "Uvítacia sekcia", value: "welcome" }
+                  - { label: "Naše hodnoty", value: "values" }
+                  - { label: "YouTube sekcia", value: "youtube" }
+                  - { label: "Časy bohoslužieb", value: "serviceTimes" }
+              - label: "Typ"
+                name: "type"
+                widget: "hidden"
+              - {
+                  label: "Aktívna",
+                  name: "enabled",
+                  widget: "boolean",
+                  default: true,
+                }
+              - {
+                  label: "Poradie",
+                  name: "order",
+                  widget: "number",
+                  min: 1,
+                  max: 10,
+                }
+
+  # ===== STRÁNKA O NÁS =====
+  - name: "about"
+    label: "Stránka O nás"
+    files:
+      - name: "content"
+        label: "Obsah stránky"
+        file: "src/content/about/content.json"
+        fields:
+          - label: "Hero sekcia"
+            name: "hero"
+            widget: "object"
+            fields:
+              - { label: "Štítok", name: "badge", widget: "string" }
+              - { label: "Nadpis", name: "title", widget: "string" }
+              - { label: "Popis", name: "description", widget: "text" }
+          - label: "Náš príbeh"
+            name: "story"
+            widget: "object"
+            fields:
+              - {
+                  label: "Aktívna",
+                  name: "enabled",
+                  widget: "boolean",
+                  default: true,
+                }
+              - { label: "Nadpis", name: "heading", widget: "string" }
+              - label: "Odseky"
+                name: "paragraphs"
+                widget: "list"
+                field: { label: "Odsek", name: "text", widget: "text" }
+              - { label: "Obrázok", name: "image", widget: "image" }
+          - label: "Poslanie"
+            name: "mission"
+            widget: "object"
+            fields:
+              - {
+                  label: "Aktívne",
+                  name: "enabled",
+                  widget: "boolean",
+                  default: true,
+                }
+              - { label: "Názov", name: "title", widget: "string" }
+              - { label: "Text", name: "text", widget: "text" }
+          - label: "Vízia"
+            name: "vision"
+            widget: "object"
+            fields:
+              - {
+                  label: "Aktívna",
+                  name: "enabled",
+                  widget: "boolean",
+                  default: true,
+                }
+              - { label: "Názov", name: "title", widget: "string" }
+              - { label: "Text", name: "text", widget: "text" }
+          - label: "Hodnoty"
+            name: "values"
+            widget: "object"
+            fields:
+              - {
+                  label: "Aktívna",
+                  name: "enabled",
+                  widget: "boolean",
+                  default: true,
+                }
+              - { label: "Nadpis", name: "heading", widget: "string" }
+              - { label: "Popis", name: "description", widget: "text" }
+              - label: "Položky"
+                name: "items"
+                widget: "list"
+                fields:
+                  - { label: "Názov", name: "title", widget: "string" }
+                  - { label: "Popis", name: "description", widget: "text" }
+          - label: "CTA sekcia"
+            name: "cta"
+            widget: "object"
+            fields:
+              - {
+                  label: "Aktívna",
+                  name: "enabled",
+                  widget: "boolean",
+                  default: true,
+                }
+              - { label: "Nadpis", name: "heading", widget: "string" }
+              - { label: "Popis", name: "description", widget: "text" }
+              - { label: "Text tlačidla", name: "buttonText", widget: "string" }
+              - {
+                  label: "Odkaz tlačidla",
+                  name: "buttonLink",
+                  widget: "string",
+                }
+
+  # ===== STRÁNKA KONTAKT =====
+  - name: "contact-page"
+    label: "Stránka Kontakt"
+    files:
+      - name: "content"
+        label: "Obsah stránky"
+        file: "src/content/contact/content.json"
+        fields:
+          - label: "Hero sekcia"
+            name: "hero"
+            widget: "object"
+            fields:
+              - { label: "Štítok", name: "badge", widget: "string" }
+              - { label: "Nadpis", name: "title", widget: "string" }
+              - { label: "Popis", name: "description", widget: "text" }
+          - label: "Formulár"
+            name: "form"
+            widget: "object"
+            fields:
+              - {
+                  label: "Aktívny",
+                  name: "enabled",
+                  widget: "boolean",
+                  default: true,
+                }
+              - { label: "Nadpis", name: "heading", widget: "string" }
+              - label: "Možnosti predmetu"
+                name: "subjects"
+                widget: "list"
+                field: { label: "Predmet", name: "subject", widget: "string" }
+              - {
+                  label: "Placeholder meno",
+                  name: "namePlaceholder",
+                  widget: "string",
+                }
+              - {
+                  label: "Placeholder email",
+                  name: "emailPlaceholder",
+                  widget: "string",
+                }
+              - {
+                  label: "Placeholder správa",
+                  name: "messagePlaceholder",
+                  widget: "string",
+                }
+              - { label: "Text tlačidla", name: "submitText", widget: "string" }
+          - label: "YouTube CTA"
+            name: "youtubeCta"
+            widget: "object"
+            fields:
+              - {
+                  label: "Aktívna",
+                  name: "enabled",
+                  widget: "boolean",
+                  default: true,
+                }
+              - { label: "Nadpis", name: "heading", widget: "string" }
+              - { label: "Popis", name: "description", widget: "text" }
+              - { label: "Text tlačidla", name: "buttonText", widget: "string" }
+
+  # ===== GALÉRIA =====
+  - name: "gallery"
+    label: "Galéria - Fotky"
+    folder: "src/content/gallery"
+    create: true
+    delete: true
+    slug: "{{slug}}"
+    extension: "json"
+    format: "json"
+    filter: { field: "type", value: "photo" }
+    fields:
+      - { label: "Typ", name: "type", widget: "hidden", default: "photo" }
+      - { label: "Názov", name: "title", widget: "string" }
+      - { label: "Obrázok", name: "image", widget: "image" }
+      - { label: "Popis", name: "caption", widget: "string", required: false }
+      - { label: "Dátum", name: "date", widget: "datetime" }
+      - label: "Kategória"
+        name: "category"
+        widget: "select"
+        options:
+          - { label: "Uctievanie", value: "Uctievanie" }
+          - { label: "Komunita", value: "Komunita" }
+          - { label: "Mládež", value: "Mládež" }
+          - { label: "Misie", value: "Misie" }
+          - { label: "Podujatia", value: "Podujatia" }
+      - {
+          label: "Poradie",
+          name: "order",
+          widget: "number",
+          default: 0,
+          hint: "Nižšie číslo = vyššie na stránke",
+        }
+
+  - name: "gallery-settings"
+    label: "Galéria - Nastavenia"
+    files:
+      - name: "settings"
+        label: "Nastavenia galérie"
+        file: "src/content/gallery/settings.json"
+        fields:
+          - label: "Hero sekcia"
+            name: "hero"
+            widget: "object"
+            fields:
+              - { label: "Štítok", name: "badge", widget: "string" }
+              - { label: "Nadpis", name: "title", widget: "string" }
+              - { label: "Popis", name: "description", widget: "text" }
+          - label: "CTA sekcia"
+            name: "cta"
+            widget: "object"
+            fields:
+              - {
+                  label: "Aktívna",
+                  name: "enabled",
+                  widget: "boolean",
+                  default: true,
+                }
+              - { label: "Nadpis", name: "heading", widget: "string" }
+              - { label: "Popis", name: "description", widget: "text" }
+              - { label: "Text tlačidla", name: "buttonText", widget: "string" }
+              - {
+                  label: "Odkaz tlačidla",
+                  name: "buttonLink",
+                  widget: "string",
+                }
