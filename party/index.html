@@ -1,0 +1,808 @@
+<!DOCTYPE html><html lang="sk"> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="description" content="Party pre mladých v New Level Church - každý piatok o 18:00. Jedlo, ping pong, kalčeto, herňa, varenie a karaoke."><link rel="icon" type="image/svg+xml" href="/favicon.svg"><title>Party | New Level Church</title><style>
+    :root {
+      --color-primary: #dd0e18;
+      --color-primary-light: #fef2f2;
+      --color-primary-dark: #dd0e18;
+      --color-accent: #3ebbc0;
+      --color-accent-light: #00f7ff;
+      --color-accent-dark: #3f787b;
+      --color-background: #ffffff;
+      --color-background-alt: #f5f5f4;
+      --color-header-bg: #3ebbc0;
+      --color-text: #1c1917;
+      --color-text-light: #57534e;
+      --color-text-muted: #a8a29e;
+    }
+
+    /* Party page custom styles */
+    .party-hero {
+      background: linear-gradient(135deg, #0f0f0f 0%, #1a1a2e 50%, #16213e 100%);
+    }
+
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 20px rgba(0, 247, 255, 0.3); }
+      50% { box-shadow: 0 0 40px rgba(0, 247, 255, 0.6); }
+    }
+
+    .cta-glow {
+      animation: pulse-glow 2s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .emoji-float {
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes neon-pulse {
+      0%, 100% { text-shadow: 0 0 10px rgba(0, 247, 255, 0.5), 0 0 20px rgba(0, 247, 255, 0.3); }
+      50% { text-shadow: 0 0 20px rgba(0, 247, 255, 0.8), 0 0 40px rgba(0, 247, 255, 0.5), 0 0 60px rgba(0, 247, 255, 0.3); }
+    }
+
+    .neon-text {
+      animation: neon-pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes counter-pop {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+
+    .counter-pop {
+      animation: counter-pop 0.4s ease-out;
+    }
+
+    .lightbox-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.9);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .lightbox-overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .lightbox-content {
+      max-width: 90vw;
+      max-height: 90vh;
+    }
+
+    .lightbox-content img {
+      max-width: 100%;
+      max-height: 80vh;
+      object-fit: contain;
+    }
+  </style><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"><link rel="stylesheet" href="/_astro/about.D6uwGl1n.css"></head> <body class="min-h-screen flex flex-col"> <header class="bg-[var(--color-header-bg)]/90 backdrop-blur-md shadow-sm sticky top-0 z-50"> <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"> <div class="flex justify-between items-center h-16 md:h-20"> <!-- Logo --> <a href="/" class="flex items-center"> <picture><source srcset="/images/logo.webp" type="image/webp"><img src="/images/logo.png" alt="New Level Church" class="h-10 md:h-12 w-auto" width="299" height="200"></picture> </a> <!-- Desktop Navigation --> <div class="hidden md:flex items-center space-x-8"> <a href="/" class="text-base font-medium transition-colors duration-200 text-[var(--color-text-light)] hover:text-[var(--color-primary)]"> Domov </a><a href="/about" class="text-base font-medium transition-colors duration-200 text-[var(--color-text-light)] hover:text-[var(--color-primary)]"> O nás </a><a href="/gallery" class="text-base font-medium transition-colors duration-200 text-[var(--color-text-light)] hover:text-[var(--color-primary)]"> Galéria </a><a href="/party" class="text-base font-medium transition-colors duration-200 text-[var(--color-primary)]"> Party </a><a href="/contact" class="text-base font-medium transition-colors duration-200 text-[var(--color-text-light)] hover:text-[var(--color-primary)]"> Kontakt </a><a href="/dar" class="text-base font-medium transition-colors duration-200 text-[var(--color-text-light)] hover:text-[var(--color-primary)]"> Dar </a> <!-- Social Icons --> <div class="flex items-center space-x-3 border-l border-[var(--color-text-muted)]/30 pl-6"> <a href="https://www.facebook.com/churchnewlevel/" target="_blank" rel="noopener noreferrer" class="text-[var(--color-text-light)] hover:text-[var(--color-primary)] transition-colors duration-200" aria-label="Facebook"> <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"> <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"></path> </svg> </a><a href="https://www.youtube.com/@NEWLEVELCHURCH" target="_blank" rel="noopener noreferrer" class="text-[var(--color-text-light)] hover:text-[var(--color-primary)] transition-colors duration-200" aria-label="YouTube"> <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"> <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"></path> </svg> </a><a href="https://www.instagram.com/newlevelchurch/" target="_blank" rel="noopener noreferrer" class="text-[var(--color-text-light)] hover:text-[var(--color-primary)] transition-colors duration-200" aria-label="Instagram"> <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"> <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"></path> </svg> </a><a href="https://www.tiktok.com/@newlevelchurch" target="_blank" rel="noopener noreferrer" class="text-[var(--color-text-light)] hover:text-[var(--color-primary)] transition-colors duration-200" aria-label="TikTok"> <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"> <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"></path> </svg> </a> </div> <a href="https://www.youtube.com/@NEWLEVELCHURCH" target="_blank" rel="noopener noreferrer" class="bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-white px-5 py-2.5 rounded-full font-medium transition-colors duration-200"> Sledovať </a> </div> <!-- Mobile Menu Button --> <button id="mobile-menu-button" class="md:hidden p-2 rounded-lg text-[var(--color-text-light)] hover:bg-[var(--color-background-alt)]" aria-label="Prepnúť menu"> <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path> </svg> </button> </div> <!-- Mobile Navigation --> <div id="mobile-menu" class="hidden md:hidden pb-4"> <div class="flex flex-col space-y-3"> <a href="/" class="text-base font-medium px-3 py-2 rounded-lg transition-colors duration-200 text-[var(--color-text-light)] hover:bg-[var(--color-background-alt)]"> Domov </a><a href="/about" class="text-base font-medium px-3 py-2 rounded-lg transition-colors duration-200 text-[var(--color-text-light)] hover:bg-[var(--color-background-alt)]"> O nás </a><a href="/gallery" class="text-base font-medium px-3 py-2 rounded-lg transition-colors duration-200 text-[var(--color-text-light)] hover:bg-[var(--color-background-alt)]"> Galéria </a><a href="/party" class="text-base font-medium px-3 py-2 rounded-lg transition-colors duration-200 text-[var(--color-primary)] bg-[var(--color-primary-light)]"> Party </a><a href="/contact" class="text-base font-medium px-3 py-2 rounded-lg transition-colors duration-200 text-[var(--color-text-light)] hover:bg-[var(--color-background-alt)]"> Kontakt </a><a href="/dar" class="text-base font-medium px-3 py-2 rounded-lg transition-colors duration-200 text-[var(--color-text-light)] hover:bg-[var(--color-background-alt)]"> Dar </a> <!-- Mobile Social Icons --> <div class="flex items-center justify-center space-x-4 py-3 border-t border-[var(--color-text-muted)]/20"> <a href="https://www.facebook.com/churchnewlevel/" target="_blank" rel="noopener noreferrer" class="text-[var(--color-text-light)] hover:text-[var(--color-primary)] transition-colors duration-200" aria-label="Facebook"> <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"> <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"></path> </svg> </a><a href="https://www.youtube.com/@NEWLEVELCHURCH" target="_blank" rel="noopener noreferrer" class="text-[var(--color-text-light)] hover:text-[var(--color-primary)] transition-colors duration-200" aria-label="YouTube"> <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"> <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"></path> </svg> </a><a href="https://www.instagram.com/newlevelchurch/" target="_blank" rel="noopener noreferrer" class="text-[var(--color-text-light)] hover:text-[var(--color-primary)] transition-colors duration-200" aria-label="Instagram"> <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"> <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"></path> </svg> </a><a href="https://www.tiktok.com/@newlevelchurch" target="_blank" rel="noopener noreferrer" class="text-[var(--color-text-light)] hover:text-[var(--color-primary)] transition-colors duration-200" aria-label="TikTok"> <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"> <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"></path> </svg> </a> </div> <a href="https://www.youtube.com/@NEWLEVELCHURCH" target="_blank" rel="noopener noreferrer" class="bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-white px-5 py-2.5 rounded-full font-medium text-center transition-colors duration-200"> Sledovať </a> </div> </div> </nav> </header> <script type="module">const e=document.getElementById("mobile-menu-button"),t=document.getElementById("mobile-menu");e?.addEventListener("click",()=>{t?.classList.toggle("hidden")});</script> <!-- Floating Social Sidebar - Hidden on mobile, visible on larger screens --><div class="hidden lg:flex fixed left-0 top-1/2 -translate-y-1/2 z-40 flex-col" data-astro-cid-b6hgtfku> <a href="https://www.facebook.com/churchnewlevel/" target="_blank" rel="noopener noreferrer" class="social-sidebar-link group flex items-center" aria-label="Facebook" style="--link-color: #1877F2; animation-delay: 0ms;" data-astro-cid-b6hgtfku> <span class="flex items-center justify-center w-12 h-12 bg-[var(--color-text)] group-hover:bg-[var(--link-color)] text-white transition-all duration-300 group-hover:w-14" data-astro-cid-b6hgtfku> <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" data-astro-cid-b6hgtfku> <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" data-astro-cid-b6hgtfku></path> </svg> </span> <span class="absolute left-12 bg-[var(--link-color)] text-white text-sm font-medium px-3 py-2 rounded-r-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap pointer-events-none" data-astro-cid-b6hgtfku> Facebook </span> </a><a href="https://www.youtube.com/@NEWLEVELCHURCH" target="_blank" rel="noopener noreferrer" class="social-sidebar-link group flex items-center" aria-label="YouTube" style="--link-color: #FF0000; animation-delay: 100ms;" data-astro-cid-b6hgtfku> <span class="flex items-center justify-center w-12 h-12 bg-[var(--color-text)] group-hover:bg-[var(--link-color)] text-white transition-all duration-300 group-hover:w-14" data-astro-cid-b6hgtfku> <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" data-astro-cid-b6hgtfku> <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" data-astro-cid-b6hgtfku></path> </svg> </span> <span class="absolute left-12 bg-[var(--link-color)] text-white text-sm font-medium px-3 py-2 rounded-r-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap pointer-events-none" data-astro-cid-b6hgtfku> YouTube </span> </a><a href="https://www.instagram.com/newlevelchurch/" target="_blank" rel="noopener noreferrer" class="social-sidebar-link group flex items-center" aria-label="Instagram" style="--link-color: #E4405F; animation-delay: 200ms;" data-astro-cid-b6hgtfku> <span class="flex items-center justify-center w-12 h-12 bg-[var(--color-text)] group-hover:bg-[var(--link-color)] text-white transition-all duration-300 group-hover:w-14" data-astro-cid-b6hgtfku> <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" data-astro-cid-b6hgtfku> <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" data-astro-cid-b6hgtfku></path> </svg> </span> <span class="absolute left-12 bg-[var(--link-color)] text-white text-sm font-medium px-3 py-2 rounded-r-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap pointer-events-none" data-astro-cid-b6hgtfku> Instagram </span> </a><a href="https://www.tiktok.com/@newlevelchurch" target="_blank" rel="noopener noreferrer" class="social-sidebar-link group flex items-center" aria-label="TikTok" style="--link-color: #000000; animation-delay: 300ms;" data-astro-cid-b6hgtfku> <span class="flex items-center justify-center w-12 h-12 bg-[var(--color-text)] group-hover:bg-[var(--link-color)] text-white transition-all duration-300 group-hover:w-14" data-astro-cid-b6hgtfku> <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" data-astro-cid-b6hgtfku> <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z" data-astro-cid-b6hgtfku></path> </svg> </span> <span class="absolute left-12 bg-[var(--link-color)] text-white text-sm font-medium px-3 py-2 rounded-r-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap pointer-events-none" data-astro-cid-b6hgtfku> TikTok </span> </a> </div>
+
+<main class="flex-grow">
+
+<!-- Section 1: Dark Hero -->
+<section class="party-hero relative overflow-hidden" style="padding-top: 5rem; padding-bottom: 5rem;">
+  <div class="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" style="background: rgba(0, 247, 255, 0.08);"></div>
+  <div class="absolute bottom-0 left-0 w-72 h-72 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" style="background: rgba(221, 14, 24, 0.08);"></div>
+  <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+    <span class="inline-block px-4 py-2 rounded-full text-sm font-medium mb-6" style="background: rgba(0, 247, 255, 0.15); color: #00f7ff;">
+      Každý piatok o 18:00
+    </span>
+    <h1 class="text-4xl md:text-6xl lg:text-7xl font-bold leading-tight mb-6" style="color: #ffffff;">
+      New Level <span style="color: #00f7ff;">Party</span>
+    </h1>
+    <p class="text-lg md:text-xl max-w-2xl mx-auto" style="color: #d6d3d1; margin-bottom: 3.5rem;">
+      Jedlo, hry, karaoke a skvelá atmosféra. Každý piatok pre mladých 15-25 rokov.
+    </p>
+    <!-- Scroll indicator -->
+    <div class="flex flex-col items-center gap-2 mt-10 animate-bounce">
+      <span class="text-sm font-medium tracking-wider uppercase" style="color: rgba(255,255,255,0.5);">Scrolluj nižšie</span>
+      <svg class="w-6 h-6" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- Section 2: Quick Info Cards -->
+<section class="py-16 md:py-24 bg-[var(--color-background)]">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div class="bg-[var(--color-primary-light)] rounded-2xl p-8 text-center hover:shadow-lg transition-shadow duration-200">
+        <div class="w-16 h-16 bg-[var(--color-primary)] rounded-full flex items-center justify-center mx-auto mb-6">
+          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </div>
+        <h3 class="text-xl font-bold text-[var(--color-text)] mb-3">Kedy</h3>
+        <p class="text-[var(--color-text-light)]">Každý piatok o 18:00</p>
+      </div>
+      <div style="background: rgba(0, 247, 255, 0.08);" class="rounded-2xl p-8 text-center hover:shadow-lg transition-shadow duration-200">
+        <div class="w-16 h-16 bg-[var(--color-accent)] rounded-full flex items-center justify-center mx-auto mb-6">
+          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+          </svg>
+        </div>
+        <h3 class="text-xl font-bold text-[var(--color-text)] mb-3">Kde</h3>
+        <p class="text-[var(--color-text-light)]">Letná 31/26, Spišská Nová Ves</p>
+      </div>
+      <div class="bg-[var(--color-background-alt)] rounded-2xl p-8 text-center hover:shadow-lg transition-shadow duration-200">
+        <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6" style="background: var(--color-text-light);">
+          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+          </svg>
+        </div>
+        <h3 class="text-xl font-bold text-[var(--color-text)] mb-3">Pre koho</h3>
+        <p class="text-[var(--color-text-light)]">Mladých 15-25 rokov</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Section 3: Weekly Food Menu -->
+<section id="menu" class="py-16 md:py-24 bg-[var(--color-background-alt)]">
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-12">
+      <h2 class="text-3xl md:text-4xl font-bold text-[var(--color-text)] mb-4">Tento týždeň na menu</h2>
+      <p class="text-lg text-[var(--color-text-light)]">Čo pre teba pripravil náš šéfkuchár?</p>
+    </div>
+    <!-- MENU START -->
+    <div class="bg-[var(--color-background)] rounded-2xl p-8 md:p-12 shadow-lg text-center">
+      <p class="text-sm font-medium text-[var(--color-accent)] mb-4">Piatok 28. februára 2026</p>
+      <div class="emoji-float text-6xl mb-6">&#x1F363;</div>
+      <h3 class="text-2xl md:text-3xl font-bold text-[var(--color-text)] mb-4">Sushi</h3>
+      <p class="text-[var(--color-text-light)] mb-8">Čerstvé sushi pripravené naším šéfkuchárom. Registruj sa, aby sme vedeli, koľko porcií pripraviť!</p>
+      <a href="#registracia" class="inline-flex items-center px-6 py-3 bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-white font-semibold rounded-full transition-colors duration-200">
+        Registruj sa na jedlo
+      </a>
+    </div>
+    <!-- MENU END -->
+  </div>
+</section>
+
+<!-- Section 3.5: Countdown Timer & Registration Counter -->
+<section class="py-12 md:py-16" style="background: linear-gradient(135deg, #0f0f0f 0%, #1a1a2e 50%, #16213e 100%);">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+
+    <!-- Countdown Timer (shown before deadline) -->
+    <div id="countdown-section" class="text-center mb-10">
+      <h2 class="text-2xl md:text-3xl font-bold mb-2" style="color: #ffffff;">Registrácia na jedlo sa uzatvára o</h2>
+      <p class="text-sm mb-8" style="color: #a8a29e;">Každý štvrtok o polnoci</p>
+      <div class="flex justify-center gap-4 md:gap-6">
+        <div class="rounded-xl p-4 md:p-6 min-w-[70px] md:min-w-[90px]" style="background: rgba(0, 247, 255, 0.08); border: 1px solid rgba(0, 247, 255, 0.15);">
+          <span id="countdown-days" class="neon-text block text-3xl md:text-5xl font-bold" style="color: #00f7ff;">--</span>
+          <span class="block text-xs md:text-sm mt-1" style="color: #a8a29e;">Dni</span>
+        </div>
+        <div class="rounded-xl p-4 md:p-6 min-w-[70px] md:min-w-[90px]" style="background: rgba(0, 247, 255, 0.08); border: 1px solid rgba(0, 247, 255, 0.15);">
+          <span id="countdown-hours" class="neon-text block text-3xl md:text-5xl font-bold" style="color: #00f7ff;">--</span>
+          <span class="block text-xs md:text-sm mt-1" style="color: #a8a29e;">Hodiny</span>
+        </div>
+        <div class="rounded-xl p-4 md:p-6 min-w-[70px] md:min-w-[90px]" style="background: rgba(0, 247, 255, 0.08); border: 1px solid rgba(0, 247, 255, 0.15);">
+          <span id="countdown-minutes" class="neon-text block text-3xl md:text-5xl font-bold" style="color: #00f7ff;">--</span>
+          <span class="block text-xs md:text-sm mt-1" style="color: #a8a29e;">Minúty</span>
+        </div>
+        <div class="rounded-xl p-4 md:p-6 min-w-[70px] md:min-w-[90px]" style="background: rgba(0, 247, 255, 0.08); border: 1px solid rgba(0, 247, 255, 0.15);">
+          <span id="countdown-seconds" class="neon-text block text-3xl md:text-5xl font-bold" style="color: #00f7ff;">--</span>
+          <span class="block text-xs md:text-sm mt-1" style="color: #a8a29e;">Sekundy</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Post-Deadline Message (hidden by default) -->
+    <div id="deadline-passed" class="text-center mb-10 hidden">
+      <h2 class="text-2xl md:text-3xl font-bold mb-3" style="color: #ff6b6b;">Registrácia uzavretá</h2>
+      <p class="text-lg mb-6" style="color: #d6d3d1;">Stále si môžeš objednať jedlo telefonicky</p>
+      <a href="tel:+421950889182" class="inline-flex items-center gap-3 px-8 py-4 rounded-full font-semibold text-lg transition-all duration-200 hover:scale-105" style="background: #00f7ff; color: #0f0f0f;">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+        </svg>
+        Zavolať: +421 950 889 182
+      </a>
+      <p class="text-sm mt-3" style="color: #a8a29e;">Pre mladež</p>
+    </div>
+
+    <!-- Registration Counter -->
+    <div class="text-center pt-8 mt-8" style="border-top: 1px solid rgba(0, 247, 255, 0.15);">
+      <span id="counter-value" class="neon-text block text-7xl md:text-9xl font-bold mb-2" style="color: #00f7ff;">0</span>
+      <span class="text-lg md:text-xl font-medium" style="color: #a8a29e;">registrovaných na jedlo</span>
+    </div>
+
+  </div>
+</section>
+
+<!-- Section 4: Activities Showcase -->
+<section id="aktivity" class="py-16 md:py-24 bg-[var(--color-background)]">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-12">
+      <h2 class="text-3xl md:text-4xl font-bold text-[var(--color-text)] mb-4">Čo ťa čaká</h2>
+      <p class="text-lg text-[var(--color-text-light)] max-w-2xl mx-auto">Každý piatok je plný zábavy, jedla a skvelých ľudí.</p>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div class="bg-[var(--color-primary-light)] rounded-2xl p-8 text-center hover:shadow-lg transition-shadow duration-200">
+        <div class="w-16 h-16 bg-[var(--color-primary)] rounded-full flex items-center justify-center mx-auto mb-6">
+          <span class="text-2xl">&#x1F37D;&#xFE0F;</span>
+        </div>
+        <h3 class="text-xl font-bold text-[var(--color-text)] mb-3">Jedlo od šéfkuchára</h3>
+        <p class="text-[var(--color-text-light)]">Každý týždeň iné jedlo pripravené naším šéfkuchárom. Registrácia nutná!</p>
+      </div>
+      <div style="background: rgba(0, 247, 255, 0.08);" class="rounded-2xl p-8 text-center hover:shadow-lg transition-shadow duration-200">
+        <div class="w-16 h-16 bg-[var(--color-accent)] rounded-full flex items-center justify-center mx-auto mb-6">
+          <span class="text-2xl">&#x1F3D3;</span>
+        </div>
+        <h3 class="text-xl font-bold text-[var(--color-text)] mb-3">Ping Pong</h3>
+        <p class="text-[var(--color-text-light)]">Stolný tenis pre všetkých - od začiatočníkov po profíkov.</p>
+      </div>
+      <div class="bg-[var(--color-background-alt)] rounded-2xl p-8 text-center hover:shadow-lg transition-shadow duration-200">
+        <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6" style="background: var(--color-text-light);">
+          <span class="text-2xl">&#x26BD;</span>
+        </div>
+        <h3 class="text-xl font-bold text-[var(--color-text)] mb-3">Kalčeto</h3>
+        <p class="text-[var(--color-text-light)]">Stolný futbal - vyzvite kamarátov na zápas!</p>
+      </div>
+      <div style="background: rgba(0, 247, 255, 0.08);" class="rounded-2xl p-8 text-center hover:shadow-lg transition-shadow duration-200">
+        <div class="w-16 h-16 bg-[var(--color-accent)] rounded-full flex items-center justify-center mx-auto mb-6">
+          <span class="text-2xl">&#x1F3AE;</span>
+        </div>
+        <h3 class="text-xl font-bold text-[var(--color-text)] mb-3">Herňa</h3>
+        <p class="text-[var(--color-text-light)]">Herný kútik s konzolami a spoločenskými hrami.</p>
+      </div>
+      <div class="bg-[var(--color-primary-light)] rounded-2xl p-8 text-center hover:shadow-lg transition-shadow duration-200">
+        <div class="w-16 h-16 bg-[var(--color-primary)] rounded-full flex items-center justify-center mx-auto mb-6">
+          <span class="text-2xl">&#x1F468;&#x200D;&#x1F373;</span>
+        </div>
+        <h3 class="text-xl font-bold text-[var(--color-text)] mb-3">Varenie zadarmo</h3>
+        <p class="text-[var(--color-text-light)]">Chceš si sám niečo uvariť? Kuchyňa je k dispozícii zadarmo.</p>
+      </div>
+      <div class="bg-[var(--color-background-alt)] rounded-2xl p-8 text-center hover:shadow-lg transition-shadow duration-200">
+        <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6" style="background: var(--color-text-light);">
+          <span class="text-2xl">&#x1F3A4;</span>
+        </div>
+        <h3 class="text-xl font-bold text-[var(--color-text)] mb-3">Karaoke</h3>
+        <p class="text-[var(--color-text-light)]">Spievaj svoje obľúbené piesne s kamošmi.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Section 5: Photo Gallery -->
+<section class="py-16 md:py-24 bg-[var(--color-background-alt)]">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-12">
+      <h2 class="text-3xl md:text-4xl font-bold text-[var(--color-text)] mb-4">Atmosféra z Party</h2>
+      <p class="text-lg text-[var(--color-text-light)]">Pozri sa, ako to u nás vyzeralo.</p>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div class="group relative overflow-hidden rounded-2xl shadow-lg cursor-pointer gallery-item" data-index="0" data-src="/images/party/image00001.jpeg?v=2" data-caption="Spoločné jedlo">
+        <div class="aspect-[3/4]">
+          <picture><source srcset="/images/party/image00001-thumb.webp?v=2" type="image/webp"><img src="/images/party/image00001-thumb.jpeg?v=2" alt="Spoločné jedlo" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" loading="lazy" width="450" height="600"></picture>
+        </div>
+        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <div class="absolute bottom-0 left-0 right-0 p-4">
+            <p class="text-white font-semibold">Spoločné jedlo</p>
+          </div>
+        </div>
+        <div class="absolute top-4 right-4 w-10 h-10 bg-white/90 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <svg class="w-5 h-5 text-[var(--color-text-light)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path>
+          </svg>
+        </div>
+      </div>
+      <div class="group relative overflow-hidden rounded-2xl shadow-lg cursor-pointer gallery-item" data-index="1" data-src="/images/party/image00002.jpeg?v=2" data-caption="Wrapy a hranolky">
+        <div class="aspect-[3/4]">
+          <picture><source srcset="/images/party/image00002-thumb.webp?v=2" type="image/webp"><img src="/images/party/image00002-thumb.jpeg?v=2" alt="Wrapy a hranolky" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" loading="lazy" width="450" height="600"></picture>
+        </div>
+        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <div class="absolute bottom-0 left-0 right-0 p-4">
+            <p class="text-white font-semibold">Wrapy a hranolky</p>
+          </div>
+        </div>
+        <div class="absolute top-4 right-4 w-10 h-10 bg-white/90 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <svg class="w-5 h-5 text-[var(--color-text-light)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path>
+          </svg>
+        </div>
+      </div>
+      <div class="group relative overflow-hidden rounded-2xl shadow-lg cursor-pointer gallery-item" data-index="2" data-src="/images/party/image00003.jpeg?v=2" data-caption="V kuchyni">
+        <div class="aspect-[3/4]">
+          <picture><source srcset="/images/party/image00003-thumb.webp?v=2" type="image/webp"><img src="/images/party/image00003-thumb.jpeg?v=2" alt="V kuchyni" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" loading="lazy" width="450" height="600"></picture>
+        </div>
+        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <div class="absolute bottom-0 left-0 right-0 p-4">
+            <p class="text-white font-semibold">V kuchyni</p>
+          </div>
+        </div>
+        <div class="absolute top-4 right-4 w-10 h-10 bg-white/90 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <svg class="w-5 h-5 text-[var(--color-text-light)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path>
+          </svg>
+        </div>
+      </div>
+      <div class="group relative overflow-hidden rounded-2xl shadow-lg cursor-pointer gallery-item" data-index="3" data-src="/images/party/image00004.jpeg?v=2" data-caption="Herňa">
+        <div class="aspect-[3/4]">
+          <picture><source srcset="/images/party/image00004-thumb.webp?v=2" type="image/webp"><img src="/images/party/image00004-thumb.jpeg?v=2" alt="Herňa" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" loading="lazy" width="450" height="600"></picture>
+        </div>
+        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <div class="absolute bottom-0 left-0 right-0 p-4">
+            <p class="text-white font-semibold">Herňa</p>
+          </div>
+        </div>
+        <div class="absolute top-4 right-4 w-10 h-10 bg-white/90 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <svg class="w-5 h-5 text-[var(--color-text-light)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path>
+          </svg>
+        </div>
+      </div>
+      <div class="group relative overflow-hidden rounded-2xl shadow-lg cursor-pointer gallery-item" data-index="4" data-src="/images/party/image00005.jpeg?v=2" data-caption="Karaoke">
+        <div class="aspect-[3/4]">
+          <picture><source srcset="/images/party/image00005-thumb.webp?v=2" type="image/webp"><img src="/images/party/image00005-thumb.jpeg?v=2" alt="Karaoke" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" loading="lazy" width="450" height="600"></picture>
+        </div>
+        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <div class="absolute bottom-0 left-0 right-0 p-4">
+            <p class="text-white font-semibold">Karaoke</p>
+          </div>
+        </div>
+        <div class="absolute top-4 right-4 w-10 h-10 bg-white/90 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <svg class="w-5 h-5 text-[var(--color-text-light)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path>
+          </svg>
+        </div>
+      </div>
+      <div class="group relative overflow-hidden rounded-2xl shadow-lg cursor-pointer gallery-item" data-index="5" data-src="/images/party/image00006.jpeg?v=2" data-caption="Karaoke na pódiu">
+        <div class="aspect-[3/4]">
+          <picture><source srcset="/images/party/image00006-thumb.webp?v=2" type="image/webp"><img src="/images/party/image00006-thumb.jpeg?v=2" alt="Karaoke na pódiu" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" loading="lazy" width="450" height="600"></picture>
+        </div>
+        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <div class="absolute bottom-0 left-0 right-0 p-4">
+            <p class="text-white font-semibold">Karaoke na pódiu</p>
+          </div>
+        </div>
+        <div class="absolute top-4 right-4 w-10 h-10 bg-white/90 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <svg class="w-5 h-5 text-[var(--color-text-light)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path>
+          </svg>
+        </div>
+      </div>
+      <div class="group relative overflow-hidden rounded-2xl shadow-lg cursor-pointer gallery-item" data-index="6" data-src="/images/party/image00007.jpeg?v=2" data-caption="Kalčeto">
+        <div class="aspect-[3/4]">
+          <picture><source srcset="/images/party/image00007-thumb.webp?v=2" type="image/webp"><img src="/images/party/image00007-thumb.jpeg?v=2" alt="Kalčeto" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" loading="lazy" width="450" height="600"></picture>
+        </div>
+        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <div class="absolute bottom-0 left-0 right-0 p-4">
+            <p class="text-white font-semibold">Kalčeto</p>
+          </div>
+        </div>
+        <div class="absolute top-4 right-4 w-10 h-10 bg-white/90 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <svg class="w-5 h-5 text-[var(--color-text-light)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path>
+          </svg>
+        </div>
+      </div>
+      <div class="group relative overflow-hidden rounded-2xl shadow-lg cursor-pointer gallery-item" data-index="7" data-src="/images/party/image00009.jpeg?v=2" data-caption="Ping Pong">
+        <div class="aspect-[3/4]">
+          <picture><source srcset="/images/party/image00009-thumb.webp?v=2" type="image/webp"><img src="/images/party/image00009-thumb.jpeg?v=2" alt="Ping Pong" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" loading="lazy" width="450" height="600"></picture>
+        </div>
+        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <div class="absolute bottom-0 left-0 right-0 p-4">
+            <p class="text-white font-semibold">Ping Pong</p>
+          </div>
+        </div>
+        <div class="absolute top-4 right-4 w-10 h-10 bg-white/90 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <svg class="w-5 h-5 text-[var(--color-text-light)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path>
+          </svg>
+        </div>
+      </div>
+      <div class="group relative overflow-hidden rounded-2xl shadow-lg cursor-pointer gallery-item" data-index="8" data-src="/images/party/image00010.jpeg?v=2" data-caption="Ping Pong zápas">
+        <div class="aspect-[3/4]">
+          <picture><source srcset="/images/party/image00010-thumb.webp?v=2" type="image/webp"><img src="/images/party/image00010-thumb.jpeg?v=2" alt="Ping Pong zápas" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" loading="lazy" width="450" height="600"></picture>
+        </div>
+        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <div class="absolute bottom-0 left-0 right-0 p-4">
+            <p class="text-white font-semibold">Ping Pong zápas</p>
+          </div>
+        </div>
+        <div class="absolute top-4 right-4 w-10 h-10 bg-white/90 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <svg class="w-5 h-5 text-[var(--color-text-light)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path>
+          </svg>
+        </div>
+      </div>
+      <div class="group relative overflow-hidden rounded-2xl shadow-lg cursor-pointer gallery-item" data-index="9" data-src="/images/party/image00011.jpeg?v=2" data-caption="Kalčeto zápas">
+        <div class="aspect-[3/4]">
+          <picture><source srcset="/images/party/image00011-thumb.webp?v=2" type="image/webp"><img src="/images/party/image00011-thumb.jpeg?v=2" alt="Kalčeto zápas" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" loading="lazy" width="450" height="600"></picture>
+        </div>
+        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <div class="absolute bottom-0 left-0 right-0 p-4">
+            <p class="text-white font-semibold">Kalčeto zápas</p>
+          </div>
+        </div>
+        <div class="absolute top-4 right-4 w-10 h-10 bg-white/90 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <svg class="w-5 h-5 text-[var(--color-text-light)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path>
+          </svg>
+        </div>
+      </div>
+      <div class="group relative overflow-hidden rounded-2xl shadow-lg cursor-pointer gallery-item" data-index="10" data-src="/images/party/image00013.jpeg?v=2" data-caption="Varenie">
+        <div class="aspect-[3/4]">
+          <picture><source srcset="/images/party/image00013-thumb.webp?v=2" type="image/webp"><img src="/images/party/image00013-thumb.jpeg?v=2" alt="Varenie" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" loading="lazy" width="450" height="600"></picture>
+        </div>
+        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <div class="absolute bottom-0 left-0 right-0 p-4">
+            <p class="text-white font-semibold">Varenie</p>
+          </div>
+        </div>
+        <div class="absolute top-4 right-4 w-10 h-10 bg-white/90 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <svg class="w-5 h-5 text-[var(--color-text-light)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path>
+          </svg>
+        </div>
+      </div>
+      <div class="group relative overflow-hidden rounded-2xl shadow-lg cursor-pointer gallery-item" data-index="11" data-src="/images/party/image00014.jpeg?v=2" data-caption="Rocket League">
+        <div class="aspect-[3/4]">
+          <picture><source srcset="/images/party/image00014-thumb.webp?v=2" type="image/webp"><img src="/images/party/image00014-thumb.jpeg?v=2" alt="Rocket League" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" loading="lazy" width="450" height="600"></picture>
+        </div>
+        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <div class="absolute bottom-0 left-0 right-0 p-4">
+            <p class="text-white font-semibold">Rocket League</p>
+          </div>
+        </div>
+        <div class="absolute top-4 right-4 w-10 h-10 bg-white/90 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <svg class="w-5 h-5 text-[var(--color-text-light)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path>
+          </svg>
+        </div>
+      </div>
+      <div class="group relative overflow-hidden rounded-2xl shadow-lg cursor-pointer gallery-item" data-index="12" data-src="/images/party/image00015.jpeg?v=2" data-caption="Gaming room">
+        <div class="aspect-[3/4]">
+          <picture><source srcset="/images/party/image00015-thumb.webp?v=2" type="image/webp"><img src="/images/party/image00015-thumb.jpeg?v=2" alt="Gaming room" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" loading="lazy" width="450" height="600"></picture>
+        </div>
+        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <div class="absolute bottom-0 left-0 right-0 p-4">
+            <p class="text-white font-semibold">Gaming room</p>
+          </div>
+        </div>
+        <div class="absolute top-4 right-4 w-10 h-10 bg-white/90 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <svg class="w-5 h-5 text-[var(--color-text-light)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path>
+          </svg>
+        </div>
+      </div>
+      <div class="group relative overflow-hidden rounded-2xl shadow-lg cursor-pointer gallery-item" data-index="13" data-src="/images/party/image00016.jpeg?v=2" data-caption="Herný kútik">
+        <div class="aspect-[3/4]">
+          <picture><source srcset="/images/party/image00016-thumb.webp?v=2" type="image/webp"><img src="/images/party/image00016-thumb.jpeg?v=2" alt="Herný kútik" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" loading="lazy" width="450" height="600"></picture>
+        </div>
+        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <div class="absolute bottom-0 left-0 right-0 p-4">
+            <p class="text-white font-semibold">Herný kútik</p>
+          </div>
+        </div>
+        <div class="absolute top-4 right-4 w-10 h-10 bg-white/90 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <svg class="w-5 h-5 text-[var(--color-text-light)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Lightbox -->
+<div id="lightbox" class="lightbox-overlay">
+  <button id="lightbox-close" class="absolute top-4 right-4 text-white hover:text-[var(--color-primary)] transition-colors z-10">
+    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+    </svg>
+  </button>
+  <button id="lightbox-prev" class="absolute left-4 top-1/2 -translate-y-1/2 text-white hover:text-[var(--color-primary)] transition-colors">
+    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+    </svg>
+  </button>
+  <button id="lightbox-next" class="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:text-[var(--color-primary)] transition-colors">
+    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+    </svg>
+  </button>
+  <div class="lightbox-content">
+    <img id="lightbox-image" src="" alt="">
+    <p id="lightbox-caption" class="text-white text-center mt-4 text-lg"></p>
+  </div>
+</div>
+
+<!-- Section 6: Registration Form -->
+<section id="registracia" class="py-16 md:py-24 bg-[var(--color-background)]">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-12">
+      <h2 class="text-3xl md:text-4xl font-bold text-[var(--color-text)] mb-4">Registrácia na piatok</h2>
+      <p class="text-lg text-[var(--color-text-light)] max-w-2xl mx-auto">Registruj sa, nech vieme, že prídeš a koľko jedla pripraviť.</p>
+    </div>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+      <!-- Info Panel -->
+      <div>
+        <div class="space-y-6">
+          <div class="flex items-start space-x-4">
+            <div class="w-12 h-12 bg-[var(--color-primary-light)] rounded-full flex items-center justify-center flex-shrink-0">
+              <svg class="w-6 h-6 text-[var(--color-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-lg font-semibold text-[var(--color-text)]">Čas</h3>
+              <p class="text-[var(--color-text-light)]">18:00 (dvere otvorené od 17:30)</p>
+            </div>
+          </div>
+          <div class="flex items-start space-x-4">
+            <div class="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0" style="background: rgba(0, 247, 255, 0.1);">
+              <svg class="w-6 h-6 text-[var(--color-accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-lg font-semibold text-[var(--color-text)]">Adresa</h3>
+              <p class="text-[var(--color-text-light)]">Letná 31/26, Spišská Nová Ves, 052 01</p>
+            </div>
+          </div>
+          <div class="flex items-start space-x-4">
+            <div class="w-12 h-12 bg-[var(--color-primary-light)] rounded-full flex items-center justify-center flex-shrink-0">
+              <svg class="w-6 h-6 text-[var(--color-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-lg font-semibold text-[var(--color-text)]">Vstup</h3>
+              <p class="text-[var(--color-text-light)]">Úplne zadarmo!</p>
+            </div>
+          </div>
+        </div>
+        <div class="mt-8 aspect-video bg-[var(--color-background-alt)] rounded-2xl overflow-hidden">
+          <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d5868.741632876747!2d20.5659!3d48.9447!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x473e4f1a0e277739%3A0xd07a7f7770ef20cf!2sNew%20level%20church!5e1!3m2!1sen!2sus!4v1769540098198!5m2!1sen!2sus" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="New Level Church - mapa"></iframe>
+        </div>
+      </div>
+      <!-- Form Card -->
+      <div>
+        <div class="bg-[var(--color-background-alt)] rounded-2xl p-8">
+          <h3 class="text-2xl font-bold text-[var(--color-text)] mb-6">Prihláška na Party</h3>
+          <div id="form-success" class="hidden mb-6 p-4 rounded-xl text-center" style="background: rgba(0, 247, 255, 0.1); color: var(--color-accent-dark);">
+            <p class="font-semibold text-lg">Super! Registrácia úspešná.</p>
+            <p>Tešíme sa na teba v piatok!</p>
+          </div>
+          <div id="form-error" class="hidden mb-6 p-4 rounded-xl text-center bg-[var(--color-primary-light)] text-[var(--color-primary)]">
+            <p class="font-semibold">Ups! Niečo sa pokazilo.</p>
+            <p>Skús to prosím znovu.</p>
+          </div>
+          <form id="party-form" class="space-y-6">
+            <div>
+              <label for="party-name" class="block text-sm font-medium text-[var(--color-text-light)] mb-2">Meno *</label>
+              <input type="text" id="party-name" name="name" required class="w-full px-4 py-3 rounded-xl border border-[var(--color-text-muted)]/30 focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-colors bg-[var(--color-background)]" placeholder="Tvoje meno">
+            </div>
+            <div>
+              <label for="party-email" class="block text-sm font-medium text-[var(--color-text-light)] mb-2">Email *</label>
+              <input type="email" id="party-email" name="email" required class="w-full px-4 py-3 rounded-xl border border-[var(--color-text-muted)]/30 focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-colors bg-[var(--color-background)]" placeholder="tvoj@email.com">
+            </div>
+            <div>
+              <label for="party-phone" class="block text-sm font-medium text-[var(--color-text-light)] mb-2">Telefón (voliteľné)</label>
+              <input type="tel" id="party-phone" name="phone" class="w-full px-4 py-3 rounded-xl border border-[var(--color-text-muted)]/30 focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-colors bg-[var(--color-background)]" placeholder="+421 ...">
+            </div>
+            <div class="flex items-start space-x-3">
+              <input type="checkbox" id="party-food" name="food_registration" value="Ano" class="mt-1 h-5 w-5 rounded border-[var(--color-text-muted)]/30 text-[var(--color-primary)] focus:ring-[var(--color-primary)]">
+              <label for="party-food" class="text-sm text-[var(--color-text-light)]">Objednávam si 1 porciu jedla od šéfkuchára</label>
+            </div>
+            <div>
+              <label for="party-message" class="block text-sm font-medium text-[var(--color-text-light)] mb-2">Správa (voliteľné)</label>
+              <textarea id="party-message" name="message" rows="3" class="w-full px-4 py-3 rounded-xl border border-[var(--color-text-muted)]/30 focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-colors resize-none bg-[var(--color-background)]" placeholder="Diéta, alergie, otázky..."></textarea>
+            </div>
+            <button type="submit" id="party-submit" class="w-full px-6 py-4 bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-white font-semibold rounded-xl transition-colors duration-200">
+              Odoslať registráciu
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Section 7: CTA Banner -->
+<section class="py-16 bg-gradient-to-br from-[var(--color-accent)] to-[var(--color-accent-dark)] text-white">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+    <h2 class="text-3xl md:text-4xl font-bold mb-6">Vidíme sa v piatok!</h2>
+    <p class="text-blue-100 text-lg mb-8">Sleduj nás na Instagrame, nech ti neuniknú žiadne novinky.</p>
+    <a href="https://www.instagram.com/newlevelchurch/" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-8 py-4 bg-[var(--color-primary)] hover:opacity-90 text-white font-semibold rounded-full transition-colors duration-200">
+      <svg class="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"></path>
+      </svg>
+      Sledovať na Instagrame
+    </a>
+  </div>
+</section>
+
+</main>
+
+<!-- Section 8: Footer -->
+<footer class="bg-[var(--color-text)] text-stone-300">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <!-- Church Info -->
+      <div>
+        <h3 class="text-2xl font-bold text-[var(--color-primary)] mb-4">New Level Church</h3>
+        <p class="text-stone-400 mb-4">Sme moderní kresťania, pre ktorých je život s Bohom životným štýlom.</p>
+        <div class="flex space-x-4">
+          <a href="https://www.facebook.com/churchnewlevel/" target="_blank" rel="noopener noreferrer" class="text-stone-400 hover:text-[var(--color-primary)] transition-colors duration-200" aria-label="Facebook"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a><a href="https://www.youtube.com/@NEWLEVELCHURCH" target="_blank" rel="noopener noreferrer" class="text-stone-400 hover:text-[var(--color-primary)] transition-colors duration-200" aria-label="YouTube"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a><a href="https://www.instagram.com/newlevelchurch/" target="_blank" rel="noopener noreferrer" class="text-stone-400 hover:text-[var(--color-primary)] transition-colors duration-200" aria-label="Instagram"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg></a><a href="https://www.tiktok.com/@newlevelchurch" target="_blank" rel="noopener noreferrer" class="text-stone-400 hover:text-[var(--color-primary)] transition-colors duration-200" aria-label="TikTok"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg></a>
+        </div>
+      </div>
+      <!-- Quick Links -->
+      <div>
+        <h4 class="text-lg font-semibold text-white mb-4">Rýchle odkazy</h4>
+        <ul class="space-y-2">
+          <li><a href="/" class="hover:text-[var(--color-primary)] transition-colors duration-200">Domov</a></li>
+          <li><a href="/about" class="hover:text-[var(--color-primary)] transition-colors duration-200">O nás</a></li>
+          <li><a href="/gallery" class="hover:text-[var(--color-primary)] transition-colors duration-200">Galéria</a></li>
+          <li><a href="/party" class="hover:text-[var(--color-primary)] transition-colors duration-200">Party</a></li>
+          <li><a href="/contact" class="hover:text-[var(--color-primary)] transition-colors duration-200">Kontakt</a></li>
+          <li><a href="/dar" class="hover:text-[var(--color-primary)] transition-colors duration-200">Dar</a></li>
+        </ul>
+      </div>
+      <!-- Service Times -->
+      <div>
+        <h4 class="text-lg font-semibold text-white mb-4">Časy bohoslužieb</h4>
+        <p class="text-stone-400">
+          <span>Nedeľa: 10:00<br></span>
+          <span>Štvrtok: 19:00<br></span>
+          <span>Piatok: 18:00 (Party)</span>
+        </p>
+        <a href="/contact" class="inline-block mt-4 text-[var(--color-primary)] hover:text-[var(--color-primary-light)] font-medium transition-colors duration-200">
+Viac informácií &rarr;
+</a>
+      </div>
+    </div>
+    <div class="border-t border-stone-700 mt-10 pt-8 text-center text-stone-500 text-sm">
+      <p>&copy; 2026 New Level Church. Všetky práva vyhradené.</p>
+    </div>
+  </div>
+</footer>
+
+<!-- Lightbox JavaScript -->
+<script type="module">
+const items=document.querySelectorAll(".gallery-item"),lb=document.getElementById("lightbox"),lbImg=document.getElementById("lightbox-image"),lbCap=document.getElementById("lightbox-caption"),closeBtn=document.getElementById("lightbox-close"),prevBtn=document.getElementById("lightbox-prev"),nextBtn=document.getElementById("lightbox-next");let idx=0;const data=Array.from(items).map(i=>({src:i.getAttribute("data-src")||"",caption:i.getAttribute("data-caption")||""}));function open(i){idx=i;update();lb?.classList.add("active");document.body.style.overflow="hidden";}function close(){lb?.classList.remove("active");document.body.style.overflow="";}function update(){if(lbImg&&lbCap){const jpegSrc=data[idx].src;const webpSrc=jpegSrc.replace(/\.jpe?g$/i,'.webp');lbImg.onerror=function(){lbImg.onerror=null;lbImg.src=jpegSrc;};lbImg.src=webpSrc;lbCap.textContent=data[idx].caption;}}function next(){idx=(idx+1)%data.length;update();}function prev(){idx=(idx-1+data.length)%data.length;update();}items.forEach((el,i)=>{el.addEventListener("click",()=>open(i));});closeBtn?.addEventListener("click",close);nextBtn?.addEventListener("click",next);prevBtn?.addEventListener("click",prev);lb?.addEventListener("click",e=>{if(e.target===lb)close();});document.addEventListener("keydown",e=>{if(lb?.classList.contains("active")){if(e.key==="Escape")close();if(e.key==="ArrowRight")next();if(e.key==="ArrowLeft")prev();}});
+</script>
+
+<!-- Countdown Timer & Counter -->
+<script type="module">
+(function() {
+  const daysEl = document.getElementById('countdown-days');
+  const hoursEl = document.getElementById('countdown-hours');
+  const minutesEl = document.getElementById('countdown-minutes');
+  const secondsEl = document.getElementById('countdown-seconds');
+  const countdownSection = document.getElementById('countdown-section');
+  const deadlinePassed = document.getElementById('deadline-passed');
+  const counterEl = document.getElementById('counter-value');
+  let lastCount = -1;
+
+  function getNextThursdayMidnight() {
+    const now = new Date();
+    const day = now.getDay(); // 0=Sun, 4=Thu
+    let daysUntilThursday = (4 - day + 7) % 7;
+    // If it's Thursday, check if we're past midnight
+    if (daysUntilThursday === 0) {
+      // Thursday - deadline is end of today (23:59:59)
+      const endOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+      if (now <= endOfToday) {
+        return endOfToday;
+      }
+      // Past Thursday midnight, next Thursday
+      daysUntilThursday = 7;
+    }
+    const target = new Date(now.getFullYear(), now.getMonth(), now.getDate() + daysUntilThursday, 23, 59, 59, 999);
+    return target;
+  }
+
+  function isDeadlinePassed() {
+    const now = new Date();
+    const day = now.getDay();
+    const hour = now.getHours();
+    // Friday (5) = deadline passed (until new week resets on next Monday-ish, but we show it until Saturday)
+    // After Thursday midnight = Friday
+    if (day === 5) return true;
+    if (day === 6) return true; // Saturday too
+    return false;
+  }
+
+  function updateCountdown() {
+    if (isDeadlinePassed()) {
+      countdownSection?.classList.add('hidden');
+      deadlinePassed?.classList.remove('hidden');
+      return;
+    }
+
+    countdownSection?.classList.remove('hidden');
+    deadlinePassed?.classList.add('hidden');
+
+    const now = new Date();
+    const target = getNextThursdayMidnight();
+    const diff = target - now;
+
+    if (diff <= 0) {
+      // Just passed - show deadline passed
+      countdownSection?.classList.add('hidden');
+      deadlinePassed?.classList.remove('hidden');
+      return;
+    }
+
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+    if (daysEl) daysEl.textContent = days;
+    if (hoursEl) hoursEl.textContent = hours.toString().padStart(2, '0');
+    if (minutesEl) minutesEl.textContent = minutes.toString().padStart(2, '0');
+    if (secondsEl) secondsEl.textContent = seconds.toString().padStart(2, '0');
+  }
+
+  async function fetchCounter() {
+    try {
+      const res = await fetch('/api/counter');
+      const data = await res.json();
+      const count = data.count || 0;
+      if (counterEl) {
+        if (lastCount !== -1 && count !== lastCount) {
+          counterEl.classList.remove('counter-pop');
+          void counterEl.offsetWidth; // trigger reflow
+          counterEl.classList.add('counter-pop');
+        }
+        counterEl.textContent = count;
+        lastCount = count;
+      }
+    } catch (e) {
+      // Silently fail - counter stays at current value
+    }
+  }
+
+  // Start countdown
+  updateCountdown();
+  setInterval(updateCountdown, 1000);
+
+  // Fetch counter on load and every 30 seconds
+  fetchCounter();
+  setInterval(fetchCounter, 30000);
+})();
+</script>
+
+<!-- Form AJAX Submit -->
+<script type="module">
+const form=document.getElementById("party-form"),successMsg=document.getElementById("form-success"),errorMsg=document.getElementById("form-error"),submitBtn=document.getElementById("party-submit");
+form?.addEventListener("submit",async(e)=>{
+  e.preventDefault();
+  submitBtn.disabled=true;
+  submitBtn.textContent="Odosielam...";
+  successMsg?.classList.add("hidden");
+  errorMsg?.classList.add("hidden");
+  try{
+    const fd=Object.fromEntries(new FormData(form));
+    const res=await fetch("/api/register",{method:"POST",headers:{"Content-Type":"application/json","Accept":"application/json"},body:JSON.stringify({name:fd.name,email:fd.email,phone:fd.phone||'',food_registration:fd.food_registration||'',message:fd.message||''})});
+    const data=await res.json();
+    if(data.success){
+      successMsg?.classList.remove("hidden");
+      form.reset();
+    }else{
+      errorMsg?.classList.remove("hidden");
+    }
+  }catch(err){
+    errorMsg?.classList.remove("hidden");
+  }finally{
+    submitBtn.disabled=false;
+    submitBtn.textContent="Odoslať registráciu";
+  }
+});
+</script>
+
+</body></html>
