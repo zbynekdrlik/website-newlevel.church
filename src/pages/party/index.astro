@@ -2,6 +2,9 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import page from '../../content/party/page.json';
 import contactInfo from '../../content/settings/contact.json';
+import { getPartyPhotos } from '../../utils/gallery';
+
+const partyPhotos = getPartyPhotos();
 ---
 
 <BaseLayout title="Party | New Level Church" description={page.hero.subtitle} currentPage="party">
@@ -164,10 +167,10 @@ import contactInfo from '../../content/settings/contact.json';
         <p class="text-lg text-[var(--color-text-light)]">Pozri sa, ako to u nás vyzerá</p>
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {page.gallery.map((photo: { src: string; srcWebp: string; srcFull: string; srcFullWebp: string; caption: string }, index: number) => (
-          <div class="group relative overflow-hidden rounded-2xl shadow-lg cursor-pointer gallery-item" data-index={index} data-src={photo.srcFull} data-src-webp={photo.srcFullWebp} data-caption={photo.caption}>
+        {partyPhotos.map((photo, index: number) => (
+          <div class="group relative overflow-hidden rounded-2xl shadow-lg cursor-pointer gallery-item" data-index={index} data-src={photo.image} data-caption={photo.caption}>
             <div class="aspect-[3/4]">
-              <picture><source srcset={photo.srcWebp} type="image/webp"><img src={photo.src} alt={photo.caption} class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" loading="lazy" width="450" height="600"></picture>
+              <img src={photo.image} alt={photo.caption} class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" loading="lazy" width="450" height="600">
             </div>
             <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
               <div class="absolute bottom-0 left-0 right-0 p-4">
@@ -388,7 +391,7 @@ import contactInfo from '../../content/settings/contact.json';
 </style>
 
 <script type="module">
-const items=document.querySelectorAll(".gallery-item"),lb=document.getElementById("lightbox"),lbImg=document.getElementById("lightbox-image"),lbCap=document.getElementById("lightbox-caption"),closeBtn=document.getElementById("lightbox-close"),prevBtn=document.getElementById("lightbox-prev"),nextBtn=document.getElementById("lightbox-next");let idx=0;const data=Array.from(items).map(i=>({src:i.getAttribute("data-src")||"",caption:i.getAttribute("data-caption")||""}));function open(i){idx=i;update();lb?.classList.add("active");document.body.style.overflow="hidden";}function close(){lb?.classList.remove("active");document.body.style.overflow="";}function update(){if(lbImg&&lbCap){const jpegSrc=data[idx].src;const webpSrc=jpegSrc.replace(/\.jpe?g$/i,'.webp');lbImg.onerror=function(){lbImg.onerror=null;lbImg.src=jpegSrc;};lbImg.src=webpSrc;lbCap.textContent=data[idx].caption;}}function next(){idx=(idx+1)%data.length;update();}function prev(){idx=(idx-1+data.length)%data.length;update();}items.forEach((el,i)=>{el.addEventListener("click",()=>open(i));});closeBtn?.addEventListener("click",close);nextBtn?.addEventListener("click",next);prevBtn?.addEventListener("click",prev);lb?.addEventListener("click",e=>{if(e.target===lb)close();});document.addEventListener("keydown",e=>{if(lb?.classList.contains("active")){if(e.key==="Escape")close();if(e.key==="ArrowRight")next();if(e.key==="ArrowLeft")prev();}});
+const items=document.querySelectorAll(".gallery-item"),lb=document.getElementById("lightbox"),lbImg=document.getElementById("lightbox-image"),lbCap=document.getElementById("lightbox-caption"),closeBtn=document.getElementById("lightbox-close"),prevBtn=document.getElementById("lightbox-prev"),nextBtn=document.getElementById("lightbox-next");let idx=0;const data=Array.from(items).map(i=>({src:i.getAttribute("data-src")||"",caption:i.getAttribute("data-caption")||""}));function open(i){idx=i;update();lb?.classList.add("active");document.body.style.overflow="hidden";}function close(){lb?.classList.remove("active");document.body.style.overflow="";}function update(){if(lbImg&&lbCap){lbImg.src=data[idx].src;lbCap.textContent=data[idx].caption;}}function next(){idx=(idx+1)%data.length;update();}function prev(){idx=(idx-1+data.length)%data.length;update();}items.forEach((el,i)=>{el.addEventListener("click",()=>open(i));});closeBtn?.addEventListener("click",close);nextBtn?.addEventListener("click",next);prevBtn?.addEventListener("click",prev);lb?.addEventListener("click",e=>{if(e.target===lb)close();});document.addEventListener("keydown",e=>{if(lb?.classList.contains("active")){if(e.key==="Escape")close();if(e.key==="ArrowRight")next();if(e.key==="ArrowLeft")prev();}});
 </script>
 
 <script type="module">

@@ -415,20 +415,34 @@ collections:
               - { name: buttonUrl, label: "URL tla\u010didla", widget: string }
 
   - name: gallery-photos
-    label: "Fotografie"
+    label: "Galéria - Fotky"
+    folder: "src/content/gallery/photos"
+    create: true
+    delete: true
+    slug: "{{slug}}"
+    extension: "json"
+    format: "json"
     editor:
       preview: false
-    files:
-      - name: photos
-        label: "Fotografie v gal\u00e9rii"
-        file: "src/content/gallery/photos.json"
-        fields:
-          - name: photos
-            label: "Fotografie"
-            widget: list
-            fields:
-              - { name: src, label: "URL obr\u00e1zka", widget: string }
-              - { name: caption, label: "Popis", widget: string }
+    fields:
+      - { label: "Fotka", name: "image", widget: "image" }
+      - { label: "Popis", name: "caption", widget: "string" }
+      - { label: "Poradie", name: "order", widget: "number", default: 0 }
+
+  - name: party-photos
+    label: "Party - Fotky"
+    folder: "src/content/party/photos"
+    create: true
+    delete: true
+    slug: "{{slug}}"
+    extension: "json"
+    format: "json"
+    editor:
+      preview: false
+    fields:
+      - { label: "Fotka", name: "image", widget: "image" }
+      - { label: "Popis", name: "caption", widget: "string" }
+      - { label: "Poradie", name: "order", widget: "number", default: 0 }
 
   - name: party
     label: "Party"
@@ -489,29 +503,6 @@ collections:
               - { name: emoji, label: "Emoji", widget: string }
               - { name: title, label: "N\u00e1zov", widget: string }
               - { name: description, label: "Popis", widget: text }
-          - name: gallery
-            label: "Fotografie"
-            widget: list
-            fields:
-              - { name: src, label: "Thumbnail (JPEG)", widget: string }
-              - {
-                  name: srcWebp,
-                  label: "Thumbnail (WebP)",
-                  widget: string,
-                  required: false,
-                }
-              - {
-                  name: srcFull,
-                  label: "Pln\u00e1 ve\u013ekos\u0165 (JPEG)",
-                  widget: string,
-                }
-              - {
-                  name: srcFullWebp,
-                  label: "Pln\u00e1 ve\u013ekos\u0165 (WebP)",
-                  widget: string,
-                  required: false,
-                }
-              - { name: caption, label: "Popis", widget: string }
           - name: registration
             label: "Registr\u00e1cia"
             widget: object

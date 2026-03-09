@@ -1,7 +1,9 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import page from '../../content/gallery/page.json';
-import photosData from '../../content/gallery/photos.json';
+import { getGalleryPhotos } from '../../utils/gallery';
+
+const photos = getGalleryPhotos();
 ---
 
 <BaseLayout title="Galéria | New Level Church" currentPage="gallery">
@@ -26,10 +28,10 @@ import photosData from '../../content/gallery/photos.json';
   <section class="py-16 md:py-24 bg-[var(--color-background)]">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {photosData.photos.map((photo: { src: string; caption: string }, index: number) => (
-          <div class="group relative overflow-hidden rounded-2xl shadow-lg cursor-pointer gallery-item" data-index={index} data-src={photo.src} data-caption={photo.caption}>
+        {photos.map((photo, index: number) => (
+          <div class="group relative overflow-hidden rounded-2xl shadow-lg cursor-pointer gallery-item" data-index={index} data-src={photo.image} data-caption={photo.caption}>
             <div class="aspect-[4/3]">
-              <img src={photo.src} alt={photo.caption} class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" loading="lazy">
+              <img src={photo.image} alt={photo.caption} class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" loading="lazy">
             </div>
             <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
               <div class="absolute bottom-0 left-0 right-0 p-4">
