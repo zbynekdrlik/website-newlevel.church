@@ -1,0 +1,13 @@
+{
+  "hero": {
+    "badge": "Galéria",
+    "title": "Život v New Level",
+    "subtitle": "Pozrite sa, čo sa deje, keď sa naša komunita stretáva. Od uctievania po službu - tvoríme spomienky a meníme životy."
+  },
+  "cta": {
+    "title": "Chcete byť súčasťou?",
+    "text": "Pridajte sa k nám túto nedeľu a staňte sa súčasťou našej komunity.",
+    "buttonText": "Naplánujte návštevu",
+    "buttonUrl": "/contact"
+  }
+}

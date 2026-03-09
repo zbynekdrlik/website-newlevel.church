@@ -1,0 +1,102 @@
+@import "tailwindcss";
+
+/* Social sidebar animations */
+@keyframes slideIn {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.social-sidebar-link {
+  animation: slideIn 0.5s ease-out forwards;
+  animation-delay: var(--delay, 0ms);
+}
+
+/* Lightbox styles */
+.lightbox-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.lightbox-overlay.active {
+  opacity: 1;
+}
+
+.lightbox-image {
+  max-width: 90vw;
+  max-height: 85vh;
+  object-fit: contain;
+  border-radius: 0.5rem;
+}
+
+/* Party page animations */
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 20px rgba(62, 187, 192, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(62, 187, 192, 0.6);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes neon-pulse {
+  0%,
+  100% {
+    text-shadow:
+      0 0 10px rgba(0, 247, 255, 0.5),
+      0 0 20px rgba(0, 247, 255, 0.3);
+  }
+  50% {
+    text-shadow:
+      0 0 20px rgba(0, 247, 255, 0.8),
+      0 0 40px rgba(0, 247, 255, 0.5);
+  }
+}
+
+@keyframes counter-pop {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+.animate-neon-pulse {
+  animation: neon-pulse 2s ease-in-out infinite;
+}
+.animate-counter-pop {
+  animation: counter-pop 0.4s ease-out;
+}

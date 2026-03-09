@@ -1,0 +1,92 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import page from '../../content/gallery/page.json';
+import photosData from '../../content/gallery/photos.json';
+---
+
+<BaseLayout title="Galéria | New Level Church" currentPage="gallery">
+  <!-- Hero Section -->
+  <section class="relative bg-gradient-to-br from-[var(--color-primary-light)] via-[var(--color-background)] to-[var(--color-accent-light)] py-16 md:py-24">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-3xl mx-auto text-center">
+        <span class="inline-block px-4 py-2 bg-[var(--color-primary-light)] text-[var(--color-primary)] rounded-full text-sm font-medium mb-6">
+          {page.hero.badge}
+        </span>
+        <h1 class="text-4xl md:text-5xl font-bold text-[var(--color-text)] mb-6">
+          {page.hero.title}
+        </h1>
+        <p class="text-lg text-[var(--color-text-light)]">
+          {page.hero.subtitle}
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Gallery Grid -->
+  <section class="py-16 md:py-24 bg-[var(--color-background)]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {photosData.photos.map((photo: { src: string; caption: string }, index: number) => (
+          <div class="group relative overflow-hidden rounded-2xl shadow-lg cursor-pointer gallery-item" data-index={index} data-src={photo.src} data-caption={photo.caption}>
+            <div class="aspect-[4/3]">
+              <img src={photo.src} alt={photo.caption} class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" loading="lazy">
+            </div>
+            <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <div class="absolute bottom-0 left-0 right-0 p-4">
+                <p class="text-white font-semibold">{photo.caption}</p>
+              </div>
+            </div>
+            <!-- Zoom icon -->
+            <div class="absolute top-4 right-4 w-10 h-10 bg-white/90 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <svg class="w-5 h-5 text-[var(--color-text-light)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path>
+              </svg>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Lightbox -->
+  <div id="lightbox" class="lightbox-overlay">
+    <button id="lightbox-close" class="absolute top-4 right-4 text-white hover:text-[var(--color-primary)] transition-colors z-10">
+      <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+      </svg>
+    </button>
+    <button id="lightbox-prev" class="absolute left-4 top-1/2 -translate-y-1/2 text-white hover:text-[var(--color-primary)] transition-colors">
+      <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+      </svg>
+    </button>
+    <button id="lightbox-next" class="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:text-[var(--color-primary)] transition-colors">
+      <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+      </svg>
+    </button>
+    <div class="lightbox-content">
+      <img id="lightbox-image" src="" alt="">
+      <p id="lightbox-caption" class="text-white text-center mt-4 text-lg"></p>
+    </div>
+  </div>
+
+  <!-- CTA Section -->
+  <section class="py-16 bg-[var(--color-background-alt)]">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="text-2xl md:text-3xl font-bold text-[var(--color-text)] mb-4">
+        {page.cta.title}
+      </h2>
+      <p class="text-[var(--color-text-light)] mb-6">
+        {page.cta.text}
+      </p>
+      <a href={page.cta.buttonUrl} class="inline-flex items-center px-6 py-3 bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-white font-semibold rounded-full transition-colors duration-200">
+        {page.cta.buttonText}
+      </a>
+    </div>
+  </section>
+</BaseLayout>
+
+<script type="module">
+const a=document.querySelectorAll(".gallery-item"),n=document.getElementById("lightbox"),l=document.getElementById("lightbox-image"),d=document.getElementById("lightbox-caption"),m=document.getElementById("lightbox-close"),u=document.getElementById("lightbox-prev"),h=document.getElementById("lightbox-next");let e=0;const o=Array.from(a).map(t=>({src:t.getAttribute("data-src")||"",caption:t.getAttribute("data-caption")||""}));function y(t){e=t,i(),n?.classList.add("active"),document.body.style.overflow="hidden"}function c(){n?.classList.remove("active"),document.body.style.overflow=""}function i(){l&&d&&(l.src=o[e].src,d.textContent=o[e].caption)}function s(){e=(e+1)%o.length,i()}function r(){e=(e-1+o.length)%o.length,i()}a.forEach((t,g)=>{t.addEventListener("click",()=>y(g))});m?.addEventListener("click",c);h?.addEventListener("click",s);u?.addEventListener("click",r);n?.addEventListener("click",t=>{t.target===n&&c()});document.addEventListener("keydown",t=>{n?.classList.contains("active")&&(t.key==="Escape"&&c(),t.key==="ArrowRight"&&s(),t.key==="ArrowLeft"&&r())});
+</script>

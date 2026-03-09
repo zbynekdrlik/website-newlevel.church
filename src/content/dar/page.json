@@ -1,0 +1,21 @@
+{
+  "hero": {
+    "badge": "Dar",
+    "title": "Ďakujeme za podporu",
+    "subtitle": "Vaša štedrosť nám pomáha budovať komunitu, slúžiť ľuďom a šíriť Božiu lásku. Každý dar má význam."
+  },
+  "bankDetails": {
+    "title": "Bankové údaje",
+    "subtitle": "Pre bankový prevod použite nasledujúce údaje:",
+    "iban": "SK58 8330 0000 0027 0101 1094",
+    "bic": "FIOZSKBAXXX",
+    "qrImage": "/images/dar-qr-v2.png",
+    "qrCaption": "Naskenuj QR kód v bankovej aplikácii"
+  },
+  "cta": {
+    "title": "Chcete sa zapojiť aj inak?",
+    "text": "Okrem finančnej podpory môžete pomôcť aj dobrovoľníctvom, modlitbou alebo jednoducho tým, že prídete.",
+    "buttonText": "Kontaktujte nás",
+    "buttonUrl": "/contact"
+  }
+}

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
+    <title>CMS | New Level Church</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+      :root {
+        --primary-color: #dd0e18;
+        --primary-hover: #b80c14;
+        --accent-color: #3ebbc0;
+        --background-color: #ffffff;
+        --sidebar-bg: #1c1917;
+        --text-color: #1c1917;
+        --text-muted: #57534e;
+      }
+
+      body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      }
+
+      [class*="AppMainContainer"] > div:first-child,
+      [class*="SidebarNavList"],
+      nav[class*="Sidebar"] {
+        background-color: var(--sidebar-bg) !important;
+      }
+
+      [class*="ToolbarContainer"],
+      [class*="AppHeader"] {
+        background-color: var(--background-color) !important;
+        border-bottom: 1px solid #e7e5e4 !important;
+      }
+
+      button[class*="ToolbarButton"],
+      button[class*="Button"]:not([class*="DeleteButton"]) {
+        background-color: var(--primary-color) !important;
+        border-color: var(--primary-color) !important;
+        border-radius: 8px !important;
+        font-weight: 500 !important;
+      }
+
+      button[class*="ToolbarButton"]:hover,
+      button[class*="Button"]:not([class*="DeleteButton"]):hover {
+        background-color: var(--primary-hover) !important;
+        border-color: var(--primary-hover) !important;
+      }
+
+      a[class*="SidebarNavLink"][class*="active"],
+      [class*="active"] > a[class*="SidebarNavLink"] {
+        background-color: var(--primary-color) !important;
+        color: white !important;
+      }
+
+      [class*="Card"],
+      [class*="EntryCard"],
+      [class*="ObjectWidgetTopBar"] {
+        border-radius: 12px !important;
+        border-color: #e7e5e4 !important;
+      }
+
+      [class*="ListCard"] {
+        border-radius: 8px !important;
+        transition: all 0.2s ease !important;
+      }
+
+      [class*="ListCard"]:hover {
+        border-color: var(--primary-color) !important;
+        box-shadow: 0 4px 6px -1px rgba(221, 14, 24, 0.1) !important;
+      }
+
+      input[type="text"],
+      input[type="email"],
+      input[type="url"],
+      textarea,
+      select {
+        border-radius: 8px !important;
+        border-color: #d6d3d1 !important;
+        font-family: 'Inter', sans-serif !important;
+      }
+
+      input:focus,
+      textarea:focus,
+      select:focus {
+        border-color: var(--accent-color) !important;
+        box-shadow: 0 0 0 3px rgba(62, 187, 192, 0.2) !important;
+      }
+
+      [class*="LoginButton"] {
+        background-color: var(--primary-color) !important;
+        border-radius: 9999px !important;
+        font-weight: 600 !important;
+        padding: 12px 32px !important;
+      }
+
+      [class*="LoginButton"]:hover {
+        background-color: var(--primary-hover) !important;
+      }
+
+      [class*="CustomLogoContainer"],
+      [class*="LoginLogo"] {
+        color: var(--primary-color) !important;
+      }
+
+      [class*="PublishDropdownItem"]:hover {
+        background-color: rgba(221, 14, 24, 0.1) !important;
+      }
+
+      [class*="EditorToolbar"] button {
+        border-radius: 6px !important;
+      }
+
+      [class*="EditorToolbar"] button:hover {
+        background-color: rgba(62, 187, 192, 0.1) !important;
+      }
+
+      [class*="Modal"] {
+        border-radius: 16px !important;
+      }
+
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: #f5f5f4;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: #a8a29e;
+        border-radius: 4px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: #57534e;
+      }
+    </style>
+  </head>
+  <body>
+    <script src="https://unpkg.com/@sveltia/cms/dist/sveltia-cms.js"></script>
+    <script>
+      new MutationObserver(function(mutations, observer) {
+        document.querySelectorAll('button').forEach(function(btn) {
+          if (btn.textContent.trim() === 'Sign In with GitHub') {
+            btn.textContent = 'Prihl\u00e1si\u0165 sa';
+          }
+          if (btn.textContent.trim() === 'Sign In with GitHub Using Token') {
+            btn.textContent = 'Prihl\u00e1si\u0165 sa tokenom';
+          }
+        });
+      }).observe(document.body, { childList: true, subtree: true });
+    </script>
+  </body>
+</html>

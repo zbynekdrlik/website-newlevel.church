@@ -1,0 +1,221 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import hero from '../content/homepage/hero.json';
+import aboutPreview from '../content/homepage/about-preview.json';
+import values from '../content/homepage/values.json';
+import youtube from '../content/homepage/youtube.json';
+import joinUs from '../content/homepage/join-us.json';
+import contact from '../content/settings/contact.json';
+
+const iconPaths: Record<string, string> = {
+  heart: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />',
+  book: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />',
+  music: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />',
+};
+
+const bgColorMap: Record<string, string> = {
+  'primary-light': 'bg-[var(--color-primary-light)]',
+  'accent-light': 'bg-[var(--color-accent-light)]',
+  'background-alt': 'bg-[var(--color-background-alt)]',
+};
+
+const iconCircleMap: Record<string, string> = {
+  'primary-light': 'bg-[var(--color-primary)]',
+  'accent-light': 'bg-[var(--color-accent)]',
+  'background-alt': 'bg-[var(--color-text-light)]',
+};
+---
+
+<BaseLayout title="Domov | New Level Church" description={hero.subtitle} currentPage="">
+  <!-- Hero Section -->
+  <section class="relative bg-gradient-to-br from-[var(--color-primary-light)] via-[var(--color-background)] to-[var(--color-accent-light)] overflow-hidden">
+    <!-- Decorative elements -->
+    <div class="absolute top-0 right-0 w-96 h-96 bg-[var(--color-primary)]/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+    <div class="absolute bottom-0 left-0 w-72 h-72 bg-[var(--color-accent)]/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 lg:py-32">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <!-- Text Content -->
+        <div class="text-center lg:text-left">
+          <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-[var(--color-text)] leading-tight mb-6">
+            {hero.title} <span class="text-[var(--color-primary)]">{hero.titleAccent}</span> {hero.titleSuffix}
+          </h1>
+          <p class="text-lg md:text-xl text-[var(--color-text-light)] mb-8 max-w-xl mx-auto lg:mx-0">
+            {hero.subtitle}
+          </p>
+          <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+            <a href={hero.ctaPrimary.url} class="inline-flex items-center justify-center px-8 py-4 bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-white font-semibold rounded-full transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+              {hero.ctaPrimary.text}
+            </a>
+            <a href={hero.ctaSecondary.url} target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center px-8 py-4 bg-[var(--color-background)] hover:bg-[var(--color-background-alt)] text-[var(--color-text-light)] font-semibold rounded-full transition-all duration-200 shadow-md hover:shadow-lg border border-[var(--color-text-muted)]">
+              <svg class="w-5 h-5 mr-2 text-[var(--color-primary)]" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"></path>
+              </svg>
+              {hero.ctaSecondary.text}
+            </a>
+          </div>
+        </div>
+        <!-- Image/Video Placeholder -->
+        <div class="relative">
+          <div class="aspect-video bg-[var(--color-background)] rounded-2xl shadow-2xl overflow-hidden border-4 border-[var(--color-background)]">
+            <picture><source srcset={hero.imageWebp} type="image/webp"><img src={hero.image} alt={hero.imageAlt} class="w-full h-full object-cover" width="1920" height="1279" fetchpriority="high" decoding="async"></picture>
+            <!-- Play button overlay -->
+            <a href={hero.ctaSecondary.url} target="_blank" rel="noopener noreferrer" class="absolute inset-0 flex items-center justify-center bg-black/30 hover:bg-black/40 transition-colors duration-200 group">
+              <div class="w-20 h-20 bg-[var(--color-primary)] rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-200">
+                <svg class="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M8 5v14l11-7z"></path>
+                </svg>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- About Preview Section -->
+  <section class="py-16 md:py-24 bg-[var(--color-background)]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-3xl mx-auto text-center">
+        <span class="inline-block px-4 py-2 bg-[var(--color-primary-light)] text-[var(--color-primary)] rounded-full text-sm font-medium mb-6">
+          {aboutPreview.badge}
+        </span>
+        <h2 class="text-3xl md:text-4xl font-bold text-[var(--color-text)] mb-6">
+          {aboutPreview.title}
+        </h2>
+        <p class="text-lg text-[var(--color-text-light)] mb-8">
+          {aboutPreview.text}
+        </p>
+        <div class="flex flex-wrap justify-center gap-4">
+          <a href={aboutPreview.ctaPrimary.url} class="inline-flex items-center px-6 py-3 bg-[var(--color-text)] hover:opacity-90 text-white font-semibold rounded-full transition-colors duration-200">
+            {aboutPreview.ctaPrimary.text}
+          </a>
+          <a href={aboutPreview.ctaSecondary.url} class="inline-flex items-center px-6 py-3 bg-white hover:bg-[var(--color-background-alt)] text-[var(--color-text-light)] font-semibold rounded-full border border-[var(--color-text-muted)] transition-colors duration-200">
+            {aboutPreview.ctaSecondary.text}
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Values Section -->
+  <section class="py-16 md:py-24 bg-[var(--color-background)]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl md:text-4xl font-bold text-[var(--color-text)] mb-4">
+          {values.title}
+        </h2>
+        <p class="text-lg text-[var(--color-text-light)] max-w-2xl mx-auto">
+          {values.subtitle}
+        </p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {values.items.map((item: { icon: string; bgColor: string; title: string; description: string }) => (
+          <div class={`${bgColorMap[item.bgColor]} rounded-2xl p-8 text-center hover:shadow-lg transition-shadow duration-200`}>
+            <div class={`w-16 h-16 ${iconCircleMap[item.bgColor]} rounded-full flex items-center justify-center mx-auto mb-6`}>
+              <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <Fragment set:html={iconPaths[item.icon]} />
+              </svg>
+            </div>
+            <h3 class="text-xl font-bold text-[var(--color-text)] mb-3">{item.title}</h3>
+            <p class="text-[var(--color-text-light)]">{item.description}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- YouTube Section -->
+  <section class="py-16 md:py-24 bg-[var(--color-background)]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl md:text-4xl font-bold text-[var(--color-text)] mb-4">
+          {youtube.title}
+        </h2>
+        <p class="text-lg text-[var(--color-text-light)] max-w-2xl mx-auto">
+          {youtube.subtitle}
+        </p>
+      </div>
+      <div class="max-w-4xl mx-auto">
+        <div class="aspect-video bg-[var(--color-background-alt)] rounded-2xl overflow-hidden shadow-xl">
+          <a href={youtube.url} target="_blank" rel="noopener noreferrer" class="relative block w-full h-full group">
+            <picture><source srcset={youtube.imageWebp} type="image/webp"><img src={youtube.image} alt={youtube.imageAlt} class="w-full h-full object-cover" loading="lazy" width="1280" height="853"></picture>
+            <div class="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors duration-200 flex items-center justify-center">
+              <div class="text-center">
+                <div class="w-20 h-20 bg-[var(--color-primary)] rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-200">
+                  <svg class="w-10 h-10 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M8 5v14l11-7z"></path>
+                  </svg>
+                </div>
+                <p class="text-white text-xl font-semibold">{youtube.ctaText}</p>
+              </div>
+            </div>
+          </a>
+        </div>
+        <div class="mt-8 text-center">
+          <a href={youtube.url} target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-6 py-3 bg-[var(--color-primary)] hover:opacity-90 text-white font-semibold rounded-full transition-colors duration-200">
+            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"></path>
+            </svg>
+            {youtube.ctaText}
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Join Us Section -->
+  <section class="py-16 md:py-24 bg-gradient-to-br from-[var(--color-accent)] to-[var(--color-accent-dark)] text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div>
+          <h2 class="text-3xl md:text-4xl font-bold mb-6">
+            {joinUs.title}
+          </h2>
+          <p class="text-blue-100 text-lg mb-8">
+            {joinUs.subtitle}
+          </p>
+          <div class="space-y-4">
+            <div class="flex items-start space-x-4">
+              <div class="w-12 h-12 bg-[var(--color-primary)] rounded-full flex items-center justify-center flex-shrink-0">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-xl font-semibold">Bohoslužby</h3>
+                <p class="text-blue-100">
+                  {contact.serviceTimes.map((time: { day: string; time: string }, i: number) => (
+                    <span>
+                      {time.day} {time.time}{i < contact.serviceTimes.length - 1 ? ' |  ' : ''}
+                    </span>
+                  ))}
+                </p>
+              </div>
+            </div>
+            <div class="flex items-start space-x-4">
+              <div class="w-12 h-12 bg-[var(--color-primary)] rounded-full flex items-center justify-center flex-shrink-0">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-xl font-semibold">Adresa</h3>
+                <p class="text-blue-100">{contact.address}, {contact.city}</p>
+              </div>
+            </div>
+          </div>
+          <a href={joinUs.ctaUrl} class="inline-flex items-center mt-8 px-8 py-4 bg-[var(--color-primary)] hover:opacity-90 text-white font-semibold rounded-full transition-colors duration-200">
+            {joinUs.ctaText}
+            <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+            </svg>
+          </a>
+        </div>
+        <div class="hidden lg:block">
+          <picture><source srcset={joinUs.imageWebp} type="image/webp"><img src={joinUs.image} alt={joinUs.imageAlt} class="rounded-2xl shadow-2xl" loading="lazy" width="1200" height="800"></picture>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

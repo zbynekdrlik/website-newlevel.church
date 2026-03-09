@@ -1,0 +1,173 @@
+{
+  "hero": {
+    "badge": "Každý piatok o 18:00",
+    "title": "New Level",
+    "titleAccent": "Party",
+    "subtitle": "Jedlo, hry, karaoke a skvelá atmosféra. Každý piatok pre mladých 15-25 rokov."
+  },
+  "quickInfo": [
+    { "icon": "clock", "title": "Kedy", "text": "Každý piatok o 18:00" },
+    {
+      "icon": "location",
+      "title": "Kde",
+      "text": "Letná 31/26, Spišská Nová Ves"
+    },
+    { "icon": "users", "title": "Pre koho", "text": "Mladých 15-25 rokov" }
+  ],
+  "menu": {
+    "title": "Tento týždeň na menu",
+    "subtitle": "Čo pre teba pripravil náš šéfkuchár?",
+    "emoji": "🌯",
+    "dish": "Burrito",
+    "description": "Plnené burrito pripravené naším šéfkuchárom. Registruj sa, aby sme vedeli, koľko porcií pripraviť!"
+  },
+  "countdown": {
+    "title": "Registrácia na jedlo sa uzatvára o",
+    "subtitle": "Každý štvrtok o polnoci",
+    "deadlinePhone": "+421 950 889 182"
+  },
+  "activities": [
+    {
+      "emoji": "🍽️",
+      "title": "Jedlo od šéfkuchára",
+      "description": "Každý týždeň iné jedlo pripravené naším šéfkuchárom. Registrácia nutná!"
+    },
+    {
+      "emoji": "🏓",
+      "title": "Ping Pong",
+      "description": "Stolný tenis pre všetkých - od začiatočníkov po profíkov."
+    },
+    {
+      "emoji": "⚽",
+      "title": "Kalčeto",
+      "description": "Stolný futbal - vyzvite kamarátov na zápas!"
+    },
+    {
+      "emoji": "🎮",
+      "title": "Herňa",
+      "description": "Herný kútik s konzolami a spoločenskými hrami."
+    },
+    {
+      "emoji": "👨‍🍳",
+      "title": "Varenie zadarmo",
+      "description": "Chceš si sám niečo uvariť? Kuchyňa je k dispozícii zadarmo."
+    },
+    {
+      "emoji": "🎤",
+      "title": "Karaoke",
+      "description": "Spievaj svoje obľúbené piesne s kamošmi."
+    }
+  ],
+  "gallery": [
+    {
+      "src": "/images/party/image00001-thumb.jpeg?v=2",
+      "srcWebp": "/images/party/image00001-thumb.webp?v=2",
+      "srcFull": "/images/party/image00001.jpeg?v=2",
+      "srcFullWebp": "/images/party/image00001.webp?v=2",
+      "caption": "Spoločné jedlo"
+    },
+    {
+      "src": "/images/party/image00002-thumb.jpeg?v=2",
+      "srcWebp": "/images/party/image00002-thumb.webp?v=2",
+      "srcFull": "/images/party/image00002.jpeg?v=2",
+      "srcFullWebp": "/images/party/image00002.webp?v=2",
+      "caption": "Wrapy a hranolky"
+    },
+    {
+      "src": "/images/party/image00003-thumb.jpeg?v=2",
+      "srcWebp": "/images/party/image00003-thumb.webp?v=2",
+      "srcFull": "/images/party/image00003.jpeg?v=2",
+      "srcFullWebp": "/images/party/image00003.webp?v=2",
+      "caption": "V kuchyni"
+    },
+    {
+      "src": "/images/party/image00004-thumb.jpeg?v=2",
+      "srcWebp": "/images/party/image00004-thumb.webp?v=2",
+      "srcFull": "/images/party/image00004.jpeg?v=2",
+      "srcFullWebp": "/images/party/image00004.webp?v=2",
+      "caption": "Herňa"
+    },
+    {
+      "src": "/images/party/image00005-thumb.jpeg?v=2",
+      "srcWebp": "/images/party/image00005-thumb.webp?v=2",
+      "srcFull": "/images/party/image00005.jpeg?v=2",
+      "srcFullWebp": "/images/party/image00005.webp?v=2",
+      "caption": "Karaoke"
+    },
+    {
+      "src": "/images/party/image00006-thumb.jpeg?v=2",
+      "srcWebp": "/images/party/image00006-thumb.webp?v=2",
+      "srcFull": "/images/party/image00006.jpeg?v=2",
+      "srcFullWebp": "/images/party/image00006.webp?v=2",
+      "caption": "Karaoke na pódiu"
+    },
+    {
+      "src": "/images/party/image00007-thumb.jpeg?v=2",
+      "srcWebp": "/images/party/image00007-thumb.webp?v=2",
+      "srcFull": "/images/party/image00007.jpeg?v=2",
+      "srcFullWebp": "/images/party/image00007.webp?v=2",
+      "caption": "Kalčeto"
+    },
+    {
+      "src": "/images/party/image00009-thumb.jpeg?v=2",
+      "srcWebp": "/images/party/image00009-thumb.webp?v=2",
+      "srcFull": "/images/party/image00009.jpeg?v=2",
+      "srcFullWebp": "/images/party/image00009.webp?v=2",
+      "caption": "Ping Pong"
+    },
+    {
+      "src": "/images/party/image00010-thumb.jpeg?v=2",
+      "srcWebp": "/images/party/image00010-thumb.webp?v=2",
+      "srcFull": "/images/party/image00010.jpeg?v=2",
+      "srcFullWebp": "/images/party/image00010.webp?v=2",
+      "caption": "Ping Pong zápas"
+    },
+    {
+      "src": "/images/party/image00011-thumb.jpeg?v=2",
+      "srcWebp": "/images/party/image00011-thumb.webp?v=2",
+      "srcFull": "/images/party/image00011.jpeg?v=2",
+      "srcFullWebp": "/images/party/image00011.webp?v=2",
+      "caption": "Kalčeto zápas"
+    },
+    {
+      "src": "/images/party/image00013-thumb.jpeg?v=2",
+      "srcWebp": "/images/party/image00013-thumb.webp?v=2",
+      "srcFull": "/images/party/image00013.jpeg?v=2",
+      "srcFullWebp": "/images/party/image00013.webp?v=2",
+      "caption": "Varenie"
+    },
+    {
+      "src": "/images/party/image00014-thumb.jpeg?v=2",
+      "srcWebp": "/images/party/image00014-thumb.webp?v=2",
+      "srcFull": "/images/party/image00014.jpeg?v=2",
+      "srcFullWebp": "/images/party/image00014.webp?v=2",
+      "caption": "Rocket League"
+    },
+    {
+      "src": "/images/party/image00015-thumb.jpeg?v=2",
+      "srcWebp": "/images/party/image00015-thumb.webp?v=2",
+      "srcFull": "/images/party/image00015.jpeg?v=2",
+      "srcFullWebp": "/images/party/image00015.webp?v=2",
+      "caption": "Gaming room"
+    },
+    {
+      "src": "/images/party/image00016-thumb.jpeg?v=2",
+      "srcWebp": "/images/party/image00016-thumb.webp?v=2",
+      "srcFull": "/images/party/image00016.jpeg?v=2",
+      "srcFullWebp": "/images/party/image00016.webp?v=2",
+      "caption": "Herný kútik"
+    }
+  ],
+  "registration": {
+    "formTitle": "Prihláška na Party",
+    "time": "18:00 (dvere otvorené od 17:30)",
+    "address": "Letná 31/26, Spišská Nová Ves, 052 01",
+    "price": "Úplne zadarmo!"
+  },
+  "cta": {
+    "title": "Vidíme sa v piatok!",
+    "text": "Sleduj nás na Instagrame, nech ti neuniknú žiadne novinky.",
+    "buttonText": "Sledovať na Instagrame",
+    "buttonUrl": "https://www.instagram.com/newlevelchurch/"
+  }
+}

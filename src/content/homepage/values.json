@@ -1,0 +1,24 @@
+{
+  "title": "Naše hodnoty",
+  "subtitle": "Sme oddaní vytvárať priestor pre každého, aby mohol rásť vo viere a komunite.",
+  "items": [
+    {
+      "title": "Autentická komunita",
+      "description": "Sme skutoční ľudia, ktorí spoločne prechádzajú životom. Nájdete tu pravé priateľstvá a podporu.",
+      "icon": "heart",
+      "bgColor": "primary-light"
+    },
+    {
+      "title": "Biblické učenie",
+      "description": "Praktické posolstvá založené na Písme, ktoré sa dajú aplikovať vo vašom každodennom živote.",
+      "icon": "book",
+      "bgColor": "accent-light"
+    },
+    {
+      "title": "Večer Svätého Ducha",
+      "description": "Zažite moc Ducha Svätého, ktoré vás spája s Bohom a vie zmeniť Váš život.",
+      "icon": "music",
+      "bgColor": "background-alt"
+    }
+  ]
+}

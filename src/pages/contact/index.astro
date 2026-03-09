@@ -1,0 +1,146 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import page from '../../content/contact/page.json';
+import contactInfo from '../../content/settings/contact.json';
+---
+
+<BaseLayout title="Kontakt | New Level Church" currentPage="contact">
+  <!-- Hero Section -->
+  <section class="relative bg-gradient-to-br from-[var(--color-primary-light)] via-[var(--color-background)] to-[var(--color-accent-light)] py-16 md:py-24">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-3xl mx-auto text-center">
+        <span class="inline-block px-4 py-2 bg-[var(--color-primary-light)] text-[var(--color-primary)] rounded-full text-sm font-medium mb-6">
+          {page.hero.badge}
+        </span>
+        <h1 class="text-4xl md:text-5xl font-bold text-[var(--color-text)] mb-6">
+          {page.hero.title}
+        </h1>
+        <p class="text-lg text-[var(--color-text-light)]">
+          {page.hero.subtitle}
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Info & Form Section -->
+  <section class="py-16 md:py-24 bg-[var(--color-background)]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <!-- Contact Info -->
+        <div>
+          <h2 class="text-2xl md:text-3xl font-bold text-[var(--color-text)] mb-8">
+            Kontaktné údaje
+          </h2>
+          <div class="space-y-6">
+            <!-- Service Times -->
+            <div class="flex items-start space-x-4">
+              <div class="w-12 h-12 bg-[var(--color-primary-light)] rounded-full flex items-center justify-center flex-shrink-0">
+                <svg class="w-6 h-6 text-[var(--color-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-lg font-semibold text-[var(--color-text)]">Bohosluzby</h3>
+                <p class="text-[var(--color-text-light)]">
+                  {contactInfo.serviceTimes.map((time: { day: string; time: string }) => (
+                    <span>
+                      {time.day}: {time.time}<br>
+                    </span>
+                  ))}
+                </p>
+              </div>
+            </div>
+            <!-- Location -->
+            <div class="flex items-start space-x-4">
+              <div class="w-12 h-12 bg-[var(--color-accent-light)] rounded-full flex items-center justify-center flex-shrink-0">
+                <svg class="w-6 h-6 text-[var(--color-accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-lg font-semibold text-[var(--color-text)]">Adresa</h3>
+                <p class="text-[var(--color-text-light)]">
+                  {contactInfo.address}<br>
+                  {contactInfo.postalCode} {contactInfo.city}
+                </p>
+              </div>
+            </div>
+          </div>
+          <!-- Google Maps -->
+          <div class="mt-8 aspect-video bg-[var(--color-background-alt)] rounded-2xl overflow-hidden">
+            <iframe src={contactInfo.googleMapsEmbed} width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="New Level Church - mapa"></iframe>
+          </div>
+        </div>
+        <!-- Contact Form -->
+        <div>
+          <div class="bg-[var(--color-background-alt)] rounded-2xl p-8">
+            <h2 class="text-2xl font-bold text-[var(--color-text)] mb-6">
+              {page.formTitle}
+            </h2>
+            <!-- Success Message -->
+
+            <form action="https://api.web3forms.com/submit" method="POST" class="space-y-6">
+              <!-- Web3Forms hidden fields -->
+              <input type="hidden" name="access_key" value={page.web3formsKey}>
+              <input type="hidden" name="subject" value="Nová správa z newlevel.church">
+              <input type="hidden" name="from_name" value="New Level Church Web">
+              <!-- Honeypot spam protection -->
+              <input type="checkbox" name="botcheck" class="hidden" style="display: none;">
+
+              <div>
+                <label for="name" class="block text-sm font-medium text-[var(--color-text-light)] mb-2">
+                  Meno
+                </label>
+                <input type="text" id="name" name="name" required class="w-full px-4 py-3 rounded-xl border border-[var(--color-text-muted)]/30 focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-colors bg-[var(--color-background)]" placeholder="Vaše meno">
+              </div>
+              <div>
+                <label for="email" class="block text-sm font-medium text-[var(--color-text-light)] mb-2">
+                  E-mail
+                </label>
+                <input type="email" id="email" name="email" required class="w-full px-4 py-3 rounded-xl border border-[var(--color-text-muted)]/30 focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-colors bg-[var(--color-background)]" placeholder="vas@email.com">
+              </div>
+              <div>
+                <label for="subject_type" class="block text-sm font-medium text-[var(--color-text-light)] mb-2">
+                  Predmet
+                </label>
+                <select id="subject_type" name="subject_type" class="w-full px-4 py-3 rounded-xl border border-[var(--color-text-muted)]/30 focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-colors bg-[var(--color-background)]">
+                  {page.subjectOptions.map((option: string) => (
+                    <option value={option}>{option}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label for="message" class="block text-sm font-medium text-[var(--color-text-light)] mb-2">
+                  Sprava
+                </label>
+                <textarea id="message" name="message" rows="5" required class="w-full px-4 py-3 rounded-xl border border-[var(--color-text-muted)]/30 focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-colors resize-none bg-[var(--color-background)]" placeholder="Ako vam mozeme pomoct?"></textarea>
+              </div>
+              <button type="submit" class="w-full px-6 py-4 bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-white font-semibold rounded-xl transition-colors duration-200">
+                Odoslat spravu
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="py-16 bg-gradient-to-br from-[var(--color-accent)] to-[var(--color-accent-dark)] text-white">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="text-3xl md:text-4xl font-bold mb-6">
+        {page.cta.title}
+      </h2>
+      <p class="text-blue-100 text-lg mb-8">
+        {page.cta.text}
+      </p>
+      <a href={page.cta.buttonUrl} target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-8 py-4 bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-white font-semibold rounded-full transition-colors duration-200">
+        <svg class="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"></path>
+        </svg>
+        {page.cta.buttonText}
+      </a>
+    </div>
+  </section>
+</BaseLayout>

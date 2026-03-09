@@ -1,0 +1,22 @@
+{
+  "hero": {
+    "badge": "Kontakt",
+    "title": "Radi vás vypočujeme",
+    "subtitle": "Máte otázky? Chcete naplánovať návštevu? Sme tu, aby sme vám pomohli. Ozvite sa kedykoľvek - nevieme sa dočkať spojenia s vami."
+  },
+  "formTitle": "Pošlite nám správu",
+  "subjectOptions": [
+    "Všeobecný dotaz",
+    "Plánovanie návštevy",
+    "Prosba o modlitbu",
+    "Dobrovoľníctvo",
+    "Iné"
+  ],
+  "web3formsKey": "21aa6b07-30eb-4ece-a155-905397c65029",
+  "cta": {
+    "title": "Neviete prísť osobne?",
+    "text": "Pridajte sa k nám online! Sledujte naše bohoslužby naživo na YouTube alebo si pozrite minulé záznamy.",
+    "buttonText": "Sledovať na YouTube",
+    "buttonUrl": "https://www.youtube.com/@NEWLEVELCHURCH"
+  }
+}

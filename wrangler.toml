@@ -1,0 +1,11 @@
+name = "newlevel-church"
+compatibility_date = "2024-01-01"
+pages_build_output_dir = "dist"
+
+[vars]
+UPDATE_TOKEN = "eae4131880546e0581bb16cebd2e6ad4cc8395d331dd12695f9c07c6e6a21b67"
+N8N_WEBHOOK_URL = "https://n8n-wh.newlevel.media/webhook/party-register"
+
+[[kv_namespaces]]
+binding = "PARTY_COUNTER"
+id = "201665217e9c46b4a74099e32b4d3d4b"

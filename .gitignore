@@ -1,11 +1,41 @@
+# build output
+dist/
+
+# generated types
+.astro/
+
+# dependencies
+node_modules/
+
+# env files
+.env
+.env.production
+.env.local
+
 # OS files
 .DS_Store
 Thumbs.db
 
-# Editor files
+# editor files
+.vscode/
+.idea/
 *.swp
 *.swo
 *~
 
 # Claude Code
 .claude/
+
+# Playwright MCP
+.playwright-mcp/
+
+# Wrangler
+.wrangler/
+
+# Screenshots and temp images
+*.png
+!public/images/**/*.png
+!images/**/*.png
+
+# Python scripts
+optimize-images.py

@@ -1,0 +1,538 @@
+backend:
+  name: github
+  repo: zbynekdrlik/website-newlevel.church
+  branch: main
+  base_url: https://newlevel-oauth.milostsnvtech.workers.dev
+  auth_endpoint: /auth
+
+media_folder: public/images/uploads
+public_folder: /images/uploads
+
+collections:
+  - name: settings
+    label: "Nastavenia"
+    editor:
+      preview: false
+    files:
+      - name: theme
+        label: "Farby a t\u00e9ma"
+        file: "src/content/settings/theme.json"
+        fields:
+          - name: colors
+            label: "Farby"
+            widget: object
+            fields:
+              - {
+                  name: primary,
+                  label: "Hlavn\u00e1 farba",
+                  widget: color,
+                  default: "#dd0e18",
+                }
+              - {
+                  name: primaryLight,
+                  label: "Hlavn\u00e1 svetl\u00e1",
+                  widget: color,
+                  default: "#fef2f2",
+                }
+              - {
+                  name: primaryDark,
+                  label: "Hlavn\u00e1 tmav\u00e1",
+                  widget: color,
+                  default: "#dd0e18",
+                }
+              - {
+                  name: accent,
+                  label: "Akcentov\u00e1 farba",
+                  widget: color,
+                  default: "#3ebbc0",
+                }
+              - {
+                  name: accentLight,
+                  label: "Akcentov\u00e1 svetl\u00e1",
+                  widget: color,
+                  default: "#00f7ff",
+                }
+              - {
+                  name: accentDark,
+                  label: "Akcentov\u00e1 tmav\u00e1",
+                  widget: color,
+                  default: "#3f787b",
+                }
+              - {
+                  name: background,
+                  label: "Pozadie",
+                  widget: color,
+                  default: "#ffffff",
+                }
+              - {
+                  name: backgroundAlt,
+                  label: "Alternat\u00edvne pozadie",
+                  widget: color,
+                  default: "#f5f5f4",
+                }
+              - {
+                  name: headerBg,
+                  label: "Pozadie hlavi\u010dky",
+                  widget: color,
+                  default: "#3ebbc0",
+                }
+              - { name: text, label: "Text", widget: color, default: "#1c1917" }
+              - {
+                  name: textLight,
+                  label: "Text svetl\u00fd",
+                  widget: color,
+                  default: "#57534e",
+                }
+              - {
+                  name: textMuted,
+                  label: "Text tlmen\u00fd",
+                  widget: color,
+                  default: "#a8a29e",
+                }
+
+      - name: general
+        label: "V\u0161eobecn\u00e9"
+        file: "src/content/settings/general.json"
+        fields:
+          - { name: siteName, label: "N\u00e1zov str\u00e1nky", widget: string }
+          - { name: email, label: "Email", widget: string }
+          - { name: tagline, label: "Popis str\u00e1nky", widget: string }
+          - name: social
+            label: "Soci\u00e1lne siete"
+            widget: object
+            fields:
+              - { name: facebook, label: "Facebook URL", widget: string }
+              - { name: youtube, label: "YouTube URL", widget: string }
+              - { name: instagram, label: "Instagram URL", widget: string }
+              - { name: tiktok, label: "TikTok URL", widget: string }
+
+      - name: contact
+        label: "Kontaktn\u00e9 \u00fadaje"
+        file: "src/content/settings/contact.json"
+        fields:
+          - { name: address, label: "Adresa", widget: string }
+          - { name: city, label: "Mesto", widget: string }
+          - { name: postalCode, label: "PS\u010c", widget: string }
+          - name: serviceTimes
+            label: "\u010casy bohoslu\u017eieb"
+            widget: list
+            fields:
+              - { name: day, label: "De\u0148", widget: string }
+              - { name: time, label: "\u010cas", widget: string }
+          - {
+              name: googleMapsEmbed,
+              label: "Google Maps embed URL",
+              widget: string,
+            }
+
+      - name: footer
+        label: "P\u00e4ta str\u00e1nky"
+        file: "src/content/footer/footer.json"
+        fields:
+          - { name: tagline, label: "Slogan v p\u00e4te", widget: string }
+
+  - name: homepage
+    label: "Domovsk\u00e1 str\u00e1nka"
+    editor:
+      preview: false
+    files:
+      - name: hero
+        label: "Hero sekcia"
+        file: "src/content/homepage/hero.json"
+        fields:
+          - { name: title, label: "Titulok", widget: string }
+          - {
+              name: titleAccent,
+              label: "Zv\u00fdraznen\u00fd text",
+              widget: string,
+            }
+          - { name: titleSuffix, label: "Koniec titulku", widget: string }
+          - { name: subtitle, label: "Podtitulok", widget: text }
+          - name: ctaPrimary
+            label: "Hlavn\u00e9 tla\u010didlo"
+            widget: object
+            fields:
+              - { name: text, label: "Text", widget: string }
+              - { name: url, label: "URL", widget: string }
+          - name: ctaSecondary
+            label: "Ved\u013eaj\u0161ie tla\u010didlo"
+            widget: object
+            fields:
+              - { name: text, label: "Text", widget: string }
+              - { name: url, label: "URL", widget: string }
+          - { name: image, label: "Obr\u00e1zok (JPG)", widget: image }
+          - {
+              name: imageWebp,
+              label: "Obr\u00e1zok (WebP)",
+              widget: image,
+              required: false,
+            }
+          - { name: imageAlt, label: "Alt text obr\u00e1zka", widget: string }
+
+      - name: about-preview
+        label: "Sekcia O n\u00e1s"
+        file: "src/content/homepage/about-preview.json"
+        fields:
+          - { name: badge, label: "Odznak", widget: string }
+          - { name: title, label: "Titulok", widget: string }
+          - { name: text, label: "Text", widget: text }
+          - name: ctaPrimary
+            label: "Hlavn\u00e9 tla\u010didlo"
+            widget: object
+            fields:
+              - { name: text, label: "Text", widget: string }
+              - { name: url, label: "URL", widget: string }
+          - name: ctaSecondary
+            label: "Ved\u013eaj\u0161ie tla\u010didlo"
+            widget: object
+            fields:
+              - { name: text, label: "Text", widget: string }
+              - { name: url, label: "URL", widget: string }
+
+      - name: values
+        label: "Na\u0161e hodnoty"
+        file: "src/content/homepage/values.json"
+        fields:
+          - { name: title, label: "Titulok", widget: string }
+          - { name: subtitle, label: "Podtitulok", widget: text }
+          - name: items
+            label: "Hodnoty"
+            widget: list
+            fields:
+              - { name: title, label: "N\u00e1zov", widget: string }
+              - { name: description, label: "Popis", widget: text }
+              - {
+                  name: icon,
+                  label: "Ikona (heart/book/music)",
+                  widget: string,
+                }
+              - {
+                  name: bgColor,
+                  label: "Farba pozadia (primary-light/accent-light/background-alt)",
+                  widget: string,
+                }
+
+      - name: youtube
+        label: "YouTube sekcia"
+        file: "src/content/homepage/youtube.json"
+        fields:
+          - { name: title, label: "Titulok", widget: string }
+          - { name: subtitle, label: "Podtitulok", widget: text }
+          - { name: image, label: "Obr\u00e1zok (JPG)", widget: image }
+          - {
+              name: imageWebp,
+              label: "Obr\u00e1zok (WebP)",
+              widget: image,
+              required: false,
+            }
+          - { name: imageAlt, label: "Alt text", widget: string }
+          - { name: ctaText, label: "Text tla\u010didla", widget: string }
+          - { name: url, label: "YouTube URL", widget: string }
+
+      - name: join-us
+        label: "Pridajte sa"
+        file: "src/content/homepage/join-us.json"
+        fields:
+          - { name: title, label: "Titulok", widget: string }
+          - { name: subtitle, label: "Podtitulok", widget: text }
+          - { name: ctaText, label: "Text tla\u010didla", widget: string }
+          - { name: ctaUrl, label: "URL tla\u010didla", widget: string }
+          - { name: image, label: "Obr\u00e1zok (JPG)", widget: image }
+          - {
+              name: imageWebp,
+              label: "Obr\u00e1zok (WebP)",
+              widget: image,
+              required: false,
+            }
+          - { name: imageAlt, label: "Alt text", widget: string }
+
+  - name: pages
+    label: "Str\u00e1nky"
+    editor:
+      preview: false
+    files:
+      - name: about
+        label: "O n\u00e1s"
+        file: "src/content/about/page.json"
+        fields:
+          - name: hero
+            label: "Hero sekcia"
+            widget: object
+            fields:
+              - { name: badge, label: "Odznak", widget: string }
+              - { name: title, label: "Titulok", widget: string }
+              - { name: subtitle, label: "Podtitulok", widget: text }
+          - name: whoWeAre
+            label: "Kto sme"
+            widget: object
+            fields:
+              - { name: title, label: "Titulok", widget: string }
+              - {
+                  name: paragraphs,
+                  label: "Odseky",
+                  widget: list,
+                  field: { name: text, label: "Text", widget: text },
+                }
+              - { name: image, label: "Obr\u00e1zok (JPG)", widget: image }
+              - {
+                  name: imageWebp,
+                  label: "Obr\u00e1zok (WebP)",
+                  widget: image,
+                  required: false,
+                }
+              - { name: imageAlt, label: "Alt text", widget: string }
+          - name: mission
+            label: "Poslanie"
+            widget: object
+            fields:
+              - { name: title, label: "Titulok", widget: string }
+              - { name: text, label: "Text", widget: text }
+          - name: vision
+            label: "V\u00edzia"
+            widget: object
+            fields:
+              - { name: title, label: "Titulok", widget: string }
+              - { name: text, label: "Text", widget: text }
+          - name: beliefs
+            label: "\u010comu ver\u00edme"
+            widget: object
+            fields:
+              - { name: title, label: "Titulok", widget: string }
+              - { name: subtitle, label: "Podtitulok", widget: text }
+              - name: items
+                label: "Polo\u017eky"
+                widget: list
+                fields:
+                  - { name: title, label: "N\u00e1zov", widget: string }
+                  - { name: text, label: "Text", widget: text }
+          - name: cta
+            label: "V\u00fdzva k akcii"
+            widget: object
+            fields:
+              - { name: title, label: "Titulok", widget: string }
+              - { name: text, label: "Text", widget: text }
+              - {
+                  name: buttonText,
+                  label: "Text tla\u010didla",
+                  widget: string,
+                }
+              - { name: buttonUrl, label: "URL tla\u010didla", widget: string }
+
+      - name: contact
+        label: "Kontakt"
+        file: "src/content/contact/page.json"
+        fields:
+          - name: hero
+            label: "Hero sekcia"
+            widget: object
+            fields:
+              - { name: badge, label: "Odznak", widget: string }
+              - { name: title, label: "Titulok", widget: string }
+              - { name: subtitle, label: "Podtitulok", widget: text }
+          - { name: formTitle, label: "Titulok formul\u00e1ra", widget: string }
+          - name: subjectOptions
+            label: "Mo\u017enosti predmetu"
+            widget: list
+            field: { name: option, label: "Mo\u017enos\u0165", widget: string }
+          - {
+              name: web3formsKey,
+              label: "Web3Forms API k\u013e\u00fa\u010d",
+              widget: string,
+            }
+          - name: cta
+            label: "V\u00fdzva k akcii"
+            widget: object
+            fields:
+              - { name: title, label: "Titulok", widget: string }
+              - { name: text, label: "Text", widget: text }
+              - {
+                  name: buttonText,
+                  label: "Text tla\u010didla",
+                  widget: string,
+                }
+              - { name: buttonUrl, label: "URL tla\u010didla", widget: string }
+
+      - name: gallery
+        label: "Gal\u00e9ria"
+        file: "src/content/gallery/page.json"
+        fields:
+          - name: hero
+            label: "Hero sekcia"
+            widget: object
+            fields:
+              - { name: badge, label: "Odznak", widget: string }
+              - { name: title, label: "Titulok", widget: string }
+              - { name: subtitle, label: "Podtitulok", widget: text }
+          - name: cta
+            label: "V\u00fdzva k akcii"
+            widget: object
+            fields:
+              - { name: title, label: "Titulok", widget: string }
+              - { name: text, label: "Text", widget: text }
+              - {
+                  name: buttonText,
+                  label: "Text tla\u010didla",
+                  widget: string,
+                }
+              - { name: buttonUrl, label: "URL tla\u010didla", widget: string }
+
+      - name: dar
+        label: "Dar"
+        file: "src/content/dar/page.json"
+        fields:
+          - name: hero
+            label: "Hero sekcia"
+            widget: object
+            fields:
+              - { name: badge, label: "Odznak", widget: string }
+              - { name: title, label: "Titulok", widget: string }
+              - { name: subtitle, label: "Podtitulok", widget: text }
+          - name: bankDetails
+            label: "Bankov\u00e9 \u00fadaje"
+            widget: object
+            fields:
+              - { name: title, label: "Titulok", widget: string }
+              - { name: subtitle, label: "Podtitulok", widget: string }
+              - { name: iban, label: "IBAN", widget: string }
+              - { name: bic, label: "BIC/SWIFT", widget: string }
+              - {
+                  name: qrImage,
+                  label: "QR k\u00f3d obr\u00e1zok",
+                  widget: image,
+                }
+              - { name: qrCaption, label: "Popis QR k\u00f3du", widget: string }
+          - name: cta
+            label: "V\u00fdzva k akcii"
+            widget: object
+            fields:
+              - { name: title, label: "Titulok", widget: string }
+              - { name: text, label: "Text", widget: text }
+              - {
+                  name: buttonText,
+                  label: "Text tla\u010didla",
+                  widget: string,
+                }
+              - { name: buttonUrl, label: "URL tla\u010didla", widget: string }
+
+  - name: gallery-photos
+    label: "Fotografie"
+    editor:
+      preview: false
+    files:
+      - name: photos
+        label: "Fotografie v gal\u00e9rii"
+        file: "src/content/gallery/photos.json"
+        fields:
+          - name: photos
+            label: "Fotografie"
+            widget: list
+            fields:
+              - { name: src, label: "URL obr\u00e1zka", widget: string }
+              - { name: caption, label: "Popis", widget: string }
+
+  - name: party
+    label: "Party"
+    editor:
+      preview: false
+    files:
+      - name: page
+        label: "Party str\u00e1nka"
+        file: "src/content/party/page.json"
+        fields:
+          - name: hero
+            label: "Hero sekcia"
+            widget: object
+            fields:
+              - { name: badge, label: "Odznak", widget: string }
+              - { name: title, label: "Titulok", widget: string }
+              - {
+                  name: titleAccent,
+                  label: "Zv\u00fdraznen\u00fd text",
+                  widget: string,
+                }
+              - { name: subtitle, label: "Podtitulok", widget: text }
+          - name: quickInfo
+            label: "R\u00fdchle info"
+            widget: list
+            fields:
+              - {
+                  name: icon,
+                  label: "Ikona (clock/location/users)",
+                  widget: string,
+                }
+              - { name: title, label: "Titulok", widget: string }
+              - { name: text, label: "Text", widget: string }
+          - name: menu
+            label: "T\u00fd\u017edenn\u00e9 menu"
+            widget: object
+            fields:
+              - { name: title, label: "Titulok", widget: string }
+              - { name: subtitle, label: "Podtitulok", widget: string }
+              - { name: emoji, label: "Emoji jedla", widget: string }
+              - { name: dish, label: "Jedlo", widget: string }
+              - { name: description, label: "Popis", widget: text }
+          - name: countdown
+            label: "Odpo\u010d\u00edtavanie"
+            widget: object
+            fields:
+              - { name: title, label: "Titulok", widget: string }
+              - { name: subtitle, label: "Podtitulok", widget: string }
+              - {
+                  name: deadlinePhone,
+                  label: "Telef\u00f3n po uz\u00e1vierke",
+                  widget: string,
+                }
+          - name: activities
+            label: "Aktivity"
+            widget: list
+            fields:
+              - { name: emoji, label: "Emoji", widget: string }
+              - { name: title, label: "N\u00e1zov", widget: string }
+              - { name: description, label: "Popis", widget: text }
+          - name: gallery
+            label: "Fotografie"
+            widget: list
+            fields:
+              - { name: src, label: "Thumbnail (JPEG)", widget: string }
+              - {
+                  name: srcWebp,
+                  label: "Thumbnail (WebP)",
+                  widget: string,
+                  required: false,
+                }
+              - {
+                  name: srcFull,
+                  label: "Pln\u00e1 ve\u013ekos\u0165 (JPEG)",
+                  widget: string,
+                }
+              - {
+                  name: srcFullWebp,
+                  label: "Pln\u00e1 ve\u013ekos\u0165 (WebP)",
+                  widget: string,
+                  required: false,
+                }
+              - { name: caption, label: "Popis", widget: string }
+          - name: registration
+            label: "Registr\u00e1cia"
+            widget: object
+            fields:
+              - {
+                  name: formTitle,
+                  label: "Titulok formul\u00e1ra",
+                  widget: string,
+                }
+              - { name: time, label: "\u010cas", widget: string }
+              - { name: address, label: "Adresa", widget: string }
+              - { name: price, label: "Cena", widget: string }
+          - name: cta
+            label: "V\u00fdzva k akcii"
+            widget: object
+            fields:
+              - { name: title, label: "Titulok", widget: string }
+              - { name: text, label: "Text", widget: text }
+              - {
+                  name: buttonText,
+                  label: "Text tla\u010didla",
+                  widget: string,
+                }
+              - { name: buttonUrl, label: "URL tla\u010didla", widget: string }

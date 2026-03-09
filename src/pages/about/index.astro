@@ -1,0 +1,111 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import page from '../../content/about/page.json';
+---
+
+<BaseLayout title="O nás | New Level Church" description="Spoznajte New Level Church - náš príbeh, poslanie a hodnoty. Sme komunita veriacich v Bratislave." currentPage="about">
+  <!-- Hero Section -->
+  <section class="relative bg-gradient-to-br from-[var(--color-primary-light)] via-[var(--color-background)] to-[var(--color-accent-light)] py-16 md:py-24">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-3xl mx-auto text-center">
+        <span class="inline-block px-4 py-2 bg-[var(--color-primary-light)] text-[var(--color-primary)] rounded-full text-sm font-medium mb-6">
+          {page.hero.badge}
+        </span>
+        <h1 class="text-4xl md:text-5xl font-bold text-[var(--color-text)] mb-6">
+          {page.hero.title}
+        </h1>
+        <p class="text-lg text-[var(--color-text-light)]">
+          {page.hero.subtitle}
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Who We Are Section -->
+  <section class="py-16 md:py-24 bg-[var(--color-background)]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div>
+          <h2 class="text-3xl md:text-4xl font-bold text-[var(--color-text)] mb-6">
+            {page.whoWeAre.title}
+          </h2>
+          <div class="space-y-4 text-[var(--color-text-light)]">
+            {page.whoWeAre.paragraphs.map((p: string) => (
+              <p>{p}</p>
+            ))}
+          </div>
+        </div>
+        <div>
+          <picture><source srcset={page.whoWeAre.imageWebp} type="image/webp"><img src={page.whoWeAre.image} alt={page.whoWeAre.imageAlt} class="rounded-2xl shadow-xl" loading="lazy" width="1200" height="800"></picture>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Mission & Vision Section -->
+  <section class="py-16 md:py-24 bg-[var(--color-background-alt)]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div class="bg-[var(--color-background)] rounded-2xl p-8 shadow-lg">
+          <div class="w-14 h-14 bg-[var(--color-primary)] rounded-full flex items-center justify-center mb-6">
+            <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+            </svg>
+          </div>
+          <h3 class="text-2xl font-bold text-[var(--color-text)] mb-4">{page.mission.title}</h3>
+          <p class="text-[var(--color-text-light)]">{page.mission.text}</p>
+        </div>
+        <div class="bg-[var(--color-background)] rounded-2xl p-8 shadow-lg">
+          <div class="w-14 h-14 bg-[var(--color-accent)] rounded-full flex items-center justify-center mb-6">
+            <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+            </svg>
+          </div>
+          <h3 class="text-2xl font-bold text-[var(--color-text)] mb-4">{page.vision.title}</h3>
+          <p class="text-[var(--color-text-light)]">{page.vision.text}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Beliefs Section -->
+  <section class="py-16 md:py-24 bg-[var(--color-background)]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl md:text-4xl font-bold text-[var(--color-text)] mb-4">
+          {page.beliefs.title}
+        </h2>
+        <p class="text-lg text-[var(--color-text-light)] max-w-2xl mx-auto">
+          {page.beliefs.subtitle}
+        </p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {page.beliefs.items.map((item: { title: string; text: string }) => (
+          <div class="p-6 border border-[var(--color-text-muted)]/30 rounded-xl hover:border-[var(--color-primary)]/50 hover:shadow-lg transition-all duration-200">
+            <h4 class="text-xl font-bold text-[var(--color-text)] mb-3">{item.title}</h4>
+            <p class="text-[var(--color-text-light)]">{item.text}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="py-16 md:py-24 bg-gradient-to-br from-[var(--color-accent)] to-[var(--color-accent-dark)] text-white">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="text-3xl md:text-4xl font-bold mb-6">
+        {page.cta.title}
+      </h2>
+      <p class="text-blue-100 text-lg mb-8">
+        {page.cta.text}
+      </p>
+      <a href={page.cta.buttonUrl} class="inline-flex items-center px-8 py-4 bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-white font-semibold rounded-full transition-colors duration-200">
+        {page.cta.buttonText}
+        <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+        </svg>
+      </a>
+    </div>
+  </section>
+</BaseLayout>

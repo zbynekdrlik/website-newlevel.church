@@ -1,0 +1,520 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import page from '../../content/party/page.json';
+import contactInfo from '../../content/settings/contact.json';
+---
+
+<BaseLayout title="Party | New Level Church" description={page.hero.subtitle} currentPage="party">
+  <!-- Section 1: Dark Hero -->
+  <section class="party-hero relative overflow-hidden" style="padding-top: 5rem; padding-bottom: 5rem;">
+    <div class="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" style="background: rgba(0, 247, 255, 0.08);"></div>
+    <div class="absolute bottom-0 left-0 w-72 h-72 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" style="background: rgba(221, 14, 24, 0.08);"></div>
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <span class="inline-block px-4 py-2 rounded-full text-sm font-medium mb-6" style="background: rgba(0, 247, 255, 0.15); color: #00f7ff;">
+        {page.hero.badge}
+      </span>
+      <h1 class="text-4xl md:text-6xl lg:text-7xl font-bold leading-tight mb-6" style="color: #ffffff;">
+        {page.hero.title} <span style="color: #00f7ff;">{page.hero.titleAccent}</span>
+      </h1>
+      <p class="text-lg md:text-xl max-w-2xl mx-auto" style="color: #d6d3d1; margin-bottom: 3.5rem;">
+        {page.hero.subtitle}
+      </p>
+      <!-- Scroll indicator -->
+      <div class="flex flex-col items-center gap-2 mt-10 animate-bounce">
+        <span class="text-sm font-medium tracking-wider uppercase" style="color: rgba(255,255,255,0.5);">Scrolluj nižšie</span>
+        <svg class="w-6 h-6" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 2: Quick Info Cards -->
+  <section class="py-16 md:py-24 bg-[var(--color-background)]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="bg-[var(--color-primary-light)] rounded-2xl p-8 text-center hover:shadow-lg transition-shadow duration-200">
+          <div class="w-16 h-16 bg-[var(--color-primary)] rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-[var(--color-text)] mb-3">{page.quickInfo[0].title}</h3>
+          <p class="text-[var(--color-text-light)]">{page.quickInfo[0].text}</p>
+        </div>
+        <div style="background: rgba(0, 247, 255, 0.08);" class="rounded-2xl p-8 text-center hover:shadow-lg transition-shadow duration-200">
+          <div class="w-16 h-16 bg-[var(--color-accent)] rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-[var(--color-text)] mb-3">{page.quickInfo[1].title}</h3>
+          <p class="text-[var(--color-text-light)]">{page.quickInfo[1].text}</p>
+        </div>
+        <div class="bg-[var(--color-background-alt)] rounded-2xl p-8 text-center hover:shadow-lg transition-shadow duration-200">
+          <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6" style="background: var(--color-text-light);">
+            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-[var(--color-text)] mb-3">{page.quickInfo[2].title}</h3>
+          <p class="text-[var(--color-text-light)]">{page.quickInfo[2].text}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 3: Weekly Food Menu -->
+  <section id="menu" class="py-16 md:py-24 bg-[var(--color-background-alt)]">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl md:text-4xl font-bold text-[var(--color-text)] mb-4">{page.menu.title}</h2>
+        <p class="text-lg text-[var(--color-text-light)]">{page.menu.subtitle}</p>
+      </div>
+      <!-- MENU START -->
+      <div class="bg-[var(--color-background)] rounded-2xl p-8 md:p-12 shadow-lg text-center">
+        <div class="emoji-float text-6xl mb-6" set:html={page.menu.emoji}></div>
+        <h3 class="text-2xl md:text-3xl font-bold text-[var(--color-text)] mb-4">{page.menu.dish}</h3>
+        <p class="text-[var(--color-text-light)] mb-8">{page.menu.description}</p>
+        <a href="#registracia" class="inline-flex items-center px-6 py-3 bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-white font-semibold rounded-full transition-colors duration-200">
+          Registrovať sa na jedlo
+        </a>
+      </div>
+      <!-- MENU END -->
+    </div>
+  </section>
+
+  <!-- Section 3.5: Countdown Timer & Registration Counter -->
+  <section class="py-12 md:py-16" style="background: linear-gradient(135deg, #0f0f0f 0%, #1a1a2e 50%, #16213e 100%);">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+
+      <!-- Countdown Timer (shown before deadline) -->
+      <div id="countdown-section" class="text-center mb-10">
+        <h2 class="text-2xl md:text-3xl font-bold mb-2" style="color: #ffffff;">{page.countdown.title}</h2>
+        <p class="text-sm mb-8" style="color: #a8a29e;">{page.countdown.subtitle}</p>
+        <div class="flex justify-center gap-4 md:gap-6">
+          <div class="rounded-xl p-4 md:p-6 min-w-[70px] md:min-w-[90px]" style="background: rgba(0, 247, 255, 0.08); border: 1px solid rgba(0, 247, 255, 0.15);">
+            <span id="countdown-days" class="neon-text block text-3xl md:text-5xl font-bold" style="color: #00f7ff;">--</span>
+            <span class="block text-xs md:text-sm mt-1" style="color: #a8a29e;">dní</span>
+          </div>
+          <div class="rounded-xl p-4 md:p-6 min-w-[70px] md:min-w-[90px]" style="background: rgba(0, 247, 255, 0.08); border: 1px solid rgba(0, 247, 255, 0.15);">
+            <span id="countdown-hours" class="neon-text block text-3xl md:text-5xl font-bold" style="color: #00f7ff;">--</span>
+            <span class="block text-xs md:text-sm mt-1" style="color: #a8a29e;">hodín</span>
+          </div>
+          <div class="rounded-xl p-4 md:p-6 min-w-[70px] md:min-w-[90px]" style="background: rgba(0, 247, 255, 0.08); border: 1px solid rgba(0, 247, 255, 0.15);">
+            <span id="countdown-minutes" class="neon-text block text-3xl md:text-5xl font-bold" style="color: #00f7ff;">--</span>
+            <span class="block text-xs md:text-sm mt-1" style="color: #a8a29e;">minút</span>
+          </div>
+          <div class="rounded-xl p-4 md:p-6 min-w-[70px] md:min-w-[90px]" style="background: rgba(0, 247, 255, 0.08); border: 1px solid rgba(0, 247, 255, 0.15);">
+            <span id="countdown-seconds" class="neon-text block text-3xl md:text-5xl font-bold" style="color: #00f7ff;">--</span>
+            <span class="block text-xs md:text-sm mt-1" style="color: #a8a29e;">sekúnd</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Post-Deadline Message (hidden by default) -->
+      <div id="deadline-passed" class="text-center mb-10 hidden">
+        <h2 class="text-2xl md:text-3xl font-bold mb-3" style="color: #ff6b6b;">Registrácia na jedlo je uzavretá</h2>
+        <p class="text-lg mb-6" style="color: #d6d3d1;">Ak sa chceš ešte prihlásiť, zavolaj nám:</p>
+        <a href={`tel:${page.countdown.deadlinePhone}`} class="inline-flex items-center gap-3 px-8 py-4 rounded-full font-semibold text-lg transition-all duration-200 hover:scale-105" style="background: #00f7ff; color: #0f0f0f;">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+          </svg>
+          Zavolať {page.countdown.deadlinePhone}
+        </a>
+        <p class="text-sm mt-3" style="color: #a8a29e;">Možno ešte stíhame pridať porciu!</p>
+      </div>
+
+      <!-- Registration Counter -->
+      <div class="text-center pt-8 mt-8" style="border-top: 1px solid rgba(0, 247, 255, 0.15);">
+        <span id="counter-value" class="neon-text block text-7xl md:text-9xl font-bold mb-2" style="color: #00f7ff;">0</span>
+        <span class="text-lg md:text-xl font-medium" style="color: #a8a29e;">registrovaných na jedlo</span>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Section 4: Activities Showcase -->
+  <section id="aktivity" class="py-16 md:py-24 bg-[var(--color-background)]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl md:text-4xl font-bold text-[var(--color-text)] mb-4">Čo ťa čaká?</h2>
+        <p class="text-lg text-[var(--color-text-light)] max-w-2xl mx-auto">Každý piatok je nabitý aktivitami</p>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        {page.activities.map((item: { emoji: string; title: string; description: string }, i: number) => (
+          <div class="bg-[var(--color-background-alt)] rounded-2xl p-8 text-center hover:shadow-lg transition-shadow duration-200">
+            <div class="w-16 h-16 bg-[var(--color-primary)] rounded-full flex items-center justify-center mx-auto mb-6">
+              <span class="text-2xl" set:html={item.emoji}></span>
+            </div>
+            <h3 class="text-xl font-bold text-[var(--color-text)] mb-3">{item.title}</h3>
+            <p class="text-[var(--color-text-light)]">{item.description}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 5: Photo Gallery -->
+  <section class="py-16 md:py-24 bg-[var(--color-background-alt)]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl md:text-4xl font-bold text-[var(--color-text)] mb-4">Fotogaléria</h2>
+        <p class="text-lg text-[var(--color-text-light)]">Pozri sa, ako to u nás vyzerá</p>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {page.gallery.map((photo: { src: string; srcWebp: string; srcFull: string; srcFullWebp: string; caption: string }, index: number) => (
+          <div class="group relative overflow-hidden rounded-2xl shadow-lg cursor-pointer gallery-item" data-index={index} data-src={photo.srcFull} data-src-webp={photo.srcFullWebp} data-caption={photo.caption}>
+            <div class="aspect-[3/4]">
+              <picture><source srcset={photo.srcWebp} type="image/webp"><img src={photo.src} alt={photo.caption} class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" loading="lazy" width="450" height="600"></picture>
+            </div>
+            <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <div class="absolute bottom-0 left-0 right-0 p-4">
+                <p class="text-white font-semibold">{photo.caption}</p>
+              </div>
+            </div>
+            <div class="absolute top-4 right-4 w-10 h-10 bg-white/90 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <svg class="w-5 h-5 text-[var(--color-text-light)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path>
+              </svg>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Lightbox -->
+  <div id="lightbox" class="lightbox-overlay">
+    <button id="lightbox-close" class="absolute top-4 right-4 text-white hover:text-[var(--color-primary)] transition-colors z-10">
+      <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+      </svg>
+    </button>
+    <button id="lightbox-prev" class="absolute left-4 top-1/2 -translate-y-1/2 text-white hover:text-[var(--color-primary)] transition-colors">
+      <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+      </svg>
+    </button>
+    <button id="lightbox-next" class="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:text-[var(--color-primary)] transition-colors">
+      <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+      </svg>
+    </button>
+    <div class="lightbox-content">
+      <img id="lightbox-image" src="" alt="">
+      <p id="lightbox-caption" class="text-white text-center mt-4 text-lg"></p>
+    </div>
+  </div>
+
+  <!-- Section 6: Registration Form -->
+  <section id="registracia" class="py-16 md:py-24 bg-[var(--color-background)]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl md:text-4xl font-bold text-[var(--color-text)] mb-4">{page.registration.formTitle}</h2>
+        <p class="text-lg text-[var(--color-text-light)] max-w-2xl mx-auto">Zaregistruj sa a príď v piatok!</p>
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <!-- Info Panel -->
+        <div>
+          <div class="space-y-6">
+            <div class="flex items-start space-x-4">
+              <div class="w-12 h-12 bg-[var(--color-primary-light)] rounded-full flex items-center justify-center flex-shrink-0">
+                <svg class="w-6 h-6 text-[var(--color-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-lg font-semibold text-[var(--color-text)]">Kedy</h3>
+                <p class="text-[var(--color-text-light)]">{page.registration.time}</p>
+              </div>
+            </div>
+            <div class="flex items-start space-x-4">
+              <div class="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0" style="background: rgba(0, 247, 255, 0.1);">
+                <svg class="w-6 h-6 text-[var(--color-accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-lg font-semibold text-[var(--color-text)]">Kde</h3>
+                <p class="text-[var(--color-text-light)]">{contactInfo.address}, {contactInfo.city}, {contactInfo.postalCode}</p>
+              </div>
+            </div>
+            <div class="flex items-start space-x-4">
+              <div class="w-12 h-12 bg-[var(--color-primary-light)] rounded-full flex items-center justify-center flex-shrink-0">
+                <svg class="w-6 h-6 text-[var(--color-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-lg font-semibold text-[var(--color-text)]">Cena</h3>
+                <p class="text-[var(--color-text-light)]">{page.registration.price}</p>
+              </div>
+            </div>
+          </div>
+          <div class="mt-8 aspect-video bg-[var(--color-background-alt)] rounded-2xl overflow-hidden">
+            <iframe src={contactInfo.googleMapsEmbed} width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="New Level Church - mapa"></iframe>
+          </div>
+        </div>
+        <!-- Form Card -->
+        <div>
+          <div class="bg-[var(--color-background-alt)] rounded-2xl p-8">
+            <h3 class="text-2xl font-bold text-[var(--color-text)] mb-6">{page.registration.formTitle}</h3>
+            <div id="form-success" class="hidden mb-6 p-4 rounded-xl text-center" style="background: rgba(0, 247, 255, 0.1); color: var(--color-accent-dark);">
+              <p class="font-semibold text-lg">Super! Registrácia úspešná. Tešíme sa na teba v piatok!</p>
+            </div>
+            <div id="form-error" class="hidden mb-6 p-4 rounded-xl text-center bg-[var(--color-primary-light)] text-[var(--color-primary)]">
+              <p class="font-semibold">Ups! Niečo sa pokazilo. Skús to prosím znovu.</p>
+            </div>
+            <form id="party-form" class="space-y-6">
+              <div>
+                <label for="party-name" class="block text-sm font-medium text-[var(--color-text-light)] mb-2">Meno</label>
+                <input type="text" id="party-name" name="name" required class="w-full px-4 py-3 rounded-xl border border-[var(--color-text-muted)]/30 focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-colors bg-[var(--color-background)]" placeholder="Tvoje meno">
+              </div>
+              <div>
+                <label for="party-email" class="block text-sm font-medium text-[var(--color-text-light)] mb-2">Email</label>
+                <input type="email" id="party-email" name="email" required class="w-full px-4 py-3 rounded-xl border border-[var(--color-text-muted)]/30 focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-colors bg-[var(--color-background)]" placeholder="tvoj@email.sk">
+              </div>
+              <div>
+                <label for="party-phone" class="block text-sm font-medium text-[var(--color-text-light)] mb-2">Telefón (voliteľné)</label>
+                <input type="tel" id="party-phone" name="phone" class="w-full px-4 py-3 rounded-xl border border-[var(--color-text-muted)]/30 focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-colors bg-[var(--color-background)]" placeholder="+421 ...">
+              </div>
+              <div class="flex items-start space-x-3">
+                <input type="checkbox" id="party-food" name="food_registration" value="Ano" class="mt-1 h-5 w-5 rounded border-[var(--color-text-muted)]/30 text-[var(--color-primary)] focus:ring-[var(--color-primary)]">
+                <label for="party-food" class="text-sm text-[var(--color-text-light)]">Objednávam si 1 porciu jedla od šéfkuchára</label>
+              </div>
+              <div>
+                <label for="party-message" class="block text-sm font-medium text-[var(--color-text-light)] mb-2">Správa (voliteľné)</label>
+                <textarea id="party-message" name="message" rows="3" class="w-full px-4 py-3 rounded-xl border border-[var(--color-text-muted)]/30 focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-colors resize-none bg-[var(--color-background)]" placeholder="Chceš nám niečo odkázať?"></textarea>
+              </div>
+              <button type="submit" id="party-submit" class="w-full px-6 py-4 bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-white font-semibold rounded-xl transition-colors duration-200">
+                Odoslať registráciu
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 7: CTA Banner -->
+  <section class="py-16 bg-gradient-to-br from-[var(--color-accent)] to-[var(--color-accent-dark)] text-white">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="text-3xl md:text-4xl font-bold mb-6">{page.cta.title}</h2>
+      <p class="text-blue-100 text-lg mb-8">{page.cta.text}</p>
+      <a href={page.cta.buttonUrl} target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-8 py-4 bg-[var(--color-primary)] hover:opacity-90 text-white font-semibold rounded-full transition-colors duration-200">
+        <svg class="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"></path>
+        </svg>
+        {page.cta.buttonText}
+      </a>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  /* Party page custom styles */
+  .party-hero {
+    background: linear-gradient(135deg, #0f0f0f 0%, #1a1a2e 50%, #16213e 100%);
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 20px rgba(0, 247, 255, 0.3); }
+    50% { box-shadow: 0 0 40px rgba(0, 247, 255, 0.6); }
+  }
+
+  .cta-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+
+  .emoji-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  @keyframes neon-pulse {
+    0%, 100% { text-shadow: 0 0 10px rgba(0, 247, 255, 0.5), 0 0 20px rgba(0, 247, 255, 0.3); }
+    50% { text-shadow: 0 0 20px rgba(0, 247, 255, 0.8), 0 0 40px rgba(0, 247, 255, 0.5), 0 0 60px rgba(0, 247, 255, 0.3); }
+  }
+
+  .neon-text {
+    animation: neon-pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes counter-pop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+  }
+
+  .counter-pop {
+    animation: counter-pop 0.4s ease-out;
+  }
+
+  .lightbox-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  .lightbox-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .lightbox-content {
+    max-width: 90vw;
+    max-height: 90vh;
+  }
+
+  .lightbox-content img {
+    max-width: 100%;
+    max-height: 80vh;
+    object-fit: contain;
+  }
+</style>
+
+<script type="module">
+const items=document.querySelectorAll(".gallery-item"),lb=document.getElementById("lightbox"),lbImg=document.getElementById("lightbox-image"),lbCap=document.getElementById("lightbox-caption"),closeBtn=document.getElementById("lightbox-close"),prevBtn=document.getElementById("lightbox-prev"),nextBtn=document.getElementById("lightbox-next");let idx=0;const data=Array.from(items).map(i=>({src:i.getAttribute("data-src")||"",caption:i.getAttribute("data-caption")||""}));function open(i){idx=i;update();lb?.classList.add("active");document.body.style.overflow="hidden";}function close(){lb?.classList.remove("active");document.body.style.overflow="";}function update(){if(lbImg&&lbCap){const jpegSrc=data[idx].src;const webpSrc=jpegSrc.replace(/\.jpe?g$/i,'.webp');lbImg.onerror=function(){lbImg.onerror=null;lbImg.src=jpegSrc;};lbImg.src=webpSrc;lbCap.textContent=data[idx].caption;}}function next(){idx=(idx+1)%data.length;update();}function prev(){idx=(idx-1+data.length)%data.length;update();}items.forEach((el,i)=>{el.addEventListener("click",()=>open(i));});closeBtn?.addEventListener("click",close);nextBtn?.addEventListener("click",next);prevBtn?.addEventListener("click",prev);lb?.addEventListener("click",e=>{if(e.target===lb)close();});document.addEventListener("keydown",e=>{if(lb?.classList.contains("active")){if(e.key==="Escape")close();if(e.key==="ArrowRight")next();if(e.key==="ArrowLeft")prev();}});
+</script>
+
+<script type="module">
+(function() {
+  const daysEl = document.getElementById('countdown-days');
+  const hoursEl = document.getElementById('countdown-hours');
+  const minutesEl = document.getElementById('countdown-minutes');
+  const secondsEl = document.getElementById('countdown-seconds');
+  const countdownSection = document.getElementById('countdown-section');
+  const deadlinePassed = document.getElementById('deadline-passed');
+  const counterEl = document.getElementById('counter-value');
+  let lastCount = -1;
+
+  function getNextThursdayMidnight() {
+    const now = new Date();
+    const day = now.getDay(); // 0=Sun, 4=Thu
+    let daysUntilThursday = (4 - day + 7) % 7;
+    // If it's Thursday, check if we're past midnight
+    if (daysUntilThursday === 0) {
+      // Thursday - deadline is end of today (23:59:59)
+      const endOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+      if (now <= endOfToday) {
+        return endOfToday;
+      }
+      // Past Thursday midnight, next Thursday
+      daysUntilThursday = 7;
+    }
+    const target = new Date(now.getFullYear(), now.getMonth(), now.getDate() + daysUntilThursday, 23, 59, 59, 999);
+    return target;
+  }
+
+  function isDeadlinePassed() {
+    const now = new Date();
+    const day = now.getDay();
+    const hour = now.getHours();
+    // Friday (5) = deadline passed (until new week resets on next Monday-ish, but we show it until Saturday)
+    // After Thursday midnight = Friday
+    if (day === 5) return true;
+    if (day === 6) return true; // Saturday too
+    return false;
+  }
+
+  function updateCountdown() {
+    if (isDeadlinePassed()) {
+      countdownSection?.classList.add('hidden');
+      deadlinePassed?.classList.remove('hidden');
+      return;
+    }
+
+    countdownSection?.classList.remove('hidden');
+    deadlinePassed?.classList.add('hidden');
+
+    const now = new Date();
+    const target = getNextThursdayMidnight();
+    const diff = target - now;
+
+    if (diff <= 0) {
+      // Just passed - show deadline passed
+      countdownSection?.classList.add('hidden');
+      deadlinePassed?.classList.remove('hidden');
+      return;
+    }
+
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+    if (daysEl) daysEl.textContent = days;
+    if (hoursEl) hoursEl.textContent = hours.toString().padStart(2, '0');
+    if (minutesEl) minutesEl.textContent = minutes.toString().padStart(2, '0');
+    if (secondsEl) secondsEl.textContent = seconds.toString().padStart(2, '0');
+  }
+
+  async function fetchCounter() {
+    try {
+      const res = await fetch('/api/counter');
+      const data = await res.json();
+      const count = data.count || 0;
+      if (counterEl) {
+        if (lastCount !== -1 && count !== lastCount) {
+          counterEl.classList.remove('counter-pop');
+          void counterEl.offsetWidth; // trigger reflow
+          counterEl.classList.add('counter-pop');
+        }
+        counterEl.textContent = count;
+        lastCount = count;
+      }
+    } catch (e) {
+      // Silently fail - counter stays at current value
+    }
+  }
+
+  // Start countdown
+  updateCountdown();
+  setInterval(updateCountdown, 1000);
+
+  // Fetch counter on load and every 30 seconds
+  fetchCounter();
+  setInterval(fetchCounter, 30000);
+})();
+</script>
+
+<script type="module">
+const form=document.getElementById("party-form"),successMsg=document.getElementById("form-success"),errorMsg=document.getElementById("form-error"),submitBtn=document.getElementById("party-submit");
+form?.addEventListener("submit",async(e)=>{
+  e.preventDefault();
+  submitBtn.disabled=true;
+  submitBtn.textContent="Odosielam...";
+  successMsg?.classList.add("hidden");
+  errorMsg?.classList.add("hidden");
+  try{
+    const fd=Object.fromEntries(new FormData(form));
+    const res=await fetch("/api/register",{method:"POST",headers:{"Content-Type":"application/json","Accept":"application/json"},body:JSON.stringify({name:fd.name,email:fd.email,phone:fd.phone||'',food_registration:fd.food_registration||'',message:fd.message||''})});
+    const data=await res.json();
+    if(data.success){
+      successMsg?.classList.remove("hidden");
+      form.reset();
+    }else{
+      errorMsg?.classList.remove("hidden");
+    }
+  }catch(err){
+    errorMsg?.classList.remove("hidden");
+  }finally{
+    submitBtn.disabled=false;
+    submitBtn.textContent="Odoslať registráciu";
+  }
+});
+</script>

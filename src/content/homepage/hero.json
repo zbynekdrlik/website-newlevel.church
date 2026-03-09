@@ -1,0 +1,14 @@
+{
+  "title": "Vitajte v",
+  "titleAccent": "New Level",
+  "titleSuffix": "Church",
+  "subtitle": "Zažite Božiu lásku v príjemnej komunite. Sme radi, že ste tu.",
+  "ctaPrimary": { "text": "Pridajte sa k nám", "url": "/contact" },
+  "ctaSecondary": {
+    "text": "Sledovať online",
+    "url": "https://www.youtube.com/@NEWLEVELCHURCH"
+  },
+  "image": "/images/uploads/_mg_9841.jpg",
+  "imageWebp": "/images/uploads/_mg_9841.webp",
+  "imageAlt": "Church community gathering"
+}

@@ -1,0 +1,62 @@
+{
+  "hero": {
+    "badge": "O nás",
+    "title": "Náš príbeh a poslanie",
+    "subtitle": "Sme komunita veriacich, ktorí sú nadšení zdieľaním Božej lásky a pomocou ľuďom v ich ďalších krokoch viery."
+  },
+  "whoWeAre": {
+    "title": "Kto sme",
+    "paragraphs": [
+      "New Level Church je živá, priateľská komunita, kde sa ľudia zo všetkých oblastí života schádzajú, aby uctievali, rástli a slúžili. Veríme, že cirkev by mala byť miestom, kde môžete byť sami sebou a zažiť premieňajúcu Božiu lásku.",
+      "Či už vieru skúmate prvýkrát, vraciate sa po čase, alebo hľadáte nový cirkevný domov, nájdete tu svoje miesto. Nie sme dokonalí ľudia - sme ľudia na ceste, ktorí sa každý deň učia lepšie milovať Boha a druhých.",
+      "Naše dvere sú otvorené pre každého a nevieme sa dočkať, kedy vás stretneme."
+    ],
+    "image": "/images/uploads/3d8a1332.jpg",
+    "imageWebp": "/images/uploads/3d8a1332.webp",
+    "imageAlt": "Cirkevná komunita"
+  },
+  "mission": {
+    "title": "Naše poslanie",
+    "text": "Viesť ľudí do rastúceho vzťahu s Ježišom Kristom vytváraním prostredia, kde sa ľudia môžu spojiť s Bohom, rásť vo viere a slúžiť druhým."
+  },
+  "vision": {
+    "title": "Naša vízia",
+    "text": "Byť cirkvou, kde každý môže zažiť Božiu lásku, nájsť skutočnú komunitu a byť posilnený na to, aby robil rozdiel vo svete."
+  },
+  "beliefs": {
+    "title": "Čomu veríme",
+    "subtitle": "Tieto základné hodnoty usmerňujú všetko, čo ako cirkevná komunita robíme.",
+    "items": [
+      {
+        "title": "Viera v Ježiša",
+        "text": "Veríme, že Ježiš je cesta, pravda a život. Naša viera je zameraná na Neho."
+      },
+      {
+        "title": "Autentická komunita",
+        "text": "Sme lepší spolu. Skutočné vzťahy a úprimná starostlivosť o seba navzájom."
+      },
+      {
+        "title": "Radikálne privítanie",
+        "text": "Každý tu má svoje miesto. Vítame všetkých ľudí bez ohľadu na ich pozadie."
+      },
+      {
+        "title": "Duchovný rast",
+        "text": "Všetci sme na ceste. Podporujeme neustále vzdelávanie a rast vo viere."
+      },
+      {
+        "title": "Štedrý život",
+        "text": "Veríme v štedré dávanie nášho času, talentov a prostriedkov."
+      },
+      {
+        "title": "Služba druhým",
+        "text": "Existujeme, aby sme slúžili našej komunite a mali pozitívny dopad na svet."
+      }
+    ]
+  },
+  "cta": {
+    "title": "Pripravení nás navštíviť?",
+    "text": "Radi vás stretneme! Pozrite si naše časy bohoslužieb a príďte zažiť teplo našej komunity.",
+    "buttonText": "Naplánujte návštevu",
+    "buttonUrl": "/contact"
+  }
+}

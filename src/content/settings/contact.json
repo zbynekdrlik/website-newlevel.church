@@ -1,0 +1,10 @@
+{
+  "address": "Letná 31/26",
+  "city": "Spišská Nová Ves",
+  "postalCode": "052 01",
+  "serviceTimes": [
+    { "day": "Nedeľa", "time": "10:00" },
+    { "day": "Štvrtok", "time": "19:00" }
+  ],
+  "googleMapsEmbed": "https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d5868.741632876747!2d20.5659!3d48.9447!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x473e4f1a0e277739%3A0xd07a7f7770ef20cf!2sNew%20level%20church!5e1!3m2!1sen!2sus!4v1769540098198!5m2!1sen!2sus"
+}
