@@ -6,23 +6,31 @@
     "subtitle": "Jedlo, hry, karaoke a skvelá atmosféra. Každý piatok pre mladých 15-25 rokov."
   },
   "quickInfo": [
-    { "icon": "clock", "title": "Kedy", "text": "Každý piatok o 18:00" },
+    {
+      "icon": "clock",
+      "title": "Kedy",
+      "text": "Každý piatok o 18:00"
+    },
     {
       "icon": "location",
       "title": "Kde",
       "text": "Letná 31/26, Spišská Nová Ves"
     },
-    { "icon": "users", "title": "Pre koho", "text": "Mladých 15-25 rokov" }
+    {
+      "icon": "users",
+      "title": "Pre koho",
+      "text": "Mladých 15-25 rokov"
+    }
   ],
   "menu": {
     "title": "Tento týždeň na menu",
     "subtitle": "Čo pre teba pripravil náš šéfkuchár?",
-    "emoji": "🌯",
-    "dish": "Burrito",
-    "description": "Plnené burrito pripravené naším šéfkuchárom. Registruj sa, aby sme vedeli, koľko porcií pripraviť!"
+    "emoji": "🍕",
+    "dish": "Pizza",
+    "description": "Môžete sa tešiť na poctivú domácu pizzu, ktorú pre vás pripraví náš skvelý šéfkuchár. Voňavé cesto, kvalitné suroviny a chuť, ktorá stojí za zastávku."
   },
   "countdown": {
-    "title": "Registrácia na jedlo sa uzatvára o",
+    "title": "Registrácia sa uzatvára o",
     "subtitle": "Každý štvrtok o polnoci",
     "deadlinePhone": "+421 950 889 182"
   },
