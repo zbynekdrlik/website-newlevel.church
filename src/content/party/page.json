@@ -25,9 +25,9 @@
   "menu": {
     "title": "Tento týždeň na menu",
     "subtitle": "Čo pre teba pripravil náš šéfkuchár?",
-    "emoji": "🍕",
-    "dish": "Pizza",
-    "description": "Môžete sa tešiť na poctivú domácu pizzu, ktorú pre vás pripraví náš skvelý šéfkuchár. Voňavé cesto, kvalitné suroviny a chuť, ktorá stojí za zastávku."
+    "emoji": "❓",
+    "dish": ".",
+    "description": "."
   },
   "countdown": {
     "title": "Registrácia sa uzatvára o",
