@@ -7,6 +7,33 @@ import youtube from '../content/homepage/youtube.json';
 import joinUs from '../content/homepage/join-us.json';
 import contact from '../content/settings/contact.json';
 
+function getYoutubeVideoId(url: string): string | null {
+  try {
+    const parsedUrl = new URL(url);
+
+    if (parsedUrl.hostname === 'youtu.be') {
+      return parsedUrl.pathname.replace('/', '') || null;
+    }
+
+    if (parsedUrl.hostname.includes('youtube.com')) {
+      if (parsedUrl.pathname === '/watch') {
+        return parsedUrl.searchParams.get('v');
+      }
+
+      const match = parsedUrl.pathname.match(/\/(?:embed|shorts)\/([^/?]+)/);
+      return match?.[1] ?? null;
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
+}
+
+const heroYoutubeId = getYoutubeVideoId(hero.ctaSecondary.url);
+const heroThumbnail = heroYoutubeId ? `https://i.ytimg.com/vi/${heroYoutubeId}/maxresdefault.jpg` : hero.image;
+const heroThumbnailFallback = heroYoutubeId ? `https://i.ytimg.com/vi/${heroYoutubeId}/hqdefault.jpg` : hero.image;
+
 const iconPaths: Record<string, string> = {
   heart: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />',
   book: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />',
@@ -54,18 +81,22 @@ const iconCircleMap: Record<string, string> = {
             </a>
           </div>
         </div>
-        <!-- Image/Video Placeholder -->
+        <!-- Video Preview -->
         <div class="relative">
-          <div class="aspect-video bg-[var(--color-background)] rounded-2xl shadow-2xl overflow-hidden border-4 border-[var(--color-background)]">
-            <picture><source srcset={hero.imageWebp} type="image/webp"><img src={hero.image} alt={hero.imageAlt} class="w-full h-full object-cover" width="1920" height="1279" fetchpriority="high" decoding="async"></picture>
-            <!-- Play button overlay -->
-            <a href={hero.ctaSecondary.url} target="_blank" rel="noopener noreferrer" class="absolute inset-0 flex items-center justify-center bg-black/30 hover:bg-black/40 transition-colors duration-200 group">
-              <div class="w-20 h-20 bg-[var(--color-primary)] rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-200">
-                <svg class="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M8 5v14l11-7z"></path>
-                </svg>
+          <div class="absolute -inset-4 bg-gradient-to-br from-[var(--color-primary)]/10 to-[var(--color-accent)]/30 rounded-[2rem] blur-2xl"></div>
+          <div class="relative rounded-[2rem] bg-gradient-to-br from-stone-950 via-stone-900 to-stone-800 p-2 shadow-2xl ring-1 ring-white/20">
+            <div class="absolute left-1/2 top-1.5 z-10 h-1 w-16 -translate-x-1/2 rounded-full bg-white/20"></div>
+            <div class="relative aspect-video overflow-hidden rounded-[1.5rem] bg-black">
+              <img src={heroThumbnail} alt={hero.imageAlt} class="w-full h-full object-cover" width="1280" height="720" fetchpriority="high" decoding="async" onerror={`this.onerror=null;this.src='${heroThumbnailFallback}';`}>
+              <!-- Play button overlay -->
+              <a href={hero.ctaSecondary.url} target="_blank" rel="noopener noreferrer" class="absolute inset-0 flex items-center justify-center bg-black/30 hover:bg-black/40 transition-colors duration-200 group">
+                <div class="w-20 h-20 bg-[var(--color-primary)] rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-200">
+                  <svg class="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M8 5v14l11-7z"></path>
+                  </svg>
+                </div>
+              </a>
               </div>
-            </a>
           </div>
         </div>
       </div>
