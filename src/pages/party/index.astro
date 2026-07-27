@@ -274,15 +274,15 @@ const partyPhotos = getPartyPhotos();
             <form id="party-form" class="space-y-6">
               <div>
                 <label for="party-name" class="block text-sm font-medium text-[var(--color-text-light)] mb-2">Meno</label>
-                <input type="text" id="party-name" name="name" required class="w-full px-4 py-3 rounded-xl border border-[var(--color-text-muted)]/30 focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-colors bg-[var(--color-background)]" placeholder="Tvoje meno">
+                <input type="text" id="party-name" name="name" required autocomplete="name" class="w-full px-4 py-3 rounded-xl border border-[var(--color-text-muted)]/30 focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-colors bg-[var(--color-background)]" placeholder="Tvoje meno">
               </div>
               <div>
                 <label for="party-email" class="block text-sm font-medium text-[var(--color-text-light)] mb-2">Email</label>
-                <input type="email" id="party-email" name="email" required class="w-full px-4 py-3 rounded-xl border border-[var(--color-text-muted)]/30 focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-colors bg-[var(--color-background)]" placeholder="tvoj@email.sk">
+                <input type="email" id="party-email" name="email" required autocomplete="email" inputmode="email" class="w-full px-4 py-3 rounded-xl border border-[var(--color-text-muted)]/30 focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-colors bg-[var(--color-background)]" placeholder="tvoj@email.sk">
               </div>
               <div>
                 <label for="party-phone" class="block text-sm font-medium text-[var(--color-text-light)] mb-2">Telefón (voliteľné)</label>
-                <input type="tel" id="party-phone" name="phone" class="w-full px-4 py-3 rounded-xl border border-[var(--color-text-muted)]/30 focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-colors bg-[var(--color-background)]" placeholder="+421 ...">
+                <input type="tel" id="party-phone" name="phone" autocomplete="tel" inputmode="tel" class="w-full px-4 py-3 rounded-xl border border-[var(--color-text-muted)]/30 focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-colors bg-[var(--color-background)]" placeholder="+421 ...">
               </div>
               <div class="flex items-start space-x-3">
                 <input type="checkbox" id="party-food" name="food_registration" value="Ano" class="mt-1 h-5 w-5 rounded border-[var(--color-text-muted)]/30 text-[var(--color-primary)] focus:ring-[var(--color-primary)]">
