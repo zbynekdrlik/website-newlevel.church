@@ -497,6 +497,54 @@ const items=document.querySelectorAll(".gallery-item"),lb=document.getElementByI
 
 <script type="module">
 const form=document.getElementById("party-form"),successMsg=document.getElementById("form-success"),errorMsg=document.getElementById("form-error"),submitBtn=document.getElementById("party-submit");
+const savedRegistrationKey="newlevel-party-registration";
+const savedRegistrationMaxAge=1000*60*60*24*180;
+
+function getSavedRegistration(){
+  try{
+    const raw=localStorage.getItem(savedRegistrationKey);
+    if(!raw)return null;
+    const saved=JSON.parse(raw);
+    if(!saved.savedAt||Date.now()-saved.savedAt>savedRegistrationMaxAge){
+      localStorage.removeItem(savedRegistrationKey);
+      return null;
+    }
+    return saved;
+  }catch{
+    return null;
+  }
+}
+
+function prefillRegistration(){
+  if(!form)return;
+  const saved=getSavedRegistration();
+  if(!saved)return;
+  const name=form.querySelector('[name="name"]');
+  const email=form.querySelector('[name="email"]');
+  const phone=form.querySelector('[name="phone"]');
+  const food=form.querySelector('[name="food_registration"]');
+  if(name&&!name.value)name.value=saved.name||"";
+  if(email&&!email.value)email.value=saved.email||"";
+  if(phone&&!phone.value)phone.value=saved.phone||"";
+  if(food)food.checked=Boolean(saved.food_registration);
+}
+
+function saveRegistration(fd){
+  try{
+    localStorage.setItem(savedRegistrationKey,JSON.stringify({
+      name:fd.name||"",
+      email:fd.email||"",
+      phone:fd.phone||"",
+      food_registration:Boolean(fd.food_registration),
+      savedAt:Date.now()
+    }));
+  }catch{
+    // Browser storage can be unavailable in some private modes.
+  }
+}
+
+prefillRegistration();
+
 form?.addEventListener("submit",async(e)=>{
   e.preventDefault();
   submitBtn.disabled=true;
@@ -508,6 +556,7 @@ form?.addEventListener("submit",async(e)=>{
     const res=await fetch("/api/register",{method:"POST",headers:{"Content-Type":"application/json","Accept":"application/json"},body:JSON.stringify({name:fd.name,email:fd.email,phone:fd.phone||'',food_registration:fd.food_registration||'',message:fd.message||''})});
     const data=await res.json();
     if(data.success){
+      saveRegistration(fd);
       successMsg?.classList.remove("hidden");
       form.reset();
     }else{
