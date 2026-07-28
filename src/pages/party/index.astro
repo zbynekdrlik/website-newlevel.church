@@ -5,188 +5,206 @@ import contactInfo from '../../content/settings/contact.json';
 import { getPartyPhotos } from '../../utils/gallery';
 
 const partyPhotos = getPartyPhotos();
+const heroPhotos = [
+  { image: '/images/uploads/party-image00004.jpg', caption: 'New Level Party' },
+  { image: '/images/uploads/party-image00001.jpg', caption: 'Spoločné jedlo' },
+  { image: '/images/uploads/party-image00005.jpg', caption: 'Party program' },
+  { image: '/images/uploads/party-image00006.jpg', caption: 'Party program' },
+  { image: '/images/uploads/party-image00007.jpg', caption: 'Kalčeto' },
+  { image: '/images/uploads/party-image00009.jpg', caption: 'Ping Pong' },
+  { image: '/images/uploads/party-image00010.jpg', caption: 'Ping Pong' },
+  { image: '/images/uploads/party-image00011.jpg', caption: 'Kalčeto' },
+  { image: '/images/uploads/party-image00014.jpg', caption: 'Herňa' },
+  { image: '/images/uploads/party-image00015.jpg', caption: 'Herňa' },
+  { image: '/images/uploads/party-image00016.jpg', caption: 'Herňa' },
+];
+const heroPhoto = heroPhotos[0];
+const featurePhoto = partyPhotos[0] || heroPhoto;
+const momentPhotos = partyPhotos.slice(0, 3);
+const activityPhotos = [
+  '/images/uploads/party-image00001.jpg',
+  '/images/uploads/party-image00010.jpg',
+  '/images/uploads/party-image00011.jpg',
+  '/images/uploads/party-image00016.jpg',
+  '/images/uploads/party-image00002.jpg',
+  '/images/uploads/party-image00006.jpg',
+];
+const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára o'
+  ? ['Registrácia', 'sa uzatvára o']
+  : [page.countdown.title];
 ---
 
 <BaseLayout title="Party | New Level Church" description={page.hero.subtitle} currentPage="party">
-  <!-- Section 1: Dark Hero -->
-  <section class="party-hero relative overflow-hidden" style="padding-top: 5rem; padding-bottom: 5rem;">
-    <div class="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" style="background: rgba(0, 247, 255, 0.08);"></div>
-    <div class="absolute bottom-0 left-0 w-72 h-72 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" style="background: rgba(221, 14, 24, 0.08);"></div>
-    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-      <span class="inline-block px-4 py-2 rounded-full text-sm font-medium mb-6" style="background: rgba(0, 247, 255, 0.15); color: #00f7ff;">
-        {page.hero.badge}
-      </span>
-      <h1 class="text-4xl md:text-6xl lg:text-7xl font-bold leading-tight mb-6" style="color: #ffffff;">
-        {page.hero.title} <span style="color: #00f7ff;">{page.hero.titleAccent}</span>
-      </h1>
-      <p class="text-lg md:text-xl max-w-2xl mx-auto" style="color: #d6d3d1; margin-bottom: 3.5rem;">
-        {page.hero.subtitle}
-      </p>
-      <!-- Scroll indicator -->
-      <div class="flex flex-col items-center gap-2 mt-10 animate-bounce">
-        <span class="text-sm font-medium tracking-wider uppercase" style="color: rgba(255,255,255,0.5);">Scrolluj nižšie</span>
-        <svg class="w-6 h-6" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path>
-        </svg>
-      </div>
-    </div>
-  </section>
-
-  <!-- Section 2: Quick Info Cards -->
-  <section class="py-16 md:py-24 bg-[var(--color-background)]">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div class="bg-[var(--color-primary-light)] rounded-2xl p-8 text-center hover:shadow-lg transition-shadow duration-200">
-          <div class="w-16 h-16 bg-[var(--color-primary)] rounded-full flex items-center justify-center mx-auto mb-6">
-            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+  <div class="party-page-shell">
+    <svg class="poster-filter-defs" width="0" height="0" aria-hidden="true" focusable="false">
+      <filter id="print-distress">
+        <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="9" result="noise"></feTurbulence>
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.4" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
+      </filter>
+    </svg>
+    <!-- Section 1: Hero Poster -->
+    <section class="poster-section hero-poster">
+      <div class="poster-noise" aria-hidden="true"></div>
+      <div class="poster-wrap hero-grid">
+        <div class="hero-copy">
+          <h1>
+            <span>{page.hero.title}</span>
+            <span>{page.hero.titleAccent}</span>
+          </h1>
+          <span class="hero-badge">{page.hero.badge}</span>
+          <div class="hero-secondary">
+            <p>{page.hero.subtitle}</p>
+            <a href="#registracia" class="poster-button">Registrovať sa na jedlo</a>
+          </div>
+          <div class="scroll-sticker">
+            <span>Scrolluj nižšie</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M5 9l7 7 7-7"></path>
             </svg>
           </div>
-          <h3 class="text-xl font-bold text-[var(--color-text)] mb-3">{page.quickInfo[0].title}</h3>
-          <p class="text-[var(--color-text-light)]">{page.quickInfo[0].text}</p>
         </div>
-        <div style="background: rgba(0, 247, 255, 0.08);" class="rounded-2xl p-8 text-center hover:shadow-lg transition-shadow duration-200">
-          <div class="w-16 h-16 bg-[var(--color-accent)] rounded-full flex items-center justify-center mx-auto mb-6">
-            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-            </svg>
+        {heroPhoto && (
+          <div class="hero-photo-stack">
+            <img
+              id="party-hero-photo"
+              src={heroPhoto.image}
+              alt={heroPhoto.caption}
+              width="720"
+              height="520"
+              data-hero-photos={JSON.stringify(heroPhotos)}
+            >
           </div>
-          <h3 class="text-xl font-bold text-[var(--color-text)] mb-3">{page.quickInfo[1].title}</h3>
-          <p class="text-[var(--color-text-light)]">{page.quickInfo[1].text}</p>
-        </div>
-        <div class="bg-[var(--color-background-alt)] rounded-2xl p-8 text-center hover:shadow-lg transition-shadow duration-200">
-          <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6" style="background: var(--color-text-light);">
-            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-            </svg>
-          </div>
-          <h3 class="text-xl font-bold text-[var(--color-text)] mb-3">{page.quickInfo[2].title}</h3>
-          <p class="text-[var(--color-text-light)]">{page.quickInfo[2].text}</p>
-        </div>
+        )}
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- Section 3: Weekly Food Menu -->
-  <section id="menu" class="py-16 md:py-24 bg-[var(--color-background-alt)]">
-    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-12">
-        <h2 class="text-3xl md:text-4xl font-bold text-[var(--color-text)] mb-4">{page.menu.title}</h2>
-        <p class="text-lg text-[var(--color-text-light)]">{page.menu.subtitle}</p>
-      </div>
-      <!-- MENU START -->
-      <div class="bg-[var(--color-background)] rounded-2xl p-8 md:p-12 shadow-lg text-center">
-        <div class="emoji-float text-6xl mb-6" set:html={page.menu.emoji}></div>
-        <h3 class="text-2xl md:text-3xl font-bold text-[var(--color-text)] mb-4">{page.menu.dish}</h3>
-        <p class="text-[var(--color-text-light)] mb-8">{page.menu.description}</p>
-        <a href="#registracia" class="inline-flex items-center px-6 py-3 bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-white font-semibold rounded-full transition-colors duration-200">
-          Registrovať sa na jedlo
-        </a>
-      </div>
-      <!-- MENU END -->
-    </div>
-  </section>
-
-  <!-- Section 3.5: Countdown Timer & Registration Counter -->
-  <section class="py-12 md:py-16" style="background: linear-gradient(135deg, #0f0f0f 0%, #1a1a2e 50%, #16213e 100%);">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-
-      <!-- Countdown Timer (shown before deadline) -->
-      <div id="countdown-section" class="text-center mb-10">
-        <h2 class="text-2xl md:text-3xl font-bold mb-2" style="color: #ffffff;">{page.countdown.title}</h2>
-        <p class="text-sm mb-8" style="color: #a8a29e;">{page.countdown.subtitle}</p>
-        <div class="flex justify-center gap-4 md:gap-6">
-          <div class="rounded-xl p-4 md:p-6 min-w-[70px] md:min-w-[90px]" style="background: rgba(0, 247, 255, 0.08); border: 1px solid rgba(0, 247, 255, 0.15);">
-            <span id="countdown-days" class="neon-text block text-3xl md:text-5xl font-bold" style="color: #00f7ff;">--</span>
-            <span class="block text-xs md:text-sm mt-1" style="color: #a8a29e;">dní</span>
-          </div>
-          <div class="rounded-xl p-4 md:p-6 min-w-[70px] md:min-w-[90px]" style="background: rgba(0, 247, 255, 0.08); border: 1px solid rgba(0, 247, 255, 0.15);">
-            <span id="countdown-hours" class="neon-text block text-3xl md:text-5xl font-bold" style="color: #00f7ff;">--</span>
-            <span class="block text-xs md:text-sm mt-1" style="color: #a8a29e;">hodín</span>
-          </div>
-          <div class="rounded-xl p-4 md:p-6 min-w-[70px] md:min-w-[90px]" style="background: rgba(0, 247, 255, 0.08); border: 1px solid rgba(0, 247, 255, 0.15);">
-            <span id="countdown-minutes" class="neon-text block text-3xl md:text-5xl font-bold" style="color: #00f7ff;">--</span>
-            <span class="block text-xs md:text-sm mt-1" style="color: #a8a29e;">minút</span>
-          </div>
-          <div class="rounded-xl p-4 md:p-6 min-w-[70px] md:min-w-[90px]" style="background: rgba(0, 247, 255, 0.08); border: 1px solid rgba(0, 247, 255, 0.15);">
-            <span id="countdown-seconds" class="neon-text block text-3xl md:text-5xl font-bold" style="color: #00f7ff;">--</span>
-            <span class="block text-xs md:text-sm mt-1" style="color: #a8a29e;">sekúnd</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Post-Deadline Message (hidden by default) -->
-      <div id="deadline-passed" class="text-center mb-10 hidden">
-        <h2 class="text-2xl md:text-3xl font-bold mb-3" style="color: #ff6b6b;">Registrácia na jedlo je uzavretá</h2>
-        <p class="text-lg mb-6" style="color: #d6d3d1;">Ak sa chceš ešte prihlásiť, zavolaj nám:</p>
-        <a href={`tel:${page.countdown.deadlinePhone}`} class="inline-flex items-center gap-3 px-8 py-4 rounded-full font-semibold text-lg transition-all duration-200 hover:scale-105" style="background: #00f7ff; color: #0f0f0f;">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
-          </svg>
-          Zavolať {page.countdown.deadlinePhone}
-        </a>
-        <p class="text-sm mt-3" style="color: #a8a29e;">Možno ešte stíhame pridať porciu!</p>
-      </div>
-
-      <!-- Registration Counter -->
-      <div class="text-center pt-8 mt-8" style="border-top: 1px solid rgba(0, 247, 255, 0.15);">
-        <span id="counter-value" class="neon-text block text-7xl md:text-9xl font-bold mb-2" style="color: #00f7ff;">0</span>
-        <span class="text-lg md:text-xl font-medium" style="color: #a8a29e;">registrovaných na jedlo</span>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- Section 4: Activities Showcase -->
-  <section id="aktivity" class="py-16 md:py-24 bg-[var(--color-background)]">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-12">
-        <h2 class="text-3xl md:text-4xl font-bold text-[var(--color-text)] mb-4">Čo ťa čaká?</h2>
-        <p class="text-lg text-[var(--color-text-light)] max-w-2xl mx-auto">Každý piatok je nabitý aktivitami</p>
-      </div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-        {page.activities.map((item: { emoji: string; title: string; description: string }, i: number) => (
-          <div class="bg-[var(--color-background-alt)] rounded-2xl p-8 text-center hover:shadow-lg transition-shadow duration-200">
-            <div class="w-16 h-16 bg-[var(--color-primary)] rounded-full flex items-center justify-center mx-auto mb-6">
-              <span class="text-2xl" set:html={item.emoji}></span>
+    <!-- Section 2: Quick Info Strip -->
+    <section class="poster-section info-strip-section">
+      <div class="poster-wrap">
+        <div class="quick-strip">
+          {page.quickInfo.map((item: { title: string; text: string }, i: number) => (
+            <div class="quick-strip-item">
+              <span>{`0${i + 1}`}</span>
+              <h2>{item.title}</h2>
+              <p>{item.text}</p>
             </div>
-            <h3 class="text-xl font-bold text-[var(--color-text)] mb-3">{item.title}</h3>
-            <p class="text-[var(--color-text-light)]">{item.description}</p>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- Section 5: Photo Gallery -->
-  <section class="py-16 md:py-24 bg-[var(--color-background-alt)]">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-12">
-        <h2 class="text-3xl md:text-4xl font-bold text-[var(--color-text)] mb-4">Fotogaléria</h2>
-        <p class="text-lg text-[var(--color-text-light)]">Pozri sa, ako to u nás vyzerá</p>
+    <!-- Section 3: Weekly Food Menu -->
+    <section id="menu" class="poster-section menu-poster-section">
+      <div class="poster-wrap menu-layout">
+        <div class="poster-heading">
+          <h2>{page.menu.title}</h2>
+          <p>{page.menu.subtitle}</p>
+        </div>
+        <div class="menu-ticket">
+          <div class="menu-emoji" set:html={page.menu.emoji}></div>
+          <div>
+            <h3>{page.menu.dish}</h3>
+            <p>{page.menu.description}</p>
+          </div>
+          <a href="#registracia" class="poster-button">Registrovať sa na jedlo</a>
+        </div>
       </div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {partyPhotos.map((photo, index: number) => (
-          <div class="group relative overflow-hidden rounded-2xl shadow-lg cursor-pointer gallery-item" data-index={index} data-src={photo.image} data-caption={photo.caption}>
-            <div class="aspect-[3/4]">
-              <img src={photo.image} alt={photo.caption} class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" loading="lazy" width="450" height="600">
+    </section>
+
+    <!-- Section 3.5: Countdown Timer & Registration Counter -->
+    <section class="poster-section countdown-poster-section">
+      <div class="poster-wrap countdown-layout">
+        <div id="countdown-section" class="countdown-poster">
+          <div class="poster-heading poster-heading-invert">
+            <h2 aria-label={page.countdown.title}>
+              {countdownTitleLines.map((line) => <span aria-hidden="true">{line}</span>)}
+            </h2>
+          </div>
+          <div class="countdown-grid">
+            <div>
+              <span id="countdown-days" class="countdown-number">--</span>
+              <span>dní</span>
             </div>
-            <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              <div class="absolute bottom-0 left-0 right-0 p-4">
-                <p class="text-white font-semibold">{photo.caption}</p>
+            <div>
+              <span id="countdown-hours" class="countdown-number">--</span>
+              <span>hodín</span>
+            </div>
+            <div>
+              <span id="countdown-minutes" class="countdown-number">--</span>
+              <span>minút</span>
+            </div>
+            <div>
+              <span id="countdown-seconds" class="countdown-number">--</span>
+              <span>sekúnd</span>
+            </div>
+          </div>
+        </div>
+
+        <div id="deadline-passed" class="deadline-poster hidden">
+          <h2>Registrácia na jedlo je uzavretá</h2>
+          <p>Ak sa chceš ešte prihlásiť, zavolaj nám:</p>
+          <a href={`tel:${page.countdown.deadlinePhone}`} class="poster-button poster-button-lime">
+            Zavolať {page.countdown.deadlinePhone}
+          </a>
+          <p>Možno ešte stíhame pridať porciu!</p>
+        </div>
+
+        <div class="counter-poster">
+          <span id="counter-value" class="counter-number">0</span>
+          <span>registrovaných na jedlo</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 4: Activities Showcase -->
+    <section id="aktivity" class="poster-section activities-poster-section">
+      <div class="poster-wrap activities-layout">
+        <div class="poster-heading">
+          <h2>Čo ťa čaká?</h2>
+          <p>Každý piatok je nabitý aktivitami</p>
+        </div>
+        <div class="activity-row" aria-label="Aktivity">
+          {page.activities.map((item: { emoji: string; title: string; description: string }, index: number) => {
+            const activityPhoto = activityPhotos[index] || partyPhotos[index % partyPhotos.length]?.image;
+            return (
+            <div class={`activity-item activity-item-${(index % 4) + 1}`}>
+              <div class="activity-image">
+                {activityPhoto ? (
+                  <img src={activityPhoto} alt={item.title} loading="lazy" width="520" height="420">
+                ) : (
+                  <span class="activity-emoji-fallback" set:html={item.emoji}></span>
+                )}
+              </div>
+              <div class="activity-copy">
+                <h3>{item.title}</h3>
+                <p>{item.description}</p>
               </div>
             </div>
-            <div class="absolute top-4 right-4 w-10 h-10 bg-white/90 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              <svg class="w-5 h-5 text-[var(--color-text-light)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path>
-              </svg>
-            </div>
-          </div>
-        ))}
+            );
+          })}
+        </div>
       </div>
-    </div>
-  </section>
+    </section>
+
+    <!-- Section 5: Photo Gallery -->
+    <section class="poster-section gallery-poster-section">
+      <div class="poster-wrap">
+        <div class="gallery-layout">
+          <div class="poster-heading">
+            <h2>Fotogaléria</h2>
+            <p>Pozri sa, ako to u nás vyzerá</p>
+          </div>
+          <div class="gallery-collage">
+            {partyPhotos.map((photo, index: number) => (
+              <button class={`gallery-item gallery-polaroid gallery-polaroid-${(index % 6) + 1}`} type="button" data-index={index} data-src={photo.image} data-caption={photo.caption}>
+                <img src={photo.image} alt={photo.caption} loading="lazy" width="450" height="600">
+                <span>{photo.caption}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
 
   <!-- Lightbox -->
   <div id="lightbox" class="lightbox-overlay">
@@ -211,88 +229,90 @@ const partyPhotos = getPartyPhotos();
     </div>
   </div>
 
-  <!-- Section 6: Registration Form -->
-  <section id="registracia" class="py-16 md:py-24 bg-[var(--color-background)]">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-12">
-        <h2 class="text-3xl md:text-4xl font-bold text-[var(--color-text)] mb-4">{page.registration.formTitle}</h2>
-        <p class="text-lg text-[var(--color-text-light)] max-w-2xl mx-auto">Zaregistruj sa a príď v piatok!</p>
+    <!-- Section 6: Registration Form -->
+    <section id="registracia" class="registration-poster-section">
+      <div class="registration-poster-noise" aria-hidden="true"></div>
+      <div class="registration-poster-wrap">
+      <div class="registration-poster-header">
+        <h2>{page.registration.formTitle}</h2>
+        <p>Zaregistruj sa a príď v piatok!</p>
       </div>
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+      <div class="registration-poster-layout">
         <!-- Info Panel -->
-        <div>
-          <div class="space-y-6">
-            <div class="flex items-start space-x-4">
-              <div class="w-12 h-12 bg-[var(--color-primary-light)] rounded-full flex items-center justify-center flex-shrink-0">
-                <svg class="w-6 h-6 text-[var(--color-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="registration-info-poster">
+          <div class="registration-info-list">
+            <div class="registration-info-item">
+              <div class="registration-info-icon">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
               </div>
               <div>
-                <h3 class="text-lg font-semibold text-[var(--color-text)]">Kedy</h3>
-                <p class="text-[var(--color-text-light)]">{page.registration.time}</p>
+                <h3>Kedy</h3>
+                <p>{page.registration.time}</p>
               </div>
             </div>
-            <div class="flex items-start space-x-4">
-              <div class="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0" style="background: rgba(0, 247, 255, 0.1);">
-                <svg class="w-6 h-6 text-[var(--color-accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="registration-info-item">
+              <div class="registration-info-icon registration-info-icon-lime">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                 </svg>
               </div>
               <div>
-                <h3 class="text-lg font-semibold text-[var(--color-text)]">Kde</h3>
-                <p class="text-[var(--color-text-light)]">{contactInfo.address}, {contactInfo.city}, {contactInfo.postalCode}</p>
+                <h3>Kde</h3>
+                <p>{contactInfo.address}, {contactInfo.city}, {contactInfo.postalCode}</p>
               </div>
             </div>
-            <div class="flex items-start space-x-4">
-              <div class="w-12 h-12 bg-[var(--color-primary-light)] rounded-full flex items-center justify-center flex-shrink-0">
-                <svg class="w-6 h-6 text-[var(--color-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="registration-info-item">
+              <div class="registration-info-icon">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
               </div>
               <div>
-                <h3 class="text-lg font-semibold text-[var(--color-text)]">Cena</h3>
-                <p class="text-[var(--color-text-light)]">{page.registration.price}</p>
+                <h3>Cena</h3>
+                <p>{page.registration.price}</p>
               </div>
             </div>
           </div>
-          <div class="mt-8 aspect-video bg-[var(--color-background-alt)] rounded-2xl overflow-hidden">
+          <div class="registration-map">
             <iframe src={contactInfo.googleMapsEmbed} width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="New Level Church - mapa"></iframe>
           </div>
         </div>
         <!-- Form Card -->
-        <div>
-          <div class="bg-[var(--color-background-alt)] rounded-2xl p-8">
-            <h3 class="text-2xl font-bold text-[var(--color-text)] mb-6">{page.registration.formTitle}</h3>
-            <div id="form-success" class="hidden mb-6 p-4 rounded-xl text-center" style="background: rgba(0, 247, 255, 0.1); color: var(--color-accent-dark);">
-              <p class="font-semibold text-lg">Super! Registrácia úspešná. Tešíme sa na teba v piatok!</p>
+        <div class="registration-form-poster">
+          <div class="registration-form-mark" aria-hidden="true"></div>
+          <div class="registration-form-inner">
+            <h3>{page.registration.formTitle}</h3>
+            <div id="form-success" class="hidden registration-message registration-message-success">
+              <p>Super! Registrácia úspešná. Tešíme sa na teba v piatok!</p>
             </div>
-            <div id="form-error" class="hidden mb-6 p-4 rounded-xl text-center bg-[var(--color-primary-light)] text-[var(--color-primary)]">
-              <p class="font-semibold">Ups! Niečo sa pokazilo. Skús to prosím znovu.</p>
+            <div id="form-error" class="hidden registration-message registration-message-error">
+              <p>Ups! Niečo sa pokazilo. Skús to prosím znovu.</p>
             </div>
-            <form id="party-form" class="space-y-6">
-              <div>
-                <label for="party-name" class="block text-sm font-medium text-[var(--color-text-light)] mb-2">Meno</label>
-                <input type="text" id="party-name" name="name" required autocomplete="name" class="w-full px-4 py-3 rounded-xl border border-[var(--color-text-muted)]/30 focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-colors bg-[var(--color-background)]" placeholder="Tvoje meno">
+            <form id="party-form" class="registration-form">
+              <div class="registration-field">
+                <label for="party-name">Meno</label>
+                <input type="text" id="party-name" name="name" required autocomplete="name" placeholder="Tvoje meno">
               </div>
-              <div>
-                <label for="party-email" class="block text-sm font-medium text-[var(--color-text-light)] mb-2">Email</label>
-                <input type="email" id="party-email" name="email" required autocomplete="email" inputmode="email" class="w-full px-4 py-3 rounded-xl border border-[var(--color-text-muted)]/30 focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-colors bg-[var(--color-background)]" placeholder="tvoj@email.sk">
+              <div class="registration-field">
+                <label for="party-email">Email</label>
+                <input type="email" id="party-email" name="email" required autocomplete="email" inputmode="email" placeholder="tvoj@email.sk">
               </div>
-              <div>
-                <label for="party-phone" class="block text-sm font-medium text-[var(--color-text-light)] mb-2">Telefón (voliteľné)</label>
-                <input type="tel" id="party-phone" name="phone" autocomplete="tel" inputmode="tel" class="w-full px-4 py-3 rounded-xl border border-[var(--color-text-muted)]/30 focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-colors bg-[var(--color-background)]" placeholder="+421 ...">
+              <div class="registration-field">
+                <label for="party-phone">Telefón (voliteľné)</label>
+                <input type="tel" id="party-phone" name="phone" autocomplete="tel" inputmode="tel" placeholder="+421 ...">
               </div>
-              <div class="flex items-start space-x-3">
-                <input type="checkbox" id="party-food" name="food_registration" value="Ano" class="mt-1 h-5 w-5 rounded border-[var(--color-text-muted)]/30 text-[var(--color-primary)] focus:ring-[var(--color-primary)]">
-                <label for="party-food" class="text-sm text-[var(--color-text-light)]">Objednávam si 1 porciu jedla od šéfkuchára</label>
+              <div class="registration-food-option">
+                <input type="checkbox" id="party-food" name="food_registration" value="Ano">
+                <label for="party-food">Objednávam si 1 porciu jedla od šéfkuchára</label>
               </div>
-              <div>
-                <label for="party-message" class="block text-sm font-medium text-[var(--color-text-light)] mb-2">Správa (voliteľné)</label>
-                <textarea id="party-message" name="message" rows="3" class="w-full px-4 py-3 rounded-xl border border-[var(--color-text-muted)]/30 focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-colors resize-none bg-[var(--color-background)]" placeholder="Chceš nám niečo odkázať?"></textarea>
+              <div class="registration-field">
+                <label for="party-message">Správa (voliteľné)</label>
+                <textarea id="party-message" name="message" rows="3" placeholder="Chceš nám niečo odkázať?"></textarea>
               </div>
-              <button type="submit" id="party-submit" class="w-full px-6 py-4 bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-white font-semibold rounded-xl transition-colors duration-200">
+              <button type="submit" id="party-submit">
                 Odoslať registráciu
               </button>
             </form>
@@ -300,24 +320,1537 @@ const partyPhotos = getPartyPhotos();
         </div>
       </div>
     </div>
-  </section>
+    </section>
 
-  <!-- Section 7: CTA Banner -->
-  <section class="py-16 bg-gradient-to-br from-[var(--color-accent)] to-[var(--color-accent-dark)] text-white">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-      <h2 class="text-3xl md:text-4xl font-bold mb-6">{page.cta.title}</h2>
-      <p class="text-blue-100 text-lg mb-8">{page.cta.text}</p>
-      <a href={page.cta.buttonUrl} target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-8 py-4 bg-[var(--color-primary)] hover:opacity-90 text-white font-semibold rounded-full transition-colors duration-200">
-        <svg class="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"></path>
-        </svg>
-        {page.cta.buttonText}
-      </a>
-    </div>
-  </section>
+    <!-- Section 7: CTA Banner -->
+    <section class="poster-section final-cta-section">
+      <div class="poster-wrap final-cta-layout">
+        <div>
+          <h2>{page.cta.title}</h2>
+          <p>{page.cta.text}</p>
+        </div>
+        <a href={page.cta.buttonUrl} target="_blank" rel="noopener noreferrer" class="poster-button poster-button-lime">
+          {page.cta.buttonText}
+        </a>
+      </div>
+    </section>
+  </div>
 </BaseLayout>
 
 <style>
+  .registration-poster-section {
+    --party-paper: #f6f4ee;
+    --party-ink: #111111;
+    --party-purple: #7b3eff;
+    --party-lime: #d7ff27;
+    --party-gray: #777777;
+    --poster-display: Impact, "Arial Narrow", Inter, system-ui, sans-serif;
+    --poster-sans: Inter, system-ui, sans-serif;
+    position: relative;
+    overflow: hidden;
+    scroll-margin-top: 5rem;
+    padding: 4.5rem 0;
+    background:
+      linear-gradient(90deg, rgba(17, 17, 17, 0.04) 1px, transparent 1px),
+      linear-gradient(180deg, rgba(17, 17, 17, 0.035) 1px, transparent 1px),
+      var(--party-paper);
+    background-size: 48px 48px, 48px 48px, auto;
+    color: var(--party-ink);
+    font-family: var(--poster-sans);
+    isolation: isolate;
+  }
+
+  .registration-poster-noise {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.52;
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(17, 17, 17, 0.08) 0 1px, transparent 1.5px),
+      radial-gradient(circle at 70% 60%, rgba(17, 17, 17, 0.06) 0 1px, transparent 1.5px);
+    background-size: 15px 15px, 19px 19px;
+    mix-blend-mode: multiply;
+  }
+
+  .registration-poster-wrap {
+    width: min(1120px, calc(100% - 2rem));
+    margin: 0 auto;
+  }
+
+  .registration-poster-header {
+    max-width: 46rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .registration-poster-header h2 {
+    max-width: 8ch;
+    margin: 0;
+    color: var(--party-ink);
+    font-family: var(--poster-display);
+    font-size: 7rem;
+    font-weight: 900;
+    line-height: 0.82;
+    text-transform: uppercase;
+    letter-spacing: 0;
+    text-wrap: balance;
+  }
+
+  .registration-poster-header p {
+    display: inline-block;
+    margin: 1rem 0 0;
+    padding: 0.45rem 0.8rem;
+    background: var(--party-lime);
+    color: var(--party-ink);
+    font-family: var(--poster-sans);
+    font-size: 1rem;
+    font-weight: 800;
+    line-height: 1.25;
+    transform: rotate(-1.5deg);
+    box-shadow: 6px 6px 0 var(--party-ink);
+  }
+
+  .registration-poster-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(320px, 1.1fr);
+    gap: 1.25rem;
+    align-items: start;
+  }
+
+  .registration-info-poster,
+  .registration-form-poster {
+    position: relative;
+    border: 2px solid var(--party-ink);
+    background: rgba(246, 244, 238, 0.94);
+    box-shadow: 10px 10px 0 var(--party-ink);
+  }
+
+  .registration-info-poster {
+    padding: 2rem;
+    transform: rotate(-0.8deg);
+  }
+
+  .registration-info-list {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .registration-info-item {
+    display: grid;
+    grid-template-columns: 3rem minmax(0, 1fr);
+    gap: 1rem;
+    align-items: start;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid rgba(17, 17, 17, 0.14);
+  }
+
+  .registration-info-item:last-child {
+    padding-bottom: 0;
+    border-bottom: 0;
+  }
+
+  .registration-info-icon {
+    display: grid;
+    width: 3rem;
+    height: 3rem;
+    place-items: center;
+    border: 2px solid var(--party-ink);
+    border-radius: 999px;
+    background: var(--party-purple);
+    color: white;
+  }
+
+  .registration-info-icon-lime {
+    background: var(--party-lime);
+    color: var(--party-ink);
+  }
+
+  .registration-info-icon svg {
+    width: 1.45rem;
+    height: 1.45rem;
+  }
+
+  .registration-info-item h3 {
+    margin: 0 0 0.2rem;
+    color: var(--party-ink);
+    font-size: 0.82rem;
+    font-weight: 900;
+    line-height: 1;
+    text-transform: uppercase;
+    letter-spacing: 0;
+  }
+
+  .registration-info-item p {
+    margin: 0;
+    color: var(--party-gray);
+    font-size: 1.02rem;
+    font-weight: 700;
+    line-height: 1.35;
+  }
+
+  .registration-map {
+    aspect-ratio: 16 / 10;
+    margin-top: 1.5rem;
+    overflow: hidden;
+    border: 2px solid var(--party-ink);
+    background: var(--party-ink);
+  }
+
+  .registration-form-poster {
+    background:
+      linear-gradient(135deg, rgba(123, 62, 255, 0.08) 0 25%, transparent 25% 100%),
+      var(--party-paper);
+  }
+
+  .registration-form-mark {
+    position: absolute;
+    top: 1.2rem;
+    right: 1rem;
+    width: 6.25rem;
+    height: 6.25rem;
+    border: 0.65rem solid var(--party-lime);
+    border-radius: 50%;
+    opacity: 0.9;
+    transform: rotate(12deg);
+    pointer-events: none;
+  }
+
+  .registration-form-inner {
+    position: relative;
+    padding: 2rem;
+  }
+
+  .registration-form-inner h3 {
+    max-width: 8ch;
+    margin: 0 0 1.5rem;
+    color: var(--party-ink);
+    font-family: var(--poster-display);
+    font-size: 3.8rem;
+    font-weight: 900;
+    line-height: 0.84;
+    text-transform: uppercase;
+    letter-spacing: 0;
+    text-wrap: balance;
+  }
+
+  .registration-message {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 4rem;
+    margin-bottom: 1.25rem;
+    padding: 0.9rem 1rem;
+    border: 2px solid var(--party-ink);
+    color: var(--party-ink);
+    text-align: center;
+    transform: rotate(-0.7deg);
+  }
+
+  .registration-message.hidden {
+    display: none;
+  }
+
+  .registration-message p {
+    margin: 0;
+    font-weight: 900;
+    line-height: 1.25;
+  }
+
+  .registration-message-success {
+    background: var(--party-lime);
+  }
+
+  .registration-message-error {
+    background: var(--party-purple);
+    color: white;
+  }
+
+  .registration-form {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .registration-field label,
+  .registration-food-option label {
+    display: block;
+    margin-bottom: 0.45rem;
+    color: var(--party-ink);
+    font-size: 0.76rem;
+    font-weight: 900;
+    line-height: 1.1;
+    text-transform: uppercase;
+    letter-spacing: 0;
+  }
+
+  .registration-field input,
+  .registration-field textarea {
+    width: 100%;
+    border: 2px solid var(--party-ink);
+    border-radius: 0;
+    background: rgba(255, 255, 255, 0.68);
+    color: var(--party-ink);
+    padding: 0.95rem 1rem;
+    font: 800 1rem/1.25 Inter, system-ui, sans-serif;
+    outline: none;
+    box-shadow: 4px 4px 0 rgba(17, 17, 17, 0.18);
+    transition: background-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+  }
+
+  .registration-field textarea {
+    min-height: 7rem;
+    resize: vertical;
+  }
+
+  .registration-field input::placeholder,
+  .registration-field textarea::placeholder {
+    color: rgba(119, 119, 119, 0.72);
+    font-weight: 700;
+  }
+
+  .registration-field input:focus,
+  .registration-field textarea:focus {
+    background: white;
+    box-shadow: 6px 6px 0 var(--party-purple);
+    transform: translate(-1px, -1px);
+  }
+
+  .registration-food-option {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.75rem;
+    align-items: start;
+    padding: 1rem;
+    border: 2px solid var(--party-ink);
+    background: var(--party-lime);
+    box-shadow: 4px 4px 0 rgba(17, 17, 17, 0.22);
+  }
+
+  .registration-food-option input {
+    width: 1.25rem;
+    height: 1.25rem;
+    margin: 0.05rem 0 0;
+    accent-color: var(--party-purple);
+  }
+
+  .registration-food-option label {
+    margin: 0;
+    font-size: 0.88rem;
+    line-height: 1.25;
+  }
+
+  #party-submit {
+    width: 100%;
+    min-height: 3.75rem;
+    margin-top: 0.25rem;
+    border: 2px solid var(--party-ink);
+    border-radius: 999px;
+    background: var(--party-purple);
+    color: white;
+    padding: 0.95rem 1.5rem;
+    font: 900 1rem/1 Inter, system-ui, sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0;
+    box-shadow: 6px 6px 0 var(--party-ink);
+    cursor: pointer;
+    transition: transform 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+  }
+
+  #party-submit:hover,
+  #party-submit:focus-visible {
+    background: var(--party-ink);
+    box-shadow: 6px 6px 0 var(--party-lime);
+    transform: translate(-1px, -1px);
+  }
+
+  #party-submit:disabled {
+    cursor: wait;
+    opacity: 0.72;
+    transform: none;
+  }
+
+  @media (max-width: 900px) {
+    .registration-poster-section {
+      padding: 3.5rem 0;
+    }
+
+    .registration-poster-header {
+      margin-bottom: 2rem;
+    }
+
+    .registration-poster-layout {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+
+    .registration-info-poster {
+      transform: none;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .registration-poster-wrap {
+      width: min(100% - 1.25rem, 1120px);
+    }
+
+    .registration-poster-header h2 {
+      max-width: 7.25ch;
+      font-size: 4.15rem;
+      line-height: 0.82;
+    }
+
+    .registration-poster-header p {
+      max-width: calc(100% - 0.5rem);
+      box-shadow: 4px 4px 0 var(--party-ink);
+    }
+
+    .registration-info-poster,
+    .registration-form-poster {
+      box-shadow: 6px 6px 0 var(--party-ink);
+    }
+
+    .registration-info-poster,
+    .registration-form-inner {
+      padding: 1.25rem;
+    }
+
+    .registration-form-inner h3 {
+      font-size: 3.05rem;
+      line-height: 0.84;
+    }
+
+    .registration-form-mark {
+      width: 4.5rem;
+      height: 4.5rem;
+      border-width: 0.5rem;
+      opacity: 0.7;
+    }
+
+    .registration-info-item {
+      grid-template-columns: 2.6rem minmax(0, 1fr);
+      gap: 0.8rem;
+    }
+
+    .registration-info-icon {
+      width: 2.6rem;
+      height: 2.6rem;
+    }
+
+    .registration-map {
+      aspect-ratio: 4 / 3;
+    }
+  }
+
+  :global(body) {
+    background: #f6f4ee;
+  }
+
+  :global(header) {
+    background: rgba(246, 244, 238, 0.94) !important;
+    border-bottom: 2px solid #111111;
+    box-shadow: none !important;
+    backdrop-filter: blur(10px);
+  }
+
+  :global(header nav a) {
+    color: #111111 !important;
+    font-weight: 900 !important;
+    text-transform: uppercase;
+    letter-spacing: 0;
+  }
+
+  :global(header img) {
+    filter: invert(1) grayscale(1) contrast(1.8);
+  }
+
+  :global(header nav a[aria-label]),
+  :global(header nav a[aria-label] svg) {
+    color: #111111 !important;
+  }
+
+  :global(header nav a:last-child) {
+    background: #7b3eff !important;
+    color: #ffffff !important;
+    border: 2px solid #111111;
+    border-radius: 0.25rem !important;
+    box-shadow: 4px 4px 0 #111111;
+  }
+
+  :global(#mobile-menu) {
+    background: #f6f4ee;
+  }
+
+  :global(.social-sidebar-link span:first-child) {
+    background: #111111 !important;
+    color: #f6f4ee !important;
+  }
+
+  .party-page-shell {
+    --party-paper: #f6f4ee;
+    --party-ink: #111111;
+    --party-purple: #7b3eff;
+    --party-lime: #d7ff27;
+    --party-gray: #777777;
+    --poster-display: Impact, "Arial Narrow", Inter, system-ui, sans-serif;
+    --poster-sans: Inter, system-ui, sans-serif;
+    overflow: hidden;
+    background: var(--party-paper);
+    color: var(--party-ink);
+    font-family: var(--poster-sans);
+  }
+
+  .poster-filter-defs {
+    position: absolute;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+  }
+
+  .poster-section {
+    position: relative;
+    overflow: hidden;
+    scroll-margin-top: 5rem;
+    border-bottom: 2px solid rgba(17, 17, 17, 0.22);
+    background:
+      radial-gradient(circle at 20% 30%, rgba(17, 17, 17, 0.04) 0 1px, transparent 1.6px),
+      linear-gradient(90deg, rgba(17, 17, 17, 0.045) 1px, transparent 1px),
+      linear-gradient(180deg, rgba(17, 17, 17, 0.04) 1px, transparent 1px),
+      var(--party-paper);
+    background-size: 21px 21px, 68px 68px, 68px 68px, auto;
+    isolation: isolate;
+  }
+
+  .poster-noise {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.5;
+    background-image:
+      radial-gradient(circle at 12% 18%, rgba(17, 17, 17, 0.15) 0 1px, transparent 1.5px),
+      radial-gradient(circle at 83% 42%, rgba(17, 17, 17, 0.08) 0 1px, transparent 1.5px);
+    background-size: 23px 23px, 31px 31px;
+    mix-blend-mode: multiply;
+  }
+
+  .poster-wrap {
+    width: min(1180px, calc(100% - 2rem));
+    margin: 0 auto;
+  }
+
+  .poster-heading h2,
+  .hero-copy h1,
+  .menu-ticket h3,
+  .countdown-poster h2,
+  .deadline-poster h2,
+  .final-cta-layout h2 {
+    font-family: var(--poster-display);
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0;
+  }
+
+  .poster-heading {
+    max-width: min(100%, 42rem);
+  }
+
+  .poster-heading h2 {
+    max-width: 8.5ch;
+    margin: 0;
+    font-size: 6.25rem;
+    line-height: 0.82;
+    text-wrap: balance;
+  }
+
+  .poster-heading p {
+    display: inline-block;
+    max-width: min(100%, 31rem);
+    margin: 0.85rem 0 0;
+    padding: 0.35rem 0.55rem;
+    background: var(--party-lime);
+    color: var(--party-ink);
+    font-family: var(--poster-sans);
+    font-weight: 900;
+    line-height: 1.2;
+    box-shadow: 5px 5px 0 var(--party-ink);
+    transform: rotate(-1deg);
+  }
+
+  .menu-layout .poster-heading h2 {
+    max-width: 7.25ch;
+  }
+
+  .countdown-poster .poster-heading h2 {
+    max-width: 13.5ch;
+    font-size: 5rem;
+    line-height: 0.84;
+  }
+
+  .countdown-poster .poster-heading h2 span {
+    display: block;
+    white-space: nowrap;
+  }
+
+  .countdown-poster .poster-heading h2 span + span {
+    margin-top: -0.04em;
+  }
+
+  .activities-poster-section .poster-heading h2 {
+    max-width: 7.15ch;
+  }
+
+  .gallery-poster-section .poster-heading h2 {
+    max-width: 9.5ch;
+  }
+
+  .poster-heading-invert h2,
+  .poster-heading-invert p {
+    color: var(--party-paper);
+  }
+
+  .poster-heading-invert p {
+    color: var(--party-ink);
+  }
+
+  .poster-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 3.1rem;
+    border: 2px solid var(--party-ink);
+    border-radius: 0.25rem;
+    background: var(--party-purple);
+    color: #ffffff;
+    padding: 0.85rem 1.4rem;
+    font-family: var(--poster-sans);
+    font-weight: 900;
+    line-height: 1;
+    text-transform: uppercase;
+    box-shadow: 5px 5px 0 var(--party-ink);
+    transition: transform 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+  }
+
+  .poster-button:hover,
+  .poster-button:focus-visible {
+    background: var(--party-ink);
+    color: #ffffff;
+    box-shadow: 5px 5px 0 var(--party-lime);
+    transform: translate(-1px, -1px);
+  }
+
+  .poster-button-lime {
+    background: var(--party-lime);
+    color: var(--party-ink);
+  }
+
+  .poster-sticker {
+    display: inline-block;
+    background: var(--party-lime);
+    color: var(--party-ink);
+    padding: 0.42rem 0.65rem;
+    font-weight: 900;
+    line-height: 1.05;
+    text-transform: uppercase;
+    box-shadow: 5px 5px 0 var(--party-ink);
+    transform: rotate(-1.5deg);
+  }
+
+  .hero-poster {
+    padding: clamp(2.4rem, 4vw, 3.4rem) 0 clamp(2.6rem, 4.8vw, 4rem);
+  }
+
+  .hero-grid {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: minmax(0, 0.82fr) minmax(320px, 1.18fr);
+    gap: clamp(2rem, 6vw, 6rem);
+    align-items: center;
+  }
+
+  .hero-copy h1 {
+    position: relative;
+    width: min-content;
+    margin: 0 0 0.35rem;
+    font-size: 9.7rem;
+    line-height: 0.76;
+    filter: url("#print-distress");
+  }
+
+  .hero-copy {
+    min-width: 0;
+  }
+
+  .hero-copy h1 span {
+    display: block;
+  }
+
+  .hero-copy h1 span:first-child {
+    max-width: 4.05em;
+  }
+
+  .hero-copy h1 span:last-child {
+    color: var(--party-purple);
+    width: 3.2em;
+    margin-top: 0.02em;
+    font-size: 0.74em;
+    line-height: 0.84;
+    position: relative;
+    text-shadow: none;
+  }
+
+  .hero-copy h1 span:last-child::after {
+    content: "";
+    position: absolute;
+    left: -0.1em;
+    right: -0.42em;
+    bottom: -0.07em;
+    z-index: -1;
+    height: 0.16em;
+    background: var(--party-lime);
+    transform: rotate(-2.8deg);
+  }
+
+  .hero-badge {
+    position: relative;
+    display: inline-block;
+    margin: 0.55rem 0 0;
+    padding: 0.48rem 1.1rem 0.42rem;
+    background: var(--party-ink);
+    color: var(--party-paper);
+    font-family: var(--poster-sans);
+    font-size: 1.05rem;
+    font-style: italic;
+    font-weight: 900;
+    line-height: 1;
+    text-transform: uppercase;
+    transform: rotate(-2deg);
+  }
+
+  .hero-badge::before,
+  .hero-badge::after {
+    content: "";
+    position: absolute;
+    inset: -0.24rem -0.5rem;
+    z-index: -1;
+    background: var(--party-ink);
+    transform: rotate(1.5deg) skewX(-8deg);
+  }
+
+  .hero-badge::after {
+    inset: auto 12% -0.8rem 16%;
+    height: 0.18rem;
+    background: var(--party-lime);
+    transform: rotate(-1deg);
+  }
+
+  .hero-secondary {
+    margin-top: 1.15rem;
+  }
+
+  .hero-copy p {
+    max-width: 30rem;
+    margin: 0 0 1.1rem;
+    color: var(--party-ink);
+    font-family: var(--poster-sans);
+    font-size: 1.12rem;
+    font-weight: 800;
+    line-height: 1.25;
+    text-wrap: balance;
+  }
+
+  .scroll-sticker {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 1.75rem;
+    color: var(--party-gray);
+    font-size: 0.82rem;
+    font-weight: 900;
+    text-transform: uppercase;
+  }
+
+  .scroll-sticker svg {
+    width: 1.15rem;
+    height: 1.15rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 3;
+  }
+
+  .hero-photo-stack {
+    position: relative;
+    max-width: 42rem;
+    justify-self: end;
+    transform: rotate(1.2deg);
+  }
+
+  .hero-photo-stack img {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    border: 2px solid var(--party-ink);
+    object-fit: cover;
+    filter: saturate(1.08) contrast(1.06);
+    box-shadow: 10px 10px 0 var(--party-ink);
+  }
+
+  .info-strip-section {
+    padding: 1.1rem 0;
+    background: var(--party-ink);
+  }
+
+  .quick-strip {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1px;
+    border: 2px solid var(--party-ink);
+    background: var(--party-ink);
+  }
+
+  .quick-strip-item {
+    padding: 1.25rem;
+    background: var(--party-paper);
+  }
+
+  .quick-strip-item span {
+    display: block;
+    color: var(--party-purple);
+    font-weight: 900;
+  }
+
+  .quick-strip-item h2 {
+    margin: 0.15rem 0 0.25rem;
+    font-family: var(--poster-display);
+    font-size: 3.25rem;
+    line-height: 0.9;
+    text-transform: uppercase;
+  }
+
+  .quick-strip-item p {
+    margin: 0;
+    color: var(--party-gray);
+    font-weight: 800;
+    line-height: 1.25;
+  }
+
+  .menu-poster-section,
+  .activities-poster-section,
+  .gallery-poster-section,
+  .registration-poster-section {
+    padding: clamp(3.5rem, 7vw, 6rem) 0;
+  }
+
+  .menu-layout {
+    display: grid;
+    grid-template-columns: minmax(260px, 0.78fr) minmax(0, 1fr);
+    gap: clamp(1.5rem, 4vw, 4rem);
+    align-items: center;
+  }
+
+  .menu-ticket {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 1.4rem;
+    align-items: center;
+    border: 2px solid var(--party-ink);
+    background: var(--party-paper);
+    padding: clamp(1.5rem, 4vw, 3rem);
+    box-shadow: 10px 10px 0 var(--party-ink);
+    transform: rotate(0.8deg);
+  }
+
+  .menu-ticket::after {
+    content: "";
+    position: absolute;
+    right: 1rem;
+    bottom: 1rem;
+    width: 8rem;
+    height: 2rem;
+    background: var(--party-lime);
+    transform: rotate(-3deg);
+    z-index: -1;
+  }
+
+  .menu-emoji {
+    display: grid;
+    width: 5rem;
+    height: 5rem;
+    place-items: center;
+    border: 2px solid var(--party-ink);
+    border-radius: 999px;
+    background: var(--party-lime);
+    font-size: 2.35rem;
+  }
+
+  .menu-ticket h3 {
+    margin: 0;
+    color: var(--party-purple);
+    font-size: 5rem;
+    line-height: 0.85;
+    text-wrap: balance;
+  }
+
+  .menu-ticket p {
+    margin: 0.55rem 0 0;
+    color: var(--party-ink);
+    font-size: 1.15rem;
+    font-weight: 900;
+  }
+
+  .menu-ticket .poster-button {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+
+  .countdown-poster-section {
+    padding: clamp(3rem, 6vw, 5rem) 0;
+    background: var(--party-ink);
+  }
+
+  .countdown-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 18rem;
+    gap: 1.25rem;
+    align-items: stretch;
+  }
+
+  .countdown-poster,
+  .deadline-poster,
+  .counter-poster {
+    border: 2px solid var(--party-paper);
+    padding: clamp(1.5rem, 4vw, 2.5rem);
+  }
+
+  .countdown-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.8rem;
+    margin-top: 2rem;
+  }
+
+  .countdown-grid div {
+    border: 2px solid var(--party-paper);
+    background: var(--party-lime);
+    color: var(--party-ink);
+    padding: 1rem 0.75rem;
+    text-align: center;
+  }
+
+  .countdown-number {
+    display: block;
+    font-family: var(--poster-display);
+    font-size: 4.8rem;
+    font-weight: 900;
+    line-height: 0.85;
+  }
+
+  .countdown-grid span:last-child,
+  .counter-poster span:last-child {
+    display: block;
+    margin-top: 0.35rem;
+    font-weight: 900;
+    text-transform: uppercase;
+  }
+
+  .deadline-poster {
+    grid-column: 1 / -1;
+    color: var(--party-paper);
+    text-align: center;
+  }
+
+  .deadline-poster.hidden {
+    display: none;
+  }
+
+  .deadline-poster h2 {
+    margin: 0 0 0.65rem;
+    font-size: 4.5rem;
+    line-height: 0.9;
+  }
+
+  .deadline-poster p {
+    margin: 0.8rem 0;
+    font-weight: 800;
+  }
+
+  .counter-poster {
+    display: grid;
+    align-content: center;
+    background: var(--party-purple);
+    color: var(--party-paper);
+    text-align: center;
+  }
+
+  .counter-number {
+    font-family: var(--poster-display);
+    font-size: 8rem;
+    font-weight: 900;
+    line-height: 0.78;
+  }
+
+  .activity-row {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 0.8rem;
+    margin-top: 2.2rem;
+  }
+
+  .activity-item {
+    position: relative;
+    min-height: 19rem;
+    overflow: hidden;
+    border-top: 2px solid var(--party-ink);
+    padding: 0.7rem 0.5rem 0;
+    text-align: left;
+  }
+
+  .activity-image {
+    position: relative;
+    overflow: hidden;
+    border: 2px solid var(--party-ink);
+    background: var(--party-ink);
+  }
+
+  .activity-image img {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    filter: saturate(1.06) contrast(1.05);
+  }
+
+  .activity-image::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 0;
+    height: 40%;
+    background: linear-gradient(180deg, transparent, rgba(17, 17, 17, 0.68));
+    pointer-events: none;
+  }
+
+  .activity-emoji-fallback {
+    display: grid;
+    min-height: 12rem;
+    place-items: center;
+    font-size: 4rem;
+  }
+
+  .activity-copy {
+    padding-top: 0.9rem;
+  }
+
+  .activity-item h3 {
+    margin: 0;
+    color: var(--party-ink);
+    font-family: var(--poster-display);
+    font-size: 1.95rem;
+    font-weight: 900;
+    line-height: 0.95;
+    text-transform: uppercase;
+  }
+
+  .activity-item p {
+    margin: 0.65rem 0 0;
+    color: var(--party-gray);
+    font-size: 0.86rem;
+    font-weight: 800;
+    line-height: 1.25;
+  }
+
+  .gallery-layout {
+    display: grid;
+    grid-template-columns: minmax(30rem, 0.55fr) minmax(0, 1fr);
+    gap: clamp(2rem, 5vw, 4.5rem);
+    align-items: start;
+  }
+
+  .gallery-collage {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 0.8rem;
+  }
+
+  .gallery-polaroid {
+    position: relative;
+    display: block;
+    grid-column: span 2;
+    min-width: 0;
+    border: 2px solid var(--party-ink);
+    background: var(--party-paper);
+    padding: 0.5rem 0.5rem 2.4rem;
+    box-shadow: 6px 6px 0 rgba(17, 17, 17, 0.85);
+    cursor: pointer;
+    transition: transform 180ms ease, box-shadow 180ms ease;
+  }
+
+  .gallery-polaroid:hover,
+  .gallery-polaroid:focus-visible {
+    transform: rotate(0deg) translateY(-0.25rem) !important;
+    box-shadow: 8px 8px 0 var(--party-ink);
+    outline: none;
+  }
+
+  .gallery-polaroid img {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    filter: saturate(1.06) contrast(1.05);
+  }
+
+  .gallery-polaroid span {
+    position: absolute;
+    left: 0.65rem;
+    right: 0.65rem;
+    bottom: 0.55rem;
+    overflow: hidden;
+    color: var(--party-ink);
+    font-weight: 900;
+    line-height: 1;
+    text-align: left;
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .gallery-polaroid-1,
+  .gallery-polaroid-5 {
+    transform: rotate(-1.5deg);
+  }
+
+  .gallery-polaroid-2,
+  .gallery-polaroid-6 {
+    transform: rotate(1.2deg);
+  }
+
+  .gallery-polaroid-3 {
+    transform: rotate(-0.4deg);
+  }
+
+  .gallery-polaroid-4 {
+    transform: rotate(1.8deg);
+  }
+
+  .registration-poster-section {
+    background:
+      radial-gradient(circle at 20% 30%, rgba(17, 17, 17, 0.055) 0 1px, transparent 1.6px),
+      linear-gradient(90deg, rgba(17, 17, 17, 0.045) 1px, transparent 1px),
+      linear-gradient(180deg, rgba(17, 17, 17, 0.04) 1px, transparent 1px),
+      var(--party-paper);
+    background-size: 17px 17px, 58px 58px, 58px 58px, auto;
+  }
+
+  .registration-form-poster {
+    background: var(--party-paper);
+  }
+
+  .final-cta-section {
+    padding: clamp(3.5rem, 7vw, 6rem) 0;
+    background: var(--party-lime);
+  }
+
+  .final-cta-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 1.5rem;
+    align-items: center;
+  }
+
+  .final-cta-layout h2 {
+    max-width: 7.5ch;
+    margin: 0;
+    font-size: 7rem;
+    line-height: 0.82;
+    text-wrap: balance;
+  }
+
+  .final-cta-layout p {
+    display: inline-block;
+    margin: 1rem 0 0;
+    padding: 0.5rem 0.8rem;
+    background: var(--party-ink);
+    color: var(--party-paper);
+    font-weight: 900;
+    transform: rotate(-1deg);
+  }
+
+  @media (max-width: 980px) {
+    .hero-grid,
+    .menu-layout,
+    .countdown-layout,
+    .gallery-layout,
+    .final-cta-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .activity-row {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .counter-poster {
+      min-height: 12rem;
+    }
+
+    .hero-copy h1 {
+      font-size: 8rem;
+    }
+
+    .poster-heading h2 {
+      font-size: 5.25rem;
+    }
+
+    .final-cta-layout h2 {
+      font-size: 5.8rem;
+    }
+  }
+
+  @media (max-width: 1180px) {
+    .gallery-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .gallery-collage {
+      max-width: 58rem;
+    }
+  }
+
+  @media (max-width: 680px) {
+    .hero-poster {
+      padding-top: 3rem;
+    }
+
+    .hero-grid {
+      grid-template-columns: minmax(0, 0.57fr) minmax(8.2rem, 0.43fr);
+      gap: 0.65rem;
+      align-items: start;
+    }
+
+    .hero-copy {
+      display: contents;
+    }
+
+    .hero-copy h1 {
+      grid-column: 1;
+      grid-row: 1;
+      font-size: 5.65rem;
+      line-height: 0.75;
+    }
+
+    .hero-photo-stack {
+      grid-column: 2;
+      grid-row: 1;
+      width: 100%;
+      max-width: none;
+      margin-top: 1.15rem;
+      justify-self: stretch;
+      transform: rotate(1.1deg);
+    }
+
+    .hero-photo-stack img {
+      aspect-ratio: 3 / 4;
+      box-shadow: 6px 6px 0 var(--party-ink);
+    }
+
+    .hero-badge,
+    .hero-secondary,
+    .scroll-sticker {
+      grid-column: 1 / -1;
+    }
+
+    .poster-heading {
+      max-width: 100%;
+    }
+
+    .poster-heading h2 {
+      max-width: 6.75ch;
+      font-size: 4.45rem;
+      line-height: 0.82;
+    }
+
+    .menu-layout .poster-heading h2 {
+      max-width: 6.1ch;
+    }
+
+    .countdown-poster .poster-heading h2 {
+      max-width: 13ch;
+      font-size: 3.15rem;
+      line-height: 0.86;
+    }
+
+    .activities-poster-section .poster-heading h2 {
+      max-width: 6.45ch;
+    }
+
+    .gallery-poster-section .poster-heading h2 {
+      max-width: 8.6ch;
+    }
+
+    .poster-heading p {
+      max-width: min(100%, 21rem);
+      margin-top: 0.7rem;
+      font-size: 1.08rem;
+      line-height: 1.1;
+    }
+
+    .hero-badge {
+      margin-left: 0.25rem;
+      max-width: calc(100vw - 4rem);
+      padding: 0.42rem 0.75rem 0.36rem;
+      font-size: 0.78rem;
+      white-space: nowrap;
+    }
+
+    .hero-badge::before {
+      inset: -0.18rem -0.28rem;
+    }
+
+    .hero-badge::after {
+      inset: auto 10% -0.65rem 14%;
+    }
+
+    .hero-secondary {
+      margin-top: 1.4rem;
+    }
+
+    .hero-copy p {
+      max-width: 21rem;
+      font-size: 1rem;
+      line-height: 1.22;
+    }
+
+    .hero-copy .poster-button {
+      width: min(100%, 21rem);
+    }
+
+    .quick-strip {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.45rem;
+      width: 100%;
+      margin-left: 0;
+      overflow: visible;
+      padding: 0;
+      border: 0;
+      background: transparent;
+    }
+
+    .quick-strip-item {
+      min-width: 0;
+      min-height: 7.1rem;
+      border: 2px solid var(--party-ink);
+      padding: 0.65rem 0.55rem;
+      box-shadow: 4px 4px 0 var(--party-ink);
+    }
+
+    .quick-strip-item span {
+      font-size: 0.85rem;
+      line-height: 1;
+    }
+
+    .quick-strip-item h2 {
+      margin-top: 0.2rem;
+      font-size: 2rem;
+    }
+
+    .quick-strip-item p {
+      font-size: 0.78rem;
+      line-height: 1.12;
+    }
+
+    .quick-strip::after {
+      content: none;
+    }
+
+    .menu-ticket {
+      grid-template-columns: 1fr;
+      width: 100%;
+      max-width: 100%;
+      overflow: hidden;
+      padding: 1.25rem;
+      transform: rotate(0.35deg);
+    }
+
+    .menu-ticket h3 {
+      max-width: 100%;
+      font-size: 3.45rem;
+      line-height: 0.84;
+    }
+
+    .menu-ticket p {
+      font-size: 1.05rem;
+    }
+
+    .menu-ticket .poster-button {
+      width: min(100%, 20rem);
+    }
+
+    .countdown-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .activity-row {
+      display: flex;
+      grid-template-columns: none;
+      gap: 1rem;
+      width: calc(100% + 1rem);
+      margin-top: 1.75rem;
+      margin-left: -0.25rem;
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 0.25rem 1rem 1.2rem 0.25rem;
+      scroll-padding-left: 0.25rem;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+      overscroll-behavior-x: contain;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .activity-row::-webkit-scrollbar {
+      display: none;
+    }
+
+    .activity-item {
+      flex: 0 0 min(82vw, 21rem);
+      min-height: 0;
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+      border: 2px solid var(--party-ink);
+      background: var(--party-paper);
+      padding: 0.65rem 0.65rem 0.9rem;
+      box-shadow: 7px 7px 0 var(--party-ink);
+      transform: rotate(-0.8deg);
+    }
+
+    .activity-item:nth-child(even) {
+      transform: rotate(0.8deg);
+    }
+
+    .activity-item-2 {
+      background: var(--party-paper);
+    }
+
+    .activity-item-3 {
+      background: var(--party-paper);
+    }
+
+    .activity-image {
+      transform: rotate(-1deg);
+    }
+
+    .activity-item:nth-child(even) .activity-image {
+      transform: rotate(1deg);
+    }
+
+    .activity-image img {
+      aspect-ratio: 16 / 10.5;
+    }
+
+    .activity-copy {
+      padding: 0.8rem 0.25rem 0;
+    }
+
+    .activity-item h3 {
+      max-width: 13rem;
+      font-size: 3rem;
+      line-height: 0.88;
+    }
+
+    .activity-item p {
+      max-width: 17rem;
+      margin-top: 0.7rem;
+      font-size: 0.98rem;
+      line-height: 1.18;
+    }
+
+    .activity-row::after {
+      content: "";
+      flex: 0 0 0.15rem;
+    }
+
+    .gallery-collage {
+      display: flex;
+      grid-template-columns: none;
+      gap: 1rem;
+      width: calc(100% + 1rem);
+      margin-left: -0.25rem;
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 0.25rem 1rem 1.2rem 0.25rem;
+      scroll-padding-left: 0.25rem;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+      overscroll-behavior-x: contain;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .gallery-collage::-webkit-scrollbar {
+      display: none;
+    }
+
+    .gallery-polaroid {
+      flex: 0 0 min(82vw, 21rem);
+      grid-column: auto;
+      padding: 0.55rem 0.55rem 2.1rem;
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+      box-shadow: 7px 7px 0 var(--party-ink);
+    }
+
+    .gallery-polaroid img {
+      aspect-ratio: 4 / 3.1;
+    }
+
+    .gallery-collage::after {
+      content: "";
+      flex: 0 0 0.15rem;
+    }
+
+    .final-cta-layout .poster-button {
+      justify-self: start;
+    }
+  }
+
+  @media (max-width: 420px) {
+    .hero-copy h1 {
+      font-size: 4.95rem;
+    }
+
+    .hero-grid {
+      grid-template-columns: minmax(0, 0.54fr) minmax(8.65rem, 0.46fr);
+      gap: 0.55rem;
+    }
+
+    .poster-heading h2 {
+      font-size: 3.8rem;
+    }
+
+    .quick-strip-item h2 {
+      font-size: 1.65rem;
+    }
+
+    .menu-ticket h3 {
+      font-size: 2.95rem;
+    }
+
+    .countdown-poster .poster-heading h2 {
+      font-size: 2.85rem;
+    }
+
+    .registration-poster-header h2 {
+      font-size: 3.65rem;
+    }
+
+    .registration-form-inner h3 {
+      font-size: 2.65rem;
+    }
+
+    .activity-item h3 {
+      font-size: 2.55rem;
+    }
+
+    .final-cta-layout h2 {
+      font-size: 4.35rem;
+    }
+  }
+
   /* Party page custom styles */
   .party-hero {
     background: linear-gradient(135deg, #0f0f0f 0%, #1a1a2e 50%, #16213e 100%);
@@ -391,6 +1924,7 @@ const partyPhotos = getPartyPhotos();
 </style>
 
 <script type="module">
+const heroImage=document.getElementById("party-hero-photo");if(heroImage){try{const photos=JSON.parse(heroImage.dataset.heroPhotos||"[]");if(photos.length>1){const photo=photos[Math.floor(Math.random()*photos.length)];if(photo?.image){heroImage.src=photo.image;heroImage.alt=photo.caption||"New Level Party";}}}catch{}}
 const items=document.querySelectorAll(".gallery-item"),lb=document.getElementById("lightbox"),lbImg=document.getElementById("lightbox-image"),lbCap=document.getElementById("lightbox-caption"),closeBtn=document.getElementById("lightbox-close"),prevBtn=document.getElementById("lightbox-prev"),nextBtn=document.getElementById("lightbox-next");let idx=0;const data=Array.from(items).map(i=>({src:i.getAttribute("data-src")||"",caption:i.getAttribute("data-caption")||""}));function open(i){idx=i;update();lb?.classList.add("active");document.body.style.overflow="hidden";}function close(){lb?.classList.remove("active");document.body.style.overflow="";}function update(){if(lbImg&&lbCap){lbImg.src=data[idx].src;lbCap.textContent=data[idx].caption;}}function next(){idx=(idx+1)%data.length;update();}function prev(){idx=(idx-1+data.length)%data.length;update();}items.forEach((el,i)=>{el.addEventListener("click",()=>open(i));});closeBtn?.addEventListener("click",close);nextBtn?.addEventListener("click",next);prevBtn?.addEventListener("click",prev);lb?.addEventListener("click",e=>{if(e.target===lb)close();});document.addEventListener("keydown",e=>{if(lb?.classList.contains("active")){if(e.key==="Escape")close();if(e.key==="ArrowRight")next();if(e.key==="ArrowLeft")prev();}});
 </script>
 
