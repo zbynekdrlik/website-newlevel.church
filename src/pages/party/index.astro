@@ -344,7 +344,7 @@ const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára 
     --party-purple: #7b3eff;
     --party-lime: #d7ff27;
     --party-gray: #777777;
-    --poster-display: Impact, "Arial Narrow", Inter, system-ui, sans-serif;
+    --poster-display: Anton, Impact, "Arial Narrow", Inter, system-ui, sans-serif;
     --poster-sans: Inter, system-ui, sans-serif;
     position: relative;
     overflow: hidden;
@@ -790,7 +790,7 @@ const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára 
     --party-purple: #7b3eff;
     --party-lime: #d7ff27;
     --party-gray: #777777;
-    --poster-display: Impact, "Arial Narrow", Inter, system-ui, sans-serif;
+    --poster-display: Anton, Impact, "Arial Narrow", Inter, system-ui, sans-serif;
     --poster-sans: Inter, system-ui, sans-serif;
     overflow: hidden;
     background: var(--party-paper);
@@ -857,7 +857,7 @@ const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára 
     max-width: 8.5ch;
     margin: 0;
     font-size: 6.25rem;
-    line-height: 0.82;
+    line-height: 0.9;
     text-wrap: balance;
   }
 
@@ -1159,6 +1159,10 @@ const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára 
     transform: rotate(0.8deg);
   }
 
+  .menu-ticket > div {
+    min-width: 0;
+  }
+
   .menu-ticket::after {
     content: "";
     position: absolute;
@@ -1186,8 +1190,9 @@ const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára 
     margin: 0;
     color: var(--party-purple);
     font-size: 5rem;
-    line-height: 0.85;
+    line-height: 1.12;
     text-wrap: balance;
+    overflow-wrap: anywhere;
   }
 
   .menu-ticket p {
@@ -1562,7 +1567,7 @@ const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára 
     .poster-heading h2 {
       max-width: 6.75ch;
       font-size: 4.45rem;
-      line-height: 0.82;
+      line-height: 0.9;
     }
 
     .menu-layout .poster-heading h2 {
@@ -1634,10 +1639,11 @@ const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára 
 
     .quick-strip-item {
       min-width: 0;
-      min-height: 7.1rem;
+      min-height: 8.4rem;
       border: 2px solid var(--party-ink);
       padding: 0.65rem 0.55rem;
       box-shadow: 4px 4px 0 var(--party-ink);
+      overflow: hidden;
     }
 
     .quick-strip-item span {
@@ -1647,12 +1653,15 @@ const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára 
 
     .quick-strip-item h2 {
       margin-top: 0.2rem;
-      font-size: 2rem;
+      font-size: 1.8rem;
+      line-height: 0.96;
+      overflow-wrap: anywhere;
     }
 
     .quick-strip-item p {
-      font-size: 0.78rem;
+      font-size: 0.76rem;
       line-height: 1.12;
+      overflow-wrap: anywhere;
     }
 
     .quick-strip::after {
@@ -1663,15 +1672,17 @@ const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára 
       grid-template-columns: 1fr;
       width: 100%;
       max-width: 100%;
-      overflow: hidden;
+      overflow: visible;
       padding: 1.25rem;
       transform: rotate(0.35deg);
     }
 
     .menu-ticket h3 {
       max-width: 100%;
-      font-size: 3.45rem;
-      line-height: 0.84;
+      font-size: clamp(2.45rem, 11.5vw, 3.15rem);
+      line-height: 1.12;
+      overflow-wrap: anywhere;
+      word-break: break-word;
     }
 
     .menu-ticket p {
@@ -1823,11 +1834,11 @@ const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára 
     }
 
     .quick-strip-item h2 {
-      font-size: 1.65rem;
+      font-size: 1.48rem;
     }
 
     .menu-ticket h3 {
-      font-size: 2.95rem;
+      font-size: 2.55rem;
     }
 
     .countdown-poster .poster-heading h2 {
