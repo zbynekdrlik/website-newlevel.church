@@ -4,7 +4,11 @@ import page from '../../content/party/page.json';
 import contactInfo from '../../content/settings/contact.json';
 import { getPartyPhotos } from '../../utils/gallery';
 
-const partyPhotos = getPartyPhotos();
+const hiddenPartyGalleryImages = new Set([
+  '/images/uploads/party-image00004.jpg',
+  '/images/uploads/party-image00006.jpg',
+]);
+const partyPhotos = getPartyPhotos().filter((photo) => !hiddenPartyGalleryImages.has(photo.image));
 const heroPhotos = [
   { image: '/images/uploads/party-image00004.jpg', caption: 'New Level Party' },
   { image: '/images/uploads/party-image00001.jpg', caption: 'Spoločné jedlo' },
@@ -28,6 +32,11 @@ const activityPhotos = [
   '/images/uploads/party-image00016.jpg',
   '/images/uploads/party-image00002.jpg',
   '/images/uploads/party-image00006.jpg',
+];
+const quickInfoIcons = [
+  '<svg viewBox="0 0 48 48" aria-hidden="true" fill="none" stroke="#D7FF27" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="24" r="17"/><path d="M24 13v12l9 5"/></svg>',
+  '<svg viewBox="0 0 48 48" aria-hidden="true" fill="none" stroke="#7B3EFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M24 43S39 30.5 39 18.5a15 15 0 1 0-30 0C9 30.5 24 43 24 43Z"/><circle cx="24" cy="18.5" r="4.5"/></svg>',
+  '<svg viewBox="0 0 48 48" aria-hidden="true" fill="none" stroke="#D7FF27" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M16 22a7 7 0 1 0 0-14 7 7 0 0 0 0 14Z"/><path d="M5 40v-3c0-7 5-11 11-11s11 4 11 11v3"/><path d="M32 22a6 6 0 1 0 0-12"/><path d="M31 27c6 1 10 5 10 11v2" stroke="#7B3EFF"/></svg>',
 ];
 const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára o'
   ? ['Registrácia', 'sa uzatvára o']
@@ -84,9 +93,11 @@ const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára 
         <div class="quick-strip">
           {page.quickInfo.map((item: { title: string; text: string }, i: number) => (
             <div class="quick-strip-item">
-              <span>{`0${i + 1}`}</span>
-              <h2>{item.title}</h2>
-              <p>{item.text}</p>
+              <span class="quick-strip-icon" set:html={quickInfoIcons[i] || quickInfoIcons[0]}></span>
+              <div>
+                <h2>{item.title}</h2>
+                <p>{item.text}</p>
+              </div>
             </div>
           ))}
         </div>
@@ -346,6 +357,7 @@ const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára 
     --party-gray: #777777;
     --poster-display: "Barlow Condensed", Impact, "Arial Narrow", Inter, system-ui, sans-serif;
     --poster-sans: Inter, system-ui, sans-serif;
+    --poster-mono: "Space Mono", "Courier New", monospace;
     position: relative;
     overflow: hidden;
     scroll-margin-top: 5rem;
@@ -483,9 +495,10 @@ const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára 
   .registration-info-item p {
     margin: 0;
     color: var(--party-gray);
-    font-size: 1.02rem;
+    font-family: var(--poster-mono);
+    font-size: 0.9rem;
     font-weight: 700;
-    line-height: 1.35;
+    line-height: 1.28;
   }
 
   .registration-map {
@@ -590,7 +603,7 @@ const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára 
     background: rgba(255, 255, 255, 0.68);
     color: var(--party-ink);
     padding: 0.95rem 1rem;
-    font: 800 1rem/1.25 Inter, system-ui, sans-serif;
+    font: 700 0.95rem/1.35 var(--poster-mono);
     outline: none;
     box-shadow: 4px 4px 0 rgba(17, 17, 17, 0.18);
     transition: background-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
@@ -792,6 +805,7 @@ const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára 
     --party-gray: #777777;
     --poster-display: "Barlow Condensed", Impact, "Arial Narrow", Inter, system-ui, sans-serif;
     --poster-sans: Inter, system-ui, sans-serif;
+    --poster-mono: "Space Mono", "Courier New", monospace;
     overflow: hidden;
     background: var(--party-paper);
     color: var(--party-ink);
@@ -876,7 +890,7 @@ const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára 
   }
 
   .menu-layout .poster-heading h2 {
-    max-width: 7.25ch;
+    max-width: 9ch;
   }
 
   .countdown-poster .poster-heading h2 {
@@ -1053,7 +1067,7 @@ const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára 
     color: var(--party-ink);
     font-family: var(--poster-sans);
     font-size: 1.12rem;
-    font-weight: 800;
+    font-weight: 900;
     line-height: 1.25;
     text-wrap: balance;
   }
@@ -1094,42 +1108,55 @@ const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára 
   }
 
   .info-strip-section {
-    padding: 1.1rem 0;
+    padding: clamp(1.2rem, 3vw, 2rem) 0;
     background: var(--party-ink);
   }
 
   .quick-strip {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 1px;
-    border: 2px solid var(--party-ink);
-    background: var(--party-ink);
+    gap: clamp(1rem, 3vw, 2.4rem);
+    align-items: start;
   }
 
   .quick-strip-item {
-    padding: 1.25rem;
-    background: var(--party-paper);
+    display: grid;
+    grid-template-columns: 2.4rem minmax(0, 1fr);
+    gap: 0.85rem;
+    align-items: center;
+    min-width: 0;
+    color: var(--party-paper);
   }
 
-  .quick-strip-item span {
-    display: block;
-    color: var(--party-purple);
-    font-weight: 900;
+  .quick-strip-icon {
+    display: grid;
+    width: 2.25rem;
+    height: 2.25rem;
+    place-items: center;
+  }
+
+  .quick-strip-icon svg {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
   }
 
   .quick-strip-item h2 {
-    margin: 0.15rem 0 0.25rem;
+    margin: 0;
+    color: var(--party-paper);
     font-family: var(--poster-display);
-    font-size: 3.25rem;
-    line-height: 1.02;
+    font-size: clamp(1.6rem, 3vw, 2.45rem);
+    line-height: 1;
     text-transform: uppercase;
   }
 
   .quick-strip-item p {
-    margin: 0;
-    color: var(--party-gray);
-    font-weight: 800;
-    line-height: 1.25;
+    margin: 0.1rem 0 0;
+    color: rgba(246, 244, 238, 0.72);
+    font-family: var(--poster-mono);
+    font-size: clamp(0.78rem, 1.18vw, 0.98rem);
+    font-weight: 700;
+    line-height: 1.18;
   }
 
   .menu-poster-section,
@@ -1198,8 +1225,10 @@ const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára 
   .menu-ticket p {
     margin: 0.55rem 0 0;
     color: var(--party-ink);
-    font-size: 1.15rem;
-    font-weight: 900;
+    font-family: var(--poster-mono);
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.25;
   }
 
   .menu-ticket .poster-button {
@@ -1275,7 +1304,9 @@ const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára 
 
   .deadline-poster p {
     margin: 0.8rem 0;
-    font-weight: 800;
+    font-family: var(--poster-mono);
+    font-weight: 700;
+    line-height: 1.28;
   }
 
   .counter-poster {
@@ -1356,9 +1387,10 @@ const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára 
   .activity-item p {
     margin: 0.65rem 0 0;
     color: var(--party-gray);
-    font-size: 0.86rem;
-    font-weight: 800;
-    line-height: 1.25;
+    font-family: var(--poster-mono);
+    font-size: 0.78rem;
+    font-weight: 700;
+    line-height: 1.28;
   }
 
   .gallery-layout {
@@ -1473,7 +1505,9 @@ const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára 
     padding: 0.5rem 0.8rem;
     background: var(--party-ink);
     color: var(--party-paper);
-    font-weight: 900;
+    font-family: var(--poster-mono);
+    font-weight: 700;
+    line-height: 1.25;
     transform: rotate(-1deg);
   }
 
@@ -1523,8 +1557,8 @@ const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára 
     }
 
     .hero-grid {
-      grid-template-columns: minmax(0, 0.57fr) minmax(8.2rem, 0.43fr);
-      gap: 0.65rem;
+      grid-template-columns: minmax(0, 1fr) clamp(6.6rem, 37vw, 9.6rem);
+      gap: clamp(0.55rem, 2.8vw, 1rem);
       align-items: start;
     }
 
@@ -1535,7 +1569,7 @@ const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára 
     .hero-copy h1 {
       grid-column: 1;
       grid-row: 1;
-      font-size: 5.65rem;
+      font-size: clamp(3.55rem, 17.2vw, 5.65rem);
       line-height: 0.92;
     }
 
@@ -1544,8 +1578,8 @@ const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára 
       grid-row: 1;
       width: 100%;
       max-width: none;
-      margin-top: 1.15rem;
-      justify-self: stretch;
+      margin-top: clamp(0.85rem, 3vw, 1.2rem);
+      justify-self: end;
       transform: rotate(1.1deg);
     }
 
@@ -1571,7 +1605,8 @@ const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára 
     }
 
     .menu-layout .poster-heading h2 {
-      max-width: 6.1ch;
+      max-width: 8.8ch;
+      font-size: 4.2rem;
     }
 
     .countdown-poster .poster-heading h2 {
@@ -1627,8 +1662,8 @@ const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára 
 
     .quick-strip {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 0.45rem;
+      grid-template-columns: 1fr;
+      gap: 0.95rem;
       width: 100%;
       margin-left: 0;
       overflow: visible;
@@ -1638,29 +1673,27 @@ const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára 
     }
 
     .quick-strip-item {
+      grid-template-columns: 2.25rem minmax(0, 1fr);
+      gap: 0.8rem;
       min-width: 0;
-      min-height: 8.4rem;
-      border: 2px solid var(--party-ink);
-      padding: 0.65rem 0.55rem;
-      box-shadow: 4px 4px 0 var(--party-ink);
-      overflow: hidden;
+      min-height: 0;
+      padding: 0;
     }
 
-    .quick-strip-item span {
-      font-size: 0.85rem;
-      line-height: 1;
+    .quick-strip-icon {
+      width: 2.1rem;
+      height: 2.1rem;
     }
 
     .quick-strip-item h2 {
-      margin-top: 0.2rem;
-      font-size: 1.8rem;
-      line-height: 1.06;
+      font-size: 1.75rem;
+      line-height: 1;
       overflow-wrap: anywhere;
     }
 
     .quick-strip-item p {
-      font-size: 0.76rem;
-      line-height: 1.12;
+      font-size: 0.98rem;
+      line-height: 1.08;
       overflow-wrap: anywhere;
     }
 
@@ -1820,21 +1853,22 @@ const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára 
   }
 
   @media (max-width: 420px) {
-    .hero-copy h1 {
-      font-size: 4.95rem;
-    }
-
     .hero-grid {
-      grid-template-columns: minmax(0, 0.54fr) minmax(8.65rem, 0.46fr);
-      gap: 0.55rem;
+      grid-template-columns: minmax(0, 1fr) clamp(6.2rem, 36vw, 8.4rem);
+      gap: clamp(0.45rem, 2.5vw, 0.75rem);
     }
 
     .poster-heading h2 {
       font-size: 3.8rem;
     }
 
+    .menu-layout .poster-heading h2 {
+      max-width: 8.6ch;
+      font-size: 3.55rem;
+    }
+
     .quick-strip-item h2 {
-      font-size: 1.48rem;
+      font-size: 1.55rem;
     }
 
     .menu-ticket h3 {
