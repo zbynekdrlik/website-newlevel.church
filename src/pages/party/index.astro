@@ -9,22 +9,7 @@ const hiddenPartyGalleryImages = new Set([
   '/images/uploads/party-image00006.jpg',
 ]);
 const partyPhotos = getPartyPhotos().filter((photo) => !hiddenPartyGalleryImages.has(photo.image));
-const heroPhotos = [
-  { image: '/images/uploads/party-image00004.jpg', caption: 'New Level Party' },
-  { image: '/images/uploads/party-image00001.jpg', caption: 'Spoločné jedlo' },
-  { image: '/images/uploads/party-image00005.jpg', caption: 'Party program' },
-  { image: '/images/uploads/party-image00006.jpg', caption: 'Party program' },
-  { image: '/images/uploads/party-image00007.jpg', caption: 'Kalčeto' },
-  { image: '/images/uploads/party-image00009.jpg', caption: 'Ping Pong' },
-  { image: '/images/uploads/party-image00010.jpg', caption: 'Ping Pong' },
-  { image: '/images/uploads/party-image00011.jpg', caption: 'Kalčeto' },
-  { image: '/images/uploads/party-image00014.jpg', caption: 'Herňa' },
-  { image: '/images/uploads/party-image00015.jpg', caption: 'Herňa' },
-  { image: '/images/uploads/party-image00016.jpg', caption: 'Herňa' },
-];
-const heroPhoto = heroPhotos[0];
-const featurePhoto = partyPhotos[0] || heroPhoto;
-const momentPhotos = partyPhotos.slice(0, 3);
+const heroPhoto = { image: '/images/uploads/party-image00015.jpg', caption: 'Herňa' };
 const activityPhotos = [
   '/images/uploads/party-image00001.jpg',
   '/images/uploads/party-image00010.jpg',
@@ -52,7 +37,12 @@ const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára 
       </filter>
     </svg>
     <!-- Section 1: Hero Poster -->
-    <section class="poster-section hero-poster">
+    <section
+      class="poster-section hero-poster"
+      id="party-hero"
+      aria-label={heroPhoto.caption}
+      style={`--hero-photo: url("${heroPhoto.image}");`}
+    >
       <div class="poster-noise" aria-hidden="true"></div>
       <div class="poster-wrap hero-grid">
         <div class="hero-copy">
@@ -72,18 +62,6 @@ const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára 
             </svg>
           </div>
         </div>
-        {heroPhoto && (
-          <div class="hero-photo-stack">
-            <img
-              id="party-hero-photo"
-              src={heroPhoto.image}
-              alt={heroPhoto.caption}
-              width="720"
-              height="520"
-              data-hero-photos={JSON.stringify(heroPhotos)}
-            >
-          </div>
-        )}
       </div>
     </section>
 
@@ -152,15 +130,22 @@ const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára 
         </div>
 
         <div id="deadline-passed" class="deadline-poster hidden">
-          <h2>Registrácia na jedlo je uzavretá</h2>
-          <p>Ak sa chceš ešte prihlásiť, zavolaj nám:</p>
-          <a href={`tel:${page.countdown.deadlinePhone}`} class="poster-button poster-button-lime">
-            Zavolať {page.countdown.deadlinePhone}
-          </a>
-          <p>Možno ešte stíhame pridať porciu!</p>
+          <div class="deadline-copy">
+            <h2 aria-label="Registrácia na jedlo je uzavretá">
+              <span aria-hidden="true">Registrácia</span>
+              <span aria-hidden="true">uzavretá</span>
+            </h2>
+            <p>Ak sa chceš ešte prihlásiť, zavolaj nám:</p>
+          </div>
+          <div class="deadline-actions">
+            <a href={`tel:${page.countdown.deadlinePhone}`} class="poster-button poster-button-lime">
+              Zavolať {page.countdown.deadlinePhone}
+            </a>
+            <p>Možno ešte stíhame pridať porciu!</p>
+          </div>
         </div>
 
-        <div class="counter-poster">
+        <div id="counter-poster" class="counter-poster">
           <span id="counter-value" class="counter-number">0</span>
           <span>registrovaných na jedlo</span>
         </div>
@@ -969,28 +954,39 @@ const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára 
   }
 
   .hero-poster {
-    padding: clamp(2.4rem, 4vw, 3.4rem) 0 clamp(2.6rem, 4.8vw, 4rem);
+    min-height: clamp(40rem, 82vh, 54rem);
+    padding: clamp(3rem, 6vw, 5.5rem) 0 clamp(3rem, 6vw, 5rem);
+    display: grid;
+    align-items: end;
+    border-bottom-color: var(--party-ink);
+    background:
+      linear-gradient(90deg, rgba(17, 17, 17, 0.9) 0%, rgba(17, 17, 17, 0.74) 44%, rgba(17, 17, 17, 0.36) 100%),
+      linear-gradient(180deg, rgba(17, 17, 17, 0.18) 0%, rgba(17, 17, 17, 0.18) 52%, rgba(17, 17, 17, 0.82) 100%),
+      var(--hero-photo),
+      var(--party-ink);
+    background-position: center 43%;
+    background-size: cover;
+    color: var(--party-paper);
   }
 
   .hero-grid {
     position: relative;
     z-index: 1;
-    display: grid;
-    grid-template-columns: minmax(0, 0.82fr) minmax(320px, 1.18fr);
-    gap: clamp(2rem, 6vw, 6rem);
-    align-items: center;
+    display: block;
   }
 
   .hero-copy h1 {
     position: relative;
     width: min-content;
     margin: 0 0 0.35rem;
-    font-size: 9.7rem;
+    color: var(--party-paper);
+    font-size: clamp(7.4rem, 14vw, 12.6rem);
     line-height: 0.9;
     filter: url("#print-distress");
   }
 
   .hero-copy {
+    max-width: min(100%, 48rem);
     min-width: 0;
   }
 
@@ -1029,8 +1025,8 @@ const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára 
     display: inline-block;
     margin: 0.55rem 0 0;
     padding: 0.48rem 1.1rem 0.42rem;
-    background: var(--party-ink);
-    color: var(--party-paper);
+    background: var(--party-lime);
+    color: var(--party-ink);
     font-family: var(--poster-sans);
     font-size: 1.05rem;
     font-style: italic;
@@ -1046,14 +1042,14 @@ const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára 
     position: absolute;
     inset: -0.24rem -0.5rem;
     z-index: -1;
-    background: var(--party-ink);
+    background: var(--party-lime);
     transform: rotate(1.5deg) skewX(-8deg);
   }
 
   .hero-badge::after {
     inset: auto 12% -0.8rem 16%;
     height: 0.18rem;
-    background: var(--party-lime);
+    background: var(--party-purple);
     transform: rotate(-1deg);
   }
 
@@ -1064,7 +1060,7 @@ const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára 
   .hero-copy p {
     max-width: 30rem;
     margin: 0 0 1.1rem;
-    color: var(--party-ink);
+    color: var(--party-paper);
     font-family: var(--poster-sans);
     font-size: 1.12rem;
     font-weight: 900;
@@ -1077,7 +1073,7 @@ const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára 
     align-items: center;
     gap: 0.4rem;
     margin-top: 1.75rem;
-    color: var(--party-gray);
+    color: rgba(246, 244, 238, 0.72);
     font-size: 0.82rem;
     font-weight: 900;
     text-transform: uppercase;
@@ -1089,22 +1085,6 @@ const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára 
     fill: none;
     stroke: currentColor;
     stroke-width: 3;
-  }
-
-  .hero-photo-stack {
-    position: relative;
-    max-width: 42rem;
-    justify-self: end;
-    transform: rotate(1.2deg);
-  }
-
-  .hero-photo-stack img {
-    width: 100%;
-    aspect-ratio: 4 / 3;
-    border: 2px solid var(--party-ink);
-    object-fit: cover;
-    filter: saturate(1.08) contrast(1.06);
-    box-shadow: 10px 10px 0 var(--party-ink);
   }
 
   .info-strip-section {
@@ -1287,9 +1267,13 @@ const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára 
   }
 
   .deadline-poster {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(14rem, 0.36fr);
+    gap: clamp(1.25rem, 4vw, 3rem);
+    align-items: end;
     grid-column: 1 / -1;
     color: var(--party-paper);
-    text-align: center;
+    text-align: left;
   }
 
   .deadline-poster.hidden {
@@ -1297,16 +1281,41 @@ const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára 
   }
 
   .deadline-poster h2 {
-    margin: 0 0 0.65rem;
-    font-size: 4.5rem;
-    line-height: 1.02;
+    max-width: 13ch;
+    margin: 0;
+    font-size: clamp(3.2rem, 7.4vw, 6.1rem);
+    line-height: 0.96;
+  }
+
+  .deadline-poster h2 span {
+    display: block;
   }
 
   .deadline-poster p {
-    margin: 0.8rem 0;
+    max-width: 28rem;
+    margin: 1rem 0 0;
     font-family: var(--poster-mono);
+    color: rgba(246, 244, 238, 0.78);
     font-weight: 700;
     line-height: 1.28;
+  }
+
+  .deadline-actions {
+    display: grid;
+    gap: 0.8rem;
+    justify-items: start;
+  }
+
+  .deadline-actions .poster-button {
+    width: 100%;
+    justify-content: center;
+    white-space: nowrap;
+  }
+
+  .deadline-actions p {
+    margin: 0;
+    color: var(--party-lime);
+    font-size: 0.9rem;
   }
 
   .counter-poster {
@@ -1315,6 +1324,10 @@ const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára 
     background: var(--party-purple);
     color: var(--party-paper);
     text-align: center;
+  }
+
+  .counter-poster.hidden {
+    display: none;
   }
 
   .counter-number {
@@ -1512,7 +1525,6 @@ const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára 
   }
 
   @media (max-width: 980px) {
-    .hero-grid,
     .menu-layout,
     .countdown-layout,
     .gallery-layout,
@@ -1529,7 +1541,7 @@ const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára 
     }
 
     .hero-copy h1 {
-      font-size: 8rem;
+      font-size: clamp(6.5rem, 17vw, 9rem);
     }
 
     .poster-heading h2 {
@@ -1553,45 +1565,30 @@ const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára 
 
   @media (max-width: 680px) {
     .hero-poster {
-      padding-top: 3rem;
+      min-height: calc(100svh - 5rem);
+      padding: 4.4rem 0 2.6rem;
+      background:
+        linear-gradient(90deg, rgba(17, 17, 17, 0.9) 0%, rgba(17, 17, 17, 0.72) 52%, rgba(17, 17, 17, 0.5) 100%),
+        linear-gradient(180deg, rgba(17, 17, 17, 0.12) 0%, rgba(17, 17, 17, 0.18) 44%, rgba(17, 17, 17, 0.86) 100%),
+        var(--hero-photo),
+        var(--party-ink);
+      background-position: 58% 45%;
+      background-size: cover;
     }
 
     .hero-grid {
-      grid-template-columns: minmax(0, 1fr) clamp(6.6rem, 37vw, 9.6rem);
-      gap: clamp(0.55rem, 2.8vw, 1rem);
-      align-items: start;
+      display: block;
     }
 
     .hero-copy {
-      display: contents;
+      display: block;
+      max-width: 100%;
+      transform: translateY(-10vh);
     }
 
     .hero-copy h1 {
-      grid-column: 1;
-      grid-row: 1;
-      font-size: clamp(3.55rem, 17.2vw, 5.65rem);
+      font-size: clamp(4.65rem, 22vw, 6.45rem);
       line-height: 0.92;
-    }
-
-    .hero-photo-stack {
-      grid-column: 2;
-      grid-row: 1;
-      width: 100%;
-      max-width: none;
-      margin-top: clamp(0.85rem, 3vw, 1.2rem);
-      justify-self: end;
-      transform: rotate(1.1deg);
-    }
-
-    .hero-photo-stack img {
-      aspect-ratio: 3 / 4;
-      box-shadow: 6px 6px 0 var(--party-ink);
-    }
-
-    .hero-badge,
-    .hero-secondary,
-    .scroll-sticker {
-      grid-column: 1 / -1;
     }
 
     .poster-heading {
@@ -1730,6 +1727,26 @@ const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára 
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
+    .deadline-poster {
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+      padding: 1.35rem;
+    }
+
+    .deadline-poster h2 {
+      max-width: 10.5ch;
+      font-size: 3.25rem;
+    }
+
+    .deadline-poster p {
+      margin-top: 0.75rem;
+      font-size: 0.9rem;
+    }
+
+    .deadline-actions {
+      max-width: 21rem;
+    }
+
     .activity-row {
       display: flex;
       grid-template-columns: none;
@@ -1853,9 +1870,14 @@ const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára 
   }
 
   @media (max-width: 420px) {
-    .hero-grid {
-      grid-template-columns: minmax(0, 1fr) clamp(6.2rem, 36vw, 8.4rem);
-      gap: clamp(0.45rem, 2.5vw, 0.75rem);
+    .hero-poster {
+      min-height: calc(100svh - 4.5rem);
+      padding-top: 3.6rem;
+      background-position: 58% 44%;
+    }
+
+    .hero-copy h1 {
+      font-size: clamp(4.2rem, 21.5vw, 5.45rem);
     }
 
     .poster-heading h2 {
@@ -1969,7 +1991,6 @@ const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára 
 </style>
 
 <script type="module">
-const heroImage=document.getElementById("party-hero-photo");if(heroImage){try{const photos=JSON.parse(heroImage.dataset.heroPhotos||"[]");if(photos.length>1){const photo=photos[Math.floor(Math.random()*photos.length)];if(photo?.image){heroImage.src=photo.image;heroImage.alt=photo.caption||"New Level Party";}}}catch{}}
 const items=document.querySelectorAll(".gallery-item"),lb=document.getElementById("lightbox"),lbImg=document.getElementById("lightbox-image"),lbCap=document.getElementById("lightbox-caption"),closeBtn=document.getElementById("lightbox-close"),prevBtn=document.getElementById("lightbox-prev"),nextBtn=document.getElementById("lightbox-next");let idx=0;const data=Array.from(items).map(i=>({src:i.getAttribute("data-src")||"",caption:i.getAttribute("data-caption")||""}));function open(i){idx=i;update();lb?.classList.add("active");document.body.style.overflow="hidden";}function close(){lb?.classList.remove("active");document.body.style.overflow="";}function update(){if(lbImg&&lbCap){lbImg.src=data[idx].src;lbCap.textContent=data[idx].caption;}}function next(){idx=(idx+1)%data.length;update();}function prev(){idx=(idx-1+data.length)%data.length;update();}items.forEach((el,i)=>{el.addEventListener("click",()=>open(i));});closeBtn?.addEventListener("click",close);nextBtn?.addEventListener("click",next);prevBtn?.addEventListener("click",prev);lb?.addEventListener("click",e=>{if(e.target===lb)close();});document.addEventListener("keydown",e=>{if(lb?.classList.contains("active")){if(e.key==="Escape")close();if(e.key==="ArrowRight")next();if(e.key==="ArrowLeft")prev();}});
 </script>
 
@@ -1981,6 +2002,7 @@ const items=document.querySelectorAll(".gallery-item"),lb=document.getElementByI
   const secondsEl = document.getElementById('countdown-seconds');
   const countdownSection = document.getElementById('countdown-section');
   const deadlinePassed = document.getElementById('deadline-passed');
+  const counterPoster = document.getElementById('counter-poster');
   const counterEl = document.getElementById('counter-value');
   let lastCount = -1;
 
@@ -2017,11 +2039,13 @@ const items=document.querySelectorAll(".gallery-item"),lb=document.getElementByI
     if (isDeadlinePassed()) {
       countdownSection?.classList.add('hidden');
       deadlinePassed?.classList.remove('hidden');
+      counterPoster?.classList.add('hidden');
       return;
     }
 
     countdownSection?.classList.remove('hidden');
     deadlinePassed?.classList.add('hidden');
+    counterPoster?.classList.remove('hidden');
 
     const now = new Date();
     const target = getNextThursdayMidnight();
@@ -2031,6 +2055,7 @@ const items=document.querySelectorAll(".gallery-item"),lb=document.getElementByI
       // Just passed - show deadline passed
       countdownSection?.classList.add('hidden');
       deadlinePassed?.classList.remove('hidden');
+      counterPoster?.classList.add('hidden');
       return;
     }
 
