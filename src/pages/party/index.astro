@@ -242,7 +242,7 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
               <span aria-hidden="true">uzavretá</span>
             </h2>
             <div class="deadline-counter">
-              <span id="deadline-counter-value" class="deadline-counter-number">--</span>
+              <span id="deadline-counter-value" class="deadline-counter-number">12</span>
               <span>registrovaných na jedlo</span>
             </div>
             <p>Ak sa chceš ešte prihlásiť, zavolaj nám:</p>
@@ -256,7 +256,7 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
         </div>
 
         <div id="counter-poster" class="counter-poster">
-          <span id="counter-value" class="counter-number">--</span>
+          <span id="counter-value" class="counter-number">12</span>
           <span>registrovaných na jedlo</span>
         </div>
       </div>
@@ -2609,7 +2609,7 @@ const items=document.querySelectorAll(".gallery-item"),lb=document.getElementByI
   const counterPoster = document.getElementById('counter-poster');
   const counterEl = document.getElementById('counter-value');
   const deadlineCounterEl = document.getElementById('deadline-counter-value');
-  let lastCount = -1;
+  const fixedFoodRegistrationCount = 12;
 
   function getNextThursdayMidnight() {
     const now = new Date();
@@ -2675,36 +2675,16 @@ const items=document.querySelectorAll(".gallery-item"),lb=document.getElementByI
     if (secondsEl) secondsEl.textContent = seconds.toString().padStart(2, '0');
   }
 
-  async function fetchCounter() {
-    try {
-      const res = await fetch('/api/counter', { cache: 'no-store' });
-      if (!res.ok) throw new Error('Counter request failed');
-      const data = await res.json();
-      const count = Number.isFinite(Number(data.count)) ? Number(data.count) : 0;
-      if (deadlineCounterEl) deadlineCounterEl.textContent = count;
-      if (counterEl) {
-        if (lastCount !== -1 && count !== lastCount) {
-          counterEl.classList.remove('counter-pop');
-          void counterEl.offsetWidth; // trigger reflow
-          counterEl.classList.add('counter-pop');
-        }
-        counterEl.textContent = count;
-        lastCount = count;
-      }
-    } catch (e) {
-      if (counterEl && lastCount === -1) counterEl.textContent = '--';
-      if (deadlineCounterEl && lastCount === -1) deadlineCounterEl.textContent = '--';
-    }
+  function setFixedCounter() {
+    if (deadlineCounterEl) deadlineCounterEl.textContent = fixedFoodRegistrationCount;
+    if (counterEl) counterEl.textContent = fixedFoodRegistrationCount;
   }
 
   // Start countdown
   updateCountdown();
   setInterval(updateCountdown, 1000);
 
-  // Fetch counter on load and every 30 seconds
-  fetchCounter();
-  setInterval(fetchCounter, 30000);
-  window.addEventListener('party-counter-refresh', fetchCounter);
+  setFixedCounter();
 })();
 </script>
 
