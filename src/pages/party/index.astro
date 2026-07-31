@@ -5,7 +5,12 @@ import contactInfo from '../../content/settings/contact.json';
 import { getPartyPhotos } from '../../utils/gallery';
 
 const partyPhotos = getPartyPhotos();
-const heroBackgroundPhotos = partyPhotos.map((photo) => ({ image: photo.image, caption: photo.caption }));
+const excludedHeroBackgroundImages = new Set([
+  '/images/uploads/party-image00003.jpg',
+]);
+const heroBackgroundPhotos = partyPhotos
+  .filter((photo) => !excludedHeroBackgroundImages.has(photo.image))
+  .map((photo) => ({ image: photo.image, caption: photo.caption }));
 const heroPhoto = heroBackgroundPhotos[0] || { image: '/images/uploads/party-image00001.jpg', caption: 'Youth' };
 const activityPhotos = [
   '/images/uploads/party-image00001.jpg',
