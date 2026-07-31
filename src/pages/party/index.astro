@@ -4,12 +4,9 @@ import page from '../../content/party/page.json';
 import contactInfo from '../../content/settings/contact.json';
 import { getPartyPhotos } from '../../utils/gallery';
 
-const hiddenPartyGalleryImages = new Set([
-  '/images/uploads/party-image00004.jpg',
-  '/images/uploads/party-image00006.jpg',
-]);
-const partyPhotos = getPartyPhotos().filter((photo) => !hiddenPartyGalleryImages.has(photo.image));
-const heroPhoto = { image: '/images/uploads/party-image00014.jpg', caption: 'Herňa' };
+const partyPhotos = getPartyPhotos();
+const heroBackgroundPhotos = partyPhotos.map((photo) => ({ image: photo.image, caption: photo.caption }));
+const heroPhoto = heroBackgroundPhotos[0] || { image: '/images/uploads/party-image00001.jpg', caption: 'Youth' };
 const activityPhotos = [
   '/images/uploads/party-image00001.jpg',
   '/images/uploads/party-image00010.jpg',
@@ -20,49 +17,39 @@ const activityPhotos = [
 ];
 const partyReels = [
   {
-    url: 'https://www.instagram.com/reel/DU6laO1Euqp/?igsh=MW53Mnd0MTNoZnd0eQ==',
-    embedUrl: 'https://www.instagram.com/reel/DU6laO1Euqp/embed/',
-    title: 'Party reel 01',
-  },
-  {
     url: 'https://www.instagram.com/reel/DVfGHeagLHp/?utm_source=ig_web_copy_link&igsh=NTc4MTIwNjQ2YQ==',
     embedUrl: 'https://www.instagram.com/reel/DVfGHeagLHp/embed/',
-    title: 'Party reel 02',
+    title: 'Party reel 01',
   },
   {
     url: 'https://www.instagram.com/reel/DbGrmxpiKg4/?utm_source=ig_web_copy_link&igsh=NTc4MTIwNjQ2YQ==',
     embedUrl: 'https://www.instagram.com/reel/DbGrmxpiKg4/embed/',
-    title: 'Party reel 03',
+    title: 'Party reel 02',
   },
   {
     url: 'https://www.instagram.com/reel/DU_FOveIEKa/?utm_source=ig_web_copy_link&igsh=NTc4MTIwNjQ2YQ==',
     embedUrl: 'https://www.instagram.com/reel/DU_FOveIEKa/embed/',
-    title: 'Party reel 04',
+    title: 'Party reel 03',
   },
   {
     url: 'https://www.instagram.com/reel/Dau3JRKufJB/?utm_source=ig_web_copy_link&igsh=NTc4MTIwNjQ2YQ==',
     embedUrl: 'https://www.instagram.com/reel/Dau3JRKufJB/embed/',
-    title: 'Party reel 05',
+    title: 'Party reel 04',
   },
   {
     url: 'https://www.instagram.com/reel/DZJYhtihpjz/?utm_source=ig_web_copy_link&igsh=NTc4MTIwNjQ2YQ==',
     embedUrl: 'https://www.instagram.com/reel/DZJYhtihpjz/embed/',
-    title: 'Party reel 06',
+    title: 'Party reel 05',
   },
   {
     url: 'https://www.instagram.com/reel/DZhzy1KAzrf/?utm_source=ig_web_copy_link&igsh=NTc4MTIwNjQ2YQ==',
     embedUrl: 'https://www.instagram.com/reel/DZhzy1KAzrf/embed/',
-    title: 'Party reel 07',
+    title: 'Party reel 06',
   },
   {
     url: 'https://www.instagram.com/reel/DbdPbjCNsW6/?utm_source=ig_web_copy_link&igsh=NTc4MTIwNjQ2YQ==',
     embedUrl: 'https://www.instagram.com/reel/DbdPbjCNsW6/embed/',
-    title: 'Party reel 08',
-  },
-  {
-    url: 'https://www.instagram.com/reel/DZGvJLyJ776/?utm_source=ig_web_copy_link&igsh=NTc4MTIwNjQ2YQ==',
-    embedUrl: 'https://www.instagram.com/reel/DZGvJLyJ776/embed/',
-    title: 'Party reel 09',
+    title: 'Party reel 07',
   },
 ];
 const quickInfoIcons = [
@@ -90,6 +77,7 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
       class="poster-section hero-poster"
       id="party-hero"
       aria-label={heroPhoto.caption}
+      data-hero-photos={JSON.stringify(heroBackgroundPhotos)}
       style={`--hero-photo: url("${heroPhoto.image}");`}
     >
       <div class="poster-noise" aria-hidden="true"></div>
@@ -118,6 +106,35 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
         </div>
       </div>
     </section>
+
+    <script is:inline>
+      (() => {
+        const hero = document.getElementById('party-hero');
+        if (!hero) return;
+
+        const photos = JSON.parse(hero.dataset.heroPhotos || '[]').filter((photo) => photo.image);
+        if (!photos.length) return;
+
+        let lastPhoto = '';
+        try {
+          lastPhoto = window.localStorage.getItem('partyHeroGalleryPhoto') || '';
+        } catch (error) {
+          lastPhoto = '';
+        }
+
+        const options = photos.length > 1 ? photos.filter((photo) => photo.image !== lastPhoto) : photos;
+        const selectedPhoto = options[Math.floor(Math.random() * options.length)];
+
+        hero.style.setProperty('--hero-photo', `url("${selectedPhoto.image}")`);
+        hero.setAttribute('aria-label', selectedPhoto.caption || 'Youth');
+
+        try {
+          window.localStorage.setItem('partyHeroGalleryPhoto', selectedPhoto.image);
+        } catch (error) {
+          // The visual rotation still works even when storage is unavailable.
+        }
+      })();
+    </script>
 
     <!-- Section 2: Quick Info Strip -->
     <section class="poster-section info-strip-section">
@@ -176,10 +193,6 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
                   <svg viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M12 2.16c3.2 0 3.58.01 4.85.07 3.25.15 4.77 1.69 4.92 4.92.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.15 3.25-1.67 4.77-4.92 4.92-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-3.25-.15-4.77-1.67-4.92-4.92-.06-1.27-.07-1.65-.07-4.85s.01-3.58.07-4.85c.15-3.25 1.67-4.77 4.92-4.92 1.27-.06 1.65-.07 4.85-.07Zm0 2.13c-3.15 0-3.52.01-4.75.07-2.17.1-2.79 1.13-2.89 2.89-.06 1.23-.07 1.6-.07 4.75s.01 3.52.07 4.75c.1 1.76.72 2.79 2.89 2.89 1.23.06 1.6.07 4.75.07s3.52-.01 4.75-.07c2.17-.1 2.79-1.13 2.89-2.89.06-1.23.07-1.6.07-4.75s-.01-3.52-.07-4.75c-.1-1.76-.72-2.79-2.89-2.89-1.23-.06-1.6-.07-4.75-.07Zm0 3.55a4.16 4.16 0 1 1 0 8.32 4.16 4.16 0 0 1 0-8.32Zm0 2.13a2.03 2.03 0 1 0 0 4.06 2.03 2.03 0 0 0 0-4.06Zm4.4-3.75a1.38 1.38 0 1 1 0 2.76 1.38 1.38 0 0 1 0-2.76Z"></path>
                   </svg>
-                </a>
-                <a class="party-reel-play" href={reel.url} target="_blank" rel="noopener noreferrer" aria-label={`Prehrať ${reel.title} na Instagrame`}>
-                  <span aria-hidden="true">▶</span>
-                  Prehrať na Instagrame
                 </a>
               </div>
             </article>
@@ -1445,14 +1458,13 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
 
   .party-reel-embed iframe {
     position: absolute;
-    top: 50%;
-    left: 50%;
+    top: -4.8rem;
+    left: 0;
     display: block;
-    width: 104%;
-    height: 112%;
+    width: 100%;
+    height: calc(100% + 9.6rem);
     border: 0;
     background: #000000;
-    transform: translate(-50%, -50%);
   }
 
   .party-reel-instagram {
@@ -1481,44 +1493,6 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
 
   .party-reel-instagram:hover,
   .party-reel-instagram:focus-visible {
-    background: var(--party-lime);
-    color: var(--party-ink);
-    transform: translateY(-1px);
-    outline: none;
-  }
-
-  .party-reel-play {
-    position: absolute;
-    left: 0.75rem;
-    right: 0.75rem;
-    bottom: 0.75rem;
-    z-index: 10;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.45rem;
-    min-height: 2.9rem;
-    border: 1px solid rgba(255, 255, 255, 0.38);
-    border-radius: 999px;
-    background: rgba(0, 0, 0, 0.72);
-    color: #ffffff;
-    padding: 0.74rem 0.95rem;
-    font-family: var(--poster-sans);
-    font-size: 0.78rem;
-    font-weight: 950;
-    line-height: 1;
-    text-decoration: none;
-    text-transform: uppercase;
-    backdrop-filter: blur(14px);
-    transition: background-color 160ms ease, color 160ms ease, transform 160ms ease;
-  }
-
-  .party-reel-play span {
-    font-size: 0.78rem;
-  }
-
-  .party-reel-play:hover,
-  .party-reel-play:focus-visible {
     background: var(--party-lime);
     color: var(--party-ink);
     transform: translateY(-1px);
@@ -1983,7 +1957,7 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
   @media (max-width: 680px) {
     .hero-poster {
       min-height: calc(100svh - 5rem);
-      padding: 4.4rem 0 2.6rem;
+      padding: 5.2rem 0 2.6rem;
       background:
         linear-gradient(90deg, rgba(17, 17, 17, 0.9) 0%, rgba(17, 17, 17, 0.72) 52%, rgba(17, 17, 17, 0.5) 100%),
         linear-gradient(180deg, rgba(17, 17, 17, 0.12) 0%, rgba(17, 17, 17, 0.18) 44%, rgba(17, 17, 17, 0.86) 100%),
@@ -2000,7 +1974,7 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
     .hero-copy {
       display: block;
       max-width: 100%;
-      transform: translateY(-8vh);
+      transform: translateY(-3vh);
     }
 
     .hero-copy h1 {
@@ -2084,14 +2058,6 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
     .party-reel-instagram svg {
       width: 1.15rem;
       height: 1.15rem;
-    }
-
-    .party-reel-play {
-      left: 0.65rem;
-      right: 0.65rem;
-      bottom: 0.65rem;
-      min-height: 2.55rem;
-      font-size: 0.68rem;
     }
 
     .hero-badge {
@@ -2369,8 +2335,12 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
   @media (max-width: 420px) {
     .hero-poster {
       min-height: calc(100svh - 4.5rem);
-      padding-top: 3.6rem;
+      padding-top: 4.7rem;
       background-position: 58% 44%;
+    }
+
+    .hero-copy {
+      transform: translateY(-2vh);
     }
 
     .hero-copy h1 {
