@@ -2,6 +2,7 @@ export async function onRequest(context) {
   const { request, env } = context;
   const headers = {
     "Content-Type": "application/json",
+    "Cache-Control": "no-store",
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type",
@@ -12,9 +13,16 @@ export async function onRequest(context) {
   }
 
   if (request.method === "GET") {
+    if (!env.PARTY_COUNTER) {
+      return new Response(JSON.stringify({ error: "Counter storage unavailable" }), {
+        status: 503,
+        headers,
+      });
+    }
+
     const value = await env.PARTY_COUNTER.get("registration_count");
     const count = value ? parseInt(value, 10) : 0;
-    return new Response(JSON.stringify({ count }), { headers });
+    return new Response(JSON.stringify({ count, source: "PARTY_COUNTER" }), { headers });
   }
 
   if (request.method === "POST") {

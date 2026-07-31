@@ -9,7 +9,7 @@ const hiddenPartyGalleryImages = new Set([
   '/images/uploads/party-image00006.jpg',
 ]);
 const partyPhotos = getPartyPhotos().filter((photo) => !hiddenPartyGalleryImages.has(photo.image));
-const heroPhoto = { image: '/images/uploads/party-image00015.jpg', caption: 'Herňa' };
+const heroPhoto = { image: '/images/uploads/party-image00014.jpg', caption: 'Herňa' };
 const activityPhotos = [
   '/images/uploads/party-image00001.jpg',
   '/images/uploads/party-image00010.jpg',
@@ -17,6 +17,53 @@ const activityPhotos = [
   '/images/uploads/party-image00016.jpg',
   '/images/uploads/party-image00002.jpg',
   '/images/uploads/party-image00006.jpg',
+];
+const partyReels = [
+  {
+    url: 'https://www.instagram.com/reel/Dau3JRKufJB/?utm_source=ig_web_copy_link&igsh=NTc4MTIwNjQ2YQ==',
+    embedUrl: 'https://www.instagram.com/reel/Dau3JRKufJB/embed/',
+    title: 'Party reel 01',
+  },
+  {
+    url: 'https://www.instagram.com/reel/DZJYhtihpjz/?utm_source=ig_web_copy_link&igsh=NTc4MTIwNjQ2YQ==',
+    embedUrl: 'https://www.instagram.com/reel/DZJYhtihpjz/embed/',
+    title: 'Party reel 02',
+  },
+  {
+    url: 'https://www.instagram.com/reel/DZhzy1KAzrf/?utm_source=ig_web_copy_link&igsh=NTc4MTIwNjQ2YQ==',
+    embedUrl: 'https://www.instagram.com/reel/DZhzy1KAzrf/embed/',
+    title: 'Party reel 03',
+  },
+  {
+    url: 'https://www.instagram.com/reel/DbdPbjCNsW6/?utm_source=ig_web_copy_link&igsh=NTc4MTIwNjQ2YQ==',
+    embedUrl: 'https://www.instagram.com/reel/DbdPbjCNsW6/embed/',
+    title: 'Party reel 04',
+  },
+  {
+    url: 'https://www.instagram.com/reel/DZGvJLyJ776/?utm_source=ig_web_copy_link&igsh=NTc4MTIwNjQ2YQ==',
+    embedUrl: 'https://www.instagram.com/reel/DZGvJLyJ776/embed/',
+    title: 'Party reel 05',
+  },
+  {
+    url: 'https://www.instagram.com/reel/DU6laO1Euqp/?igsh=MW53Mnd0MTNoZnd0eQ==',
+    embedUrl: 'https://www.instagram.com/reel/DU6laO1Euqp/embed/',
+    title: 'Party reel 06',
+  },
+  {
+    url: 'https://www.instagram.com/reel/DVfGHeagLHp/?utm_source=ig_web_copy_link&igsh=NTc4MTIwNjQ2YQ==',
+    embedUrl: 'https://www.instagram.com/reel/DVfGHeagLHp/embed/',
+    title: 'Party reel 07',
+  },
+  {
+    url: 'https://www.instagram.com/reel/DbGrmxpiKg4/?utm_source=ig_web_copy_link&igsh=NTc4MTIwNjQ2YQ==',
+    embedUrl: 'https://www.instagram.com/reel/DbGrmxpiKg4/embed/',
+    title: 'Party reel 08',
+  },
+  {
+    url: 'https://www.instagram.com/reel/DU_FOveIEKa/?utm_source=ig_web_copy_link&igsh=NTc4MTIwNjQ2YQ==',
+    embedUrl: 'https://www.instagram.com/reel/DU_FOveIEKa/embed/',
+    title: 'Party reel 09',
+  },
 ];
 const quickInfoIcons = [
   '<svg viewBox="0 0 48 48" aria-hidden="true" fill="none" stroke="#D7FF27" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="24" r="17"/><path d="M24 13v12l9 5"/></svg>',
@@ -26,6 +73,8 @@ const quickInfoIcons = [
 const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára o'
   ? ['Registrácia', 'sa uzatvára o']
   : [page.countdown.title];
+const youthInstagramUrl = 'https://www.instagram.com/newlevel_youth/';
+const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.16c3.2 0 3.58.01 4.85.07 3.25.15 4.77 1.69 4.92 4.92.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.15 3.25-1.67 4.77-4.92 4.92-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-3.25-.15-4.77-1.67-4.92-4.92-.06-1.27-.07-1.65-.07-4.85s.01-3.58.07-4.85c.15-3.25 1.67-4.77 4.92-4.92 1.27-.06 1.65-.07 4.85-.07Zm0 2.13c-3.15 0-3.52.01-4.75.07-2.17.1-2.79 1.13-2.89 2.89-.06 1.23-.07 1.6-.07 4.75s.01 3.52.07 4.75c.1 1.76.72 2.79 2.89 2.89 1.23.06 1.6.07 4.75.07s3.52-.01 4.75-.07c2.17-.1 2.79-1.13 2.89-2.89.06-1.23.07-1.6.07-4.75s-.01-3.52-.07-4.75c-.1-1.76-.72-2.79-2.89-2.89-1.23-.06-1.6-.07-4.75-.07Zm0 3.55a4.16 4.16 0 1 1 0 8.32 4.16 4.16 0 0 1 0-8.32Zm0 2.13a2.03 2.03 0 1 0 0 4.06 2.03 2.03 0 0 0 0-4.06Zm4.4-3.75a1.38 1.38 0 1 1 0 2.76 1.38 1.38 0 0 1 0-2.76Z"></path></svg>';
 ---
 
 <BaseLayout title="Party | New Level Church" description={page.hero.subtitle} currentPage="party">
@@ -53,7 +102,12 @@ const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára 
           <span class="hero-badge">{page.hero.badge}</span>
           <div class="hero-secondary">
             <p>{page.hero.subtitle}</p>
-            <a href="#registracia" class="poster-button">Registrovať sa na jedlo</a>
+            <div class="hero-actions">
+              <a href="#registracia" class="poster-button">Registrovať sa na jedlo</a>
+              <a href={youthInstagramUrl} target="_blank" rel="noopener noreferrer" class="poster-button poster-button-instagram">
+                <span set:html={instagramIcon}></span>
+              </a>
+            </div>
           </div>
           <div class="scroll-sticker">
             <span>Scrolluj nižšie</span>
@@ -77,6 +131,54 @@ const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára 
                 <p>{item.text}</p>
               </div>
             </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 2.5: Reels -->
+    <section id="reels" class="poster-section party-reels-section" aria-labelledby="party-reels-title">
+      <div class="poster-wrap party-reels-layout">
+        <div class="party-reels-header">
+          <div>
+            <h2 id="party-reels-title">SLEDUJ ČO JE NOVÉ</h2>
+            <p>@newlevel_youth</p>
+          </div>
+          <a href={youthInstagramUrl} target="_blank" rel="noopener noreferrer" class="party-reels-instagram-cta">
+            <span set:html={instagramIcon}></span>
+            Instagram
+          </a>
+          <div class="party-reels-controls" aria-label="Ovládanie reels">
+            <button type="button" class="party-reels-arrow" data-reels-prev aria-label="Predchádzajúci reel">←</button>
+            <span class="party-reels-counter" data-reels-counter aria-live="polite">01 / {String(partyReels.length).padStart(2, '0')}</span>
+            <button type="button" class="party-reels-arrow" data-reels-next aria-label="Nasledujúci reel">→</button>
+          </div>
+        </div>
+
+        <div
+          class="party-reels-track"
+          data-reels-track
+          tabindex="0"
+          role="region"
+          aria-label="Instagram reels carousel. Použi šípky alebo posuň doľava a doprava."
+        >
+          {partyReels.map((reel, index: number) => (
+            <article class="party-reel-slide" data-reel-slide>
+              <div class="party-reel-embed">
+                <iframe
+                  src={reel.embedUrl}
+                  title={reel.title}
+                  loading={index === 0 ? 'eager' : 'lazy'}
+                  allow="clipboard-write; encrypted-media; picture-in-picture; web-share"
+                  allowfullscreen
+                ></iframe>
+                <a class="party-reel-instagram" href={reel.url} target="_blank" rel="noopener noreferrer" aria-label={`Otvoriť ${reel.title} na Instagrame`}>
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 2.16c3.2 0 3.58.01 4.85.07 3.25.15 4.77 1.69 4.92 4.92.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.15 3.25-1.67 4.77-4.92 4.92-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-3.25-.15-4.77-1.67-4.92-4.92-.06-1.27-.07-1.65-.07-4.85s.01-3.58.07-4.85c.15-3.25 1.67-4.77 4.92-4.92 1.27-.06 1.65-.07 4.85-.07Zm0 2.13c-3.15 0-3.52.01-4.75.07-2.17.1-2.79 1.13-2.89 2.89-.06 1.23-.07 1.6-.07 4.75s.01 3.52.07 4.75c.1 1.76.72 2.79 2.89 2.89 1.23.06 1.6.07 4.75.07s3.52-.01 4.75-.07c2.17-.1 2.79-1.13 2.89-2.89.06-1.23.07-1.6.07-4.75s-.01-3.52-.07-4.75c-.1-1.76-.72-2.79-2.89-2.89-1.23-.06-1.6-.07-4.75-.07Zm0 3.55a4.16 4.16 0 1 1 0 8.32 4.16 4.16 0 0 1 0-8.32Zm0 2.13a2.03 2.03 0 1 0 0 4.06 2.03 2.03 0 0 0 0-4.06Zm4.4-3.75a1.38 1.38 0 1 1 0 2.76 1.38 1.38 0 0 1 0-2.76Z"></path>
+                  </svg>
+                </a>
+              </div>
+            </article>
           ))}
         </div>
       </div>
@@ -135,6 +237,10 @@ const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára 
               <span aria-hidden="true">Registrácia</span>
               <span aria-hidden="true">uzavretá</span>
             </h2>
+            <div class="deadline-counter">
+              <span id="deadline-counter-value" class="deadline-counter-number">--</span>
+              <span>registrovaných na jedlo</span>
+            </div>
             <p>Ak sa chceš ešte prihlásiť, zavolaj nám:</p>
           </div>
           <div class="deadline-actions">
@@ -146,7 +252,7 @@ const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára 
         </div>
 
         <div id="counter-poster" class="counter-poster">
-          <span id="counter-value" class="counter-number">0</span>
+          <span id="counter-value" class="counter-number">--</span>
           <span>registrovaných na jedlo</span>
         </div>
       </div>
@@ -941,6 +1047,50 @@ const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára 
     color: var(--party-ink);
   }
 
+  .poster-button-instagram {
+    position: relative;
+    width: 2.35rem;
+    min-width: 2.35rem;
+    height: 2.35rem;
+    min-height: 2.35rem;
+    border-radius: 0.28rem;
+    background: rgba(246, 244, 238, 0.94);
+    color: var(--party-ink);
+    padding: 0;
+    border-color: rgba(246, 244, 238, 0.94);
+    box-shadow: none;
+    transform: rotate(-4deg);
+  }
+
+  .poster-button-instagram:hover,
+  .poster-button-instagram:focus-visible {
+    background: var(--party-purple);
+    color: var(--party-ink);
+    border-color: var(--party-purple);
+    box-shadow: none;
+    transform: rotate(0deg) scale(1.04);
+  }
+
+  .poster-button-instagram span,
+  .party-reels-instagram-cta span {
+    display: inline-grid;
+    width: 1.05rem;
+    height: 1.05rem;
+    place-items: center;
+  }
+
+  .poster-button-instagram span {
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+
+  .poster-button-instagram svg,
+  .party-reels-instagram-cta svg {
+    width: 100%;
+    height: 100%;
+    fill: currentColor;
+  }
+
   .poster-sticker {
     display: inline-block;
     background: var(--party-lime);
@@ -1057,6 +1207,13 @@ const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára 
     margin-top: 1.15rem;
   }
 
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.85rem;
+    align-items: center;
+  }
+
   .hero-copy p {
     max-width: 30rem;
     margin: 0 0 1.1rem;
@@ -1140,10 +1297,208 @@ const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára 
   }
 
   .menu-poster-section,
+  .party-reels-section,
   .activities-poster-section,
   .gallery-poster-section,
   .registration-poster-section {
     padding: clamp(3.5rem, 7vw, 6rem) 0;
+  }
+
+  .party-reels-section {
+    background: var(--party-paper);
+  }
+
+  .party-reels-layout {
+    display: grid;
+    gap: clamp(1.25rem, 3vw, 2rem);
+  }
+
+  .party-reels-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 1rem;
+    align-items: end;
+  }
+
+  .party-reels-header h2 {
+    max-width: 10.5ch;
+    margin: 0;
+    color: var(--party-ink);
+    font-family: var(--poster-display);
+    font-size: clamp(3.9rem, 8.2vw, 7rem);
+    font-weight: 900;
+    letter-spacing: 0;
+    line-height: 0.92;
+    text-transform: uppercase;
+  }
+
+  .party-reels-header p {
+    margin: 0.65rem 0 0;
+    color: var(--party-gray);
+    font-family: var(--poster-mono);
+    font-size: clamp(0.95rem, 1.8vw, 1.08rem);
+    font-weight: 700;
+    line-height: 1.25;
+  }
+
+  .party-reels-instagram-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    min-height: 2.55rem;
+    border: 2px solid var(--party-ink);
+    border-radius: 999px;
+    background: var(--party-lime);
+    color: var(--party-ink);
+    padding: 0.62rem 0.95rem;
+    font-family: var(--poster-sans);
+    font-size: 0.82rem;
+    font-weight: 950;
+    line-height: 1;
+    text-decoration: none;
+    text-transform: uppercase;
+    white-space: nowrap;
+    box-shadow: 4px 4px 0 var(--party-ink);
+    transition: transform 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+  }
+
+  .party-reels-instagram-cta:hover,
+  .party-reels-instagram-cta:focus-visible {
+    background: var(--party-ink);
+    color: var(--party-paper);
+    box-shadow: 4px 4px 0 var(--party-purple);
+    transform: translate(-1px, -1px);
+    outline: none;
+  }
+
+  .party-reels-controls {
+    display: grid;
+    grid-template-columns: 2.75rem 4.8rem 2.75rem;
+    gap: 0.55rem;
+    align-items: center;
+  }
+
+  .party-reels-arrow {
+    display: grid;
+    width: 2.75rem;
+    height: 2.75rem;
+    place-items: center;
+    border: 2px solid var(--party-ink);
+    border-radius: 999px;
+    background: var(--party-ink);
+    color: var(--party-paper);
+    font: 900 1.05rem/1 var(--poster-sans);
+    cursor: pointer;
+    transition: background-color 160ms ease, color 160ms ease, transform 160ms ease;
+  }
+
+  .party-reels-arrow:hover,
+  .party-reels-arrow:focus-visible {
+    background: var(--party-lime);
+    color: var(--party-ink);
+    transform: translateY(-1px);
+    outline: none;
+  }
+
+  .party-reels-counter {
+    color: var(--party-ink);
+    font-family: var(--poster-mono);
+    font-size: 0.85rem;
+    font-weight: 900;
+    line-height: 1;
+    text-align: center;
+  }
+
+  .party-reels-track {
+    display: grid;
+    grid-auto-columns: minmax(17.5rem, min(76vw, 25rem));
+    grid-auto-flow: column;
+    gap: clamp(1rem, 2.8vw, 1.6rem);
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 0.1rem max(1rem, calc((100vw - 1180px) / 2 + 1rem)) 1rem 0;
+    scroll-padding-left: 0;
+    scroll-snap-type: x mandatory;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    cursor: grab;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .party-reels-track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .party-reels-track:focus-visible {
+    outline: 3px solid var(--party-purple);
+    outline-offset: 0.35rem;
+  }
+
+  .party-reels-track.is-dragging {
+    cursor: grabbing;
+    scroll-snap-type: none;
+    user-select: none;
+  }
+
+  .party-reel-slide {
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+
+  .party-reel-embed {
+    position: relative;
+    aspect-ratio: 9 / 16;
+    overflow: hidden;
+    border: 0;
+    border-radius: clamp(1.1rem, 3vw, 1.8rem);
+    background: #000000;
+    box-shadow: 0 1.25rem 3rem rgba(17, 17, 17, 0.2);
+    isolation: isolate;
+  }
+
+  .party-reel-embed iframe {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: block;
+    width: 104%;
+    height: 112%;
+    border: 0;
+    background: #000000;
+    transform: translate(-50%, -50%);
+  }
+
+  .party-reel-instagram {
+    position: absolute;
+    right: 0.8rem;
+    top: 0.8rem;
+    z-index: 10;
+    display: grid;
+    width: 2.75rem;
+    height: 2.75rem;
+    place-items: center;
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.58);
+    color: #ffffff;
+    backdrop-filter: blur(12px);
+    pointer-events: auto;
+    transition: background-color 160ms ease, color 160ms ease, transform 160ms ease;
+  }
+
+  .party-reel-instagram svg {
+    width: 1.25rem;
+    height: 1.25rem;
+    fill: currentColor;
+  }
+
+  .party-reel-instagram:hover,
+  .party-reel-instagram:focus-visible {
+    background: var(--party-lime);
+    color: var(--party-ink);
+    transform: translateY(-1px);
+    outline: none;
   }
 
   .menu-layout {
@@ -1289,6 +1644,32 @@ const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára 
 
   .deadline-poster h2 span {
     display: block;
+  }
+
+  .deadline-counter {
+    display: inline-grid;
+    grid-template-columns: auto minmax(0, 8.5rem);
+    gap: 0.75rem;
+    align-items: center;
+    margin-top: 1.15rem;
+    padding: 0.55rem 0.7rem;
+    border: 2px solid rgba(246, 244, 238, 0.86);
+    color: var(--party-paper);
+  }
+
+  .deadline-counter-number {
+    font-family: var(--poster-display);
+    font-size: clamp(2.25rem, 5vw, 3.6rem);
+    font-weight: 900;
+    line-height: 0.88;
+  }
+
+  .deadline-counter span:last-child {
+    color: rgba(246, 244, 238, 0.7);
+    font-size: 0.72rem;
+    font-weight: 900;
+    line-height: 1.05;
+    text-transform: uppercase;
   }
 
   .deadline-poster p {
@@ -1548,6 +1929,18 @@ const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára 
       font-size: 5.25rem;
     }
 
+    .party-reels-header {
+      grid-template-columns: 1fr;
+    }
+
+    .party-reels-instagram-cta {
+      justify-self: start;
+    }
+
+    .party-reels-controls {
+      justify-self: start;
+    }
+
     .final-cta-layout h2 {
       font-size: 5.8rem;
     }
@@ -1627,6 +2020,43 @@ const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára 
       line-height: 1.1;
     }
 
+    .party-reels-section {
+      padding: 3rem 0;
+    }
+
+    .party-reels-header h2 {
+      font-size: 4.1rem;
+    }
+
+    .party-reels-header p {
+      max-width: 18rem;
+      font-size: 0.95rem;
+    }
+
+    .party-reels-controls {
+      justify-self: start;
+    }
+
+    .party-reels-track {
+      width: calc(100% + 1rem);
+      grid-auto-columns: minmax(15.5rem, 72vw);
+      margin-left: -0.25rem;
+      padding-left: 0.25rem;
+      padding-right: 1rem;
+      scroll-padding-left: 0.25rem;
+    }
+
+    .party-reel-embed {
+      border-radius: 1.25rem;
+    }
+
+    .party-reel-instagram {
+      right: 0.65rem;
+      top: 0.65rem;
+      width: 2.45rem;
+      height: 2.45rem;
+    }
+
     .hero-badge {
       margin-left: 0.25rem;
       max-width: calc(100vw - 4rem);
@@ -1655,6 +2085,14 @@ const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára 
 
     .hero-copy .poster-button {
       width: min(100%, 21rem);
+    }
+
+    .hero-copy .poster-button-instagram {
+      width: 2.35rem;
+      min-width: 2.35rem;
+      height: 2.35rem;
+      min-height: 2.35rem;
+      flex: 0 0 2.35rem;
     }
 
     .quick-strip {
@@ -1741,6 +2179,17 @@ const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára 
     .deadline-poster p {
       margin-top: 0.75rem;
       font-size: 0.9rem;
+    }
+
+    .deadline-counter {
+      grid-template-columns: auto minmax(0, 7.25rem);
+      gap: 0.6rem;
+      margin-top: 0.9rem;
+      padding: 0.5rem 0.6rem;
+    }
+
+    .deadline-counter span:last-child {
+      font-size: 0.66rem;
     }
 
     .deadline-actions {
@@ -1991,6 +2440,117 @@ const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára 
 </style>
 
 <script type="module">
+(() => {
+  const track = document.querySelector('[data-reels-track]');
+  const slides = Array.from(document.querySelectorAll('[data-reel-slide]'));
+  const prev = document.querySelector('[data-reels-prev]');
+  const next = document.querySelector('[data-reels-next]');
+  const counter = document.querySelector('[data-reels-counter]');
+
+  if (!track || !slides.length || !counter) return;
+
+  let active = 0;
+  let startX = 0;
+  let startScroll = 0;
+  let pointerDown = false;
+  let dragging = false;
+  let scrollTimer = 0;
+
+  function format(index) {
+    counter.textContent = `${String(index + 1).padStart(2, '0')} / ${String(slides.length).padStart(2, '0')}`;
+  }
+
+  function nearestIndex() {
+    const trackLeft = track.getBoundingClientRect().left;
+    return slides.reduce((best, slide, index) => {
+      const distance = Math.abs(slide.getBoundingClientRect().left - trackLeft);
+      return distance < best.distance ? { index, distance } : best;
+    }, { index: 0, distance: Number.POSITIVE_INFINITY }).index;
+  }
+
+  function setActive(index) {
+    active = Math.max(0, Math.min(index, slides.length - 1));
+    format(active);
+  }
+
+  function goTo(index) {
+    const target = slides[Math.max(0, Math.min(index, slides.length - 1))];
+    if (!target) return;
+
+    target.scrollIntoView({
+      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+      block: 'nearest',
+      inline: 'start',
+    });
+  }
+
+  prev?.addEventListener('click', () => goTo(active - 1));
+  next?.addEventListener('click', () => goTo(active + 1));
+
+  track.addEventListener('keydown', (event) => {
+    if (event.key === 'ArrowLeft') {
+      event.preventDefault();
+      goTo(active - 1);
+    }
+
+    if (event.key === 'ArrowRight') {
+      event.preventDefault();
+      goTo(active + 1);
+    }
+  });
+
+  track.addEventListener('scroll', () => {
+    window.clearTimeout(scrollTimer);
+    scrollTimer = window.setTimeout(() => setActive(nearestIndex()), 80);
+  }, { passive: true });
+
+  track.addEventListener('pointerdown', (event) => {
+    if (event.pointerType === 'touch') return;
+    pointerDown = true;
+    dragging = false;
+    startX = event.clientX;
+    startScroll = track.scrollLeft;
+  });
+
+  track.addEventListener('pointermove', (event) => {
+    if (!pointerDown || event.pointerType === 'touch') return;
+    const distance = event.clientX - startX;
+    if (Math.abs(distance) > 4) {
+      dragging = true;
+      track.classList.add('is-dragging');
+      track.scrollLeft = startScroll - distance;
+    }
+  });
+
+  function stopDrag() {
+    if (!pointerDown) return;
+    pointerDown = false;
+    track.classList.remove('is-dragging');
+
+    if (dragging) {
+      goTo(nearestIndex());
+      window.setTimeout(() => {
+        dragging = false;
+      }, 0);
+    }
+  }
+
+  track.addEventListener('pointerup', stopDrag);
+  track.addEventListener('pointercancel', stopDrag);
+  track.addEventListener('pointerleave', stopDrag);
+
+  track.addEventListener('click', (event) => {
+    if (dragging) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  }, true);
+
+  format(active);
+})();
+</script>
+
+<script type="module">
 const items=document.querySelectorAll(".gallery-item"),lb=document.getElementById("lightbox"),lbImg=document.getElementById("lightbox-image"),lbCap=document.getElementById("lightbox-caption"),closeBtn=document.getElementById("lightbox-close"),prevBtn=document.getElementById("lightbox-prev"),nextBtn=document.getElementById("lightbox-next");let idx=0;const data=Array.from(items).map(i=>({src:i.getAttribute("data-src")||"",caption:i.getAttribute("data-caption")||""}));function open(i){idx=i;update();lb?.classList.add("active");document.body.style.overflow="hidden";}function close(){lb?.classList.remove("active");document.body.style.overflow="";}function update(){if(lbImg&&lbCap){lbImg.src=data[idx].src;lbCap.textContent=data[idx].caption;}}function next(){idx=(idx+1)%data.length;update();}function prev(){idx=(idx-1+data.length)%data.length;update();}items.forEach((el,i)=>{el.addEventListener("click",()=>open(i));});closeBtn?.addEventListener("click",close);nextBtn?.addEventListener("click",next);prevBtn?.addEventListener("click",prev);lb?.addEventListener("click",e=>{if(e.target===lb)close();});document.addEventListener("keydown",e=>{if(lb?.classList.contains("active")){if(e.key==="Escape")close();if(e.key==="ArrowRight")next();if(e.key==="ArrowLeft")prev();}});
 </script>
 
@@ -2004,6 +2564,7 @@ const items=document.querySelectorAll(".gallery-item"),lb=document.getElementByI
   const deadlinePassed = document.getElementById('deadline-passed');
   const counterPoster = document.getElementById('counter-poster');
   const counterEl = document.getElementById('counter-value');
+  const deadlineCounterEl = document.getElementById('deadline-counter-value');
   let lastCount = -1;
 
   function getNextThursdayMidnight() {
@@ -2072,9 +2633,11 @@ const items=document.querySelectorAll(".gallery-item"),lb=document.getElementByI
 
   async function fetchCounter() {
     try {
-      const res = await fetch('/api/counter');
+      const res = await fetch('/api/counter', { cache: 'no-store' });
+      if (!res.ok) throw new Error('Counter request failed');
       const data = await res.json();
-      const count = data.count || 0;
+      const count = Number.isFinite(Number(data.count)) ? Number(data.count) : 0;
+      if (deadlineCounterEl) deadlineCounterEl.textContent = count;
       if (counterEl) {
         if (lastCount !== -1 && count !== lastCount) {
           counterEl.classList.remove('counter-pop');
@@ -2085,7 +2648,8 @@ const items=document.querySelectorAll(".gallery-item"),lb=document.getElementByI
         lastCount = count;
       }
     } catch (e) {
-      // Silently fail - counter stays at current value
+      if (counterEl && lastCount === -1) counterEl.textContent = '--';
+      if (deadlineCounterEl && lastCount === -1) deadlineCounterEl.textContent = '--';
     }
   }
 
@@ -2096,6 +2660,7 @@ const items=document.querySelectorAll(".gallery-item"),lb=document.getElementByI
   // Fetch counter on load and every 30 seconds
   fetchCounter();
   setInterval(fetchCounter, 30000);
+  window.addEventListener('party-counter-refresh', fetchCounter);
 })();
 </script>
 
@@ -2163,6 +2728,7 @@ form?.addEventListener("submit",async(e)=>{
       saveRegistration(fd);
       successMsg?.classList.remove("hidden");
       form.reset();
+      window.dispatchEvent(new CustomEvent("party-counter-refresh"));
     }else{
       errorMsg?.classList.remove("hidden");
     }
