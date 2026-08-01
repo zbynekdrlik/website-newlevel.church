@@ -1,0 +1,21 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Stránka sa nenašla | New Level Church" description="Stránka sa nenašla.">
+  <section class="min-h-[60vh] bg-[var(--color-background)] px-4 py-20">
+    <div class="mx-auto max-w-3xl text-center">
+      <p class="mb-4 text-sm font-bold uppercase tracking-wide text-[var(--color-primary)]">404</p>
+      <h1 class="mb-6 text-4xl font-black text-[var(--color-text)] md:text-6xl">Stránka sa nenašla</h1>
+      <p class="mx-auto mb-8 max-w-xl text-lg text-[var(--color-text-light)]">
+        Tento odkaz už neexistuje alebo bol presunutý.
+      </p>
+      <a
+        href="/"
+        class="inline-flex rounded-full bg-[var(--color-primary)] px-7 py-3 font-bold text-white transition hover:bg-[var(--color-primary-dark)]"
+      >
+        Späť domov
+      </a>
+    </div>
+  </section>
+</BaseLayout>
