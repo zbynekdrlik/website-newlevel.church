@@ -10,9 +10,15 @@ interface Props {
   title: string;
   description?: string;
   currentPage?: string;
+  bodyClass?: string;
 }
 
-const { title, description = 'Vitajte v New Level Church - Moderná kresťanská komunita v Spišskej Novej Vsi.', currentPage = '' } = Astro.props;
+const {
+  title,
+  description = 'Vitajte v New Level Church - Moderná kresťanská komunita v Spišskej Novej Vsi.',
+  currentPage = '',
+  bodyClass = '',
+} = Astro.props;
 const colors = theme.colors;
 ---
 
@@ -42,7 +48,7 @@ const colors = theme.colors;
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@800;900&family=Inter:wght@400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" />
   </head>
-  <body class="min-h-screen flex flex-col">
+  <body class={`min-h-screen flex flex-col ${bodyClass}`.trim()}>
     <Header currentPage={currentPage} />
     <SocialSidebar />
     <main class="flex-grow">

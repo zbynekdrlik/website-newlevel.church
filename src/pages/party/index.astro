@@ -63,7 +63,7 @@ const youthInstagramUrl = 'https://www.instagram.com/newlevel_youth/';
 const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.16c3.2 0 3.58.01 4.85.07 3.25.15 4.77 1.69 4.92 4.92.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.15 3.25-1.67 4.77-4.92 4.92-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-3.25-.15-4.77-1.67-4.92-4.92-.06-1.27-.07-1.65-.07-4.85s.01-3.58.07-4.85c.15-3.25 1.67-4.77 4.92-4.92 1.27-.06 1.65-.07 4.85-.07Zm0 2.13c-3.15 0-3.52.01-4.75.07-2.17.1-2.79 1.13-2.89 2.89-.06 1.23-.07 1.6-.07 4.75s.01 3.52.07 4.75c.1 1.76.72 2.79 2.89 2.89 1.23.06 1.6.07 4.75.07s3.52-.01 4.75-.07c2.17-.1 2.79-1.13 2.89-2.89.06-1.23.07-1.6.07-4.75s-.01-3.52-.07-4.75c-.1-1.76-.72-2.79-2.89-2.89-1.23-.06-1.6-.07-4.75-.07Zm0 3.55a4.16 4.16 0 1 1 0 8.32 4.16 4.16 0 0 1 0-8.32Zm0 2.13a2.03 2.03 0 1 0 0 4.06 2.03 2.03 0 0 0 0-4.06Zm4.4-3.75a1.38 1.38 0 1 1 0 2.76 1.38 1.38 0 0 1 0-2.76Z"></path></svg>';
 ---
 
-<BaseLayout title="Youth | New Level Church" description={page.hero.subtitle} currentPage="party">
+<BaseLayout title="Youth | New Level Church" description={page.hero.subtitle} currentPage="party" bodyClass="party-page-body">
   <div class="party-page-shell">
     <svg class="poster-filter-defs" width="0" height="0" aria-hidden="true" focusable="false">
       <filter id="print-distress">
@@ -799,30 +799,30 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
     background: #f6f4ee;
   }
 
-  :global(header) {
+  body.party-page-body header {
     background: rgba(246, 244, 238, 0.94) !important;
     border-bottom: 2px solid #111111;
     box-shadow: none !important;
     backdrop-filter: blur(10px);
   }
 
-  :global(header nav a) {
+  body.party-page-body header nav a {
     color: #111111 !important;
     font-weight: 900 !important;
     text-transform: uppercase;
     letter-spacing: 0;
   }
 
-  :global(header img) {
+  body.party-page-body header img {
     filter: invert(1) grayscale(1) contrast(1.8);
   }
 
-  :global(header nav a[aria-label]),
-  :global(header nav a[aria-label] svg) {
+  body.party-page-body header nav a[aria-label],
+  body.party-page-body header nav a[aria-label] svg {
     color: #111111 !important;
   }
 
-  :global(header nav a:last-child) {
+  body.party-page-body header nav a:last-child {
     background: #7b3eff !important;
     color: #ffffff !important;
     border: 2px solid #111111;
@@ -830,7 +830,7 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
     box-shadow: 4px 4px 0 #111111;
   }
 
-  :global(#mobile-menu) {
+  body.party-page-body #mobile-menu {
     background: #f6f4ee;
   }
 
