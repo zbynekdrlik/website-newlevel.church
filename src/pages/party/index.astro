@@ -5,7 +5,15 @@ import contactInfo from '../../content/settings/contact.json';
 import { getPartyPhotos } from '../../utils/gallery';
 
 const partyPhotos = getPartyPhotos();
-const heroPhoto = { image: '/images/uploads/party-image00002.jpg', caption: 'Wrapy a hranolky' };
+const excludedHeroBackgroundImages = new Set([
+  '/images/uploads/party-image00003.jpg',
+  '/images/uploads/party-image00014.jpg',
+  '/images/uploads/party-image00015.jpg',
+]);
+const heroBackgroundPhotos = partyPhotos
+  .filter((photo) => !excludedHeroBackgroundImages.has(photo.image))
+  .map((photo) => ({ image: photo.image, caption: photo.caption }));
+const heroPhoto = heroBackgroundPhotos[0] || { image: '/images/uploads/party-image00002.jpg', caption: 'Wrapy a hranolky' };
 const activityPhotos = [
   '/images/uploads/party-image00001.jpg',
   '/images/uploads/party-image00010.jpg',
@@ -76,6 +84,7 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
       class="poster-section hero-poster"
       id="party-hero"
       aria-label={heroPhoto.caption}
+      data-hero-photos={JSON.stringify(heroBackgroundPhotos)}
       style={`--hero-photo: url("${heroPhoto.image}");`}
     >
       <div class="poster-noise" aria-hidden="true"></div>
@@ -104,6 +113,35 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
         </div>
       </div>
     </section>
+
+    <script is:inline>
+      (() => {
+        const hero = document.getElementById('party-hero');
+        if (!hero) return;
+
+        const photos = JSON.parse(hero.dataset.heroPhotos || '[]').filter((photo) => photo.image);
+        if (!photos.length) return;
+
+        let lastPhoto = '';
+        try {
+          lastPhoto = window.localStorage.getItem('partyHeroGalleryPhoto') || '';
+        } catch (error) {
+          lastPhoto = '';
+        }
+
+        const options = photos.length > 1 ? photos.filter((photo) => photo.image !== lastPhoto) : photos;
+        const selectedPhoto = options[Math.floor(Math.random() * options.length)] || photos[0];
+
+        hero.style.setProperty('--hero-photo', `url("${selectedPhoto.image}")`);
+        hero.setAttribute('aria-label', selectedPhoto.caption || 'Youth');
+
+        try {
+          window.localStorage.setItem('partyHeroGalleryPhoto', selectedPhoto.image);
+        } catch (error) {
+          // Background rotation should still work when storage is unavailable.
+        }
+      })();
+    </script>
 
     <!-- Section 2: Quick Info Strip -->
     <section class="poster-section info-strip-section">
