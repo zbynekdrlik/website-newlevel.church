@@ -7,8 +7,6 @@ import { getPartyPhotos } from '../../utils/gallery';
 const partyPhotos = getPartyPhotos();
 const excludedHeroBackgroundImages = new Set([
   '/images/uploads/party-image00003.jpg',
-  '/images/uploads/party-image00014.jpg',
-  '/images/uploads/party-image00015.jpg',
 ]);
 const heroBackgroundPhotos = partyPhotos
   .filter((photo) => !excludedHeroBackgroundImages.has(photo.image))
@@ -18,7 +16,7 @@ const activityPhotos = [
   '/images/uploads/party-image00001.jpg',
   '/images/uploads/party-image00010.jpg',
   '/images/uploads/party-image00011.jpg',
-  '/images/uploads/party-image00016.jpg',
+  '/images/uploads/party-image00007.jpg',
   '/images/uploads/party-image00002.jpg',
   '/images/uploads/party-image00006.jpg',
 ];
@@ -49,14 +47,9 @@ const partyReels = [
     title: 'Party reel 05',
   },
   {
-    url: 'https://www.instagram.com/reel/DZhzy1KAzrf/?utm_source=ig_web_copy_link&igsh=NTc4MTIwNjQ2YQ==',
-    embedUrl: 'https://www.instagram.com/reel/DZhzy1KAzrf/embed/',
-    title: 'Party reel 06',
-  },
-  {
     url: 'https://www.instagram.com/reel/DbdPbjCNsW6/?utm_source=ig_web_copy_link&igsh=NTc4MTIwNjQ2YQ==',
     embedUrl: 'https://www.instagram.com/reel/DbdPbjCNsW6/embed/',
-    title: 'Party reel 07',
+    title: 'Party reel 06',
   },
 ];
 const quickInfoIcons = [
