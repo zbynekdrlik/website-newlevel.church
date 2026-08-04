@@ -12,13 +12,13 @@ const navLinks = [
   { href: '/', label: 'Domov', id: '' },
   { href: '/about', label: 'O nás', id: 'about' },
   { href: '/gallery', label: 'Galéria', id: 'gallery' },
-  { href: '/party', label: 'Party', id: 'party' },
+  { href: '/youth', label: 'Youth', id: 'youth' },
   { href: '/contact', label: 'Kontakt', id: 'contact' },
   { href: '/dar', label: 'Dar', id: 'dar' },
 ];
 ---
 
-<header class="bg-[var(--color-header-bg)]/90 backdrop-blur-md shadow-sm sticky top-0 z-50">
+<header class="bg-[var(--color-header-bg)]/90 backdrop-blur-md shadow-sm sticky top-0 z-50" data-current-page={currentPage || 'home'}>
   <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex justify-between items-center h-16 md:h-20">
       <a href="/" class="flex items-center">
@@ -32,6 +32,7 @@ const navLinks = [
         {navLinks.map(link => (
           <a
             href={link.href}
+            data-nav-id={link.id || 'home'}
             class={`text-base font-medium transition-colors duration-200 ${
               currentPage === link.id
                 ? 'text-[var(--color-primary)]'
@@ -74,6 +75,7 @@ const navLinks = [
         {navLinks.map(link => (
           <a
             href={link.href}
+            data-nav-id={link.id || 'home'}
             class={`text-base font-medium px-3 py-2 rounded-lg transition-colors duration-200 ${
               currentPage === link.id
                 ? 'text-[var(--color-primary)] bg-[var(--color-primary-light)]'

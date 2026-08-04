@@ -1,1 +1,4 @@
+/party /youth 301
+/party/ /youth 301
+/party/* /youth/:splat 301
 /_astro/* /404.html 404

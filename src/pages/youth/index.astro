@@ -1,0 +1,2768 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import page from '../../content/party/page.json';
+import contactInfo from '../../content/settings/contact.json';
+import { getPartyPhotos } from '../../utils/gallery';
+
+const partyPhotos = getPartyPhotos();
+const excludedHeroBackgroundImages = new Set([
+  '/images/uploads/party-image00003.jpg',
+]);
+const heroBackgroundPhotos = partyPhotos
+  .filter((photo) => !excludedHeroBackgroundImages.has(photo.image))
+  .map((photo) => ({ image: photo.image, caption: photo.caption }));
+const heroPhoto = heroBackgroundPhotos[0] || { image: '/images/uploads/party-image00002.jpg', caption: 'Wrapy a hranolky' };
+const activityPhotos = [
+  '/images/uploads/party-image00001.jpg',
+  '/images/uploads/party-image00010.jpg',
+  '/images/uploads/party-image00011.jpg',
+  '/images/uploads/party-image00007.jpg',
+  '/images/uploads/party-image00002.jpg',
+  '/images/uploads/party-image00006.jpg',
+];
+const partyReels = [
+  {
+    url: 'https://www.instagram.com/reel/DVfGHeagLHp/?utm_source=ig_web_copy_link&igsh=NTc4MTIwNjQ2YQ==',
+    embedUrl: 'https://www.instagram.com/reel/DVfGHeagLHp/embed/',
+    title: 'Party reel 01',
+  },
+  {
+    url: 'https://www.instagram.com/reel/DbGrmxpiKg4/?utm_source=ig_web_copy_link&igsh=NTc4MTIwNjQ2YQ==',
+    embedUrl: 'https://www.instagram.com/reel/DbGrmxpiKg4/embed/',
+    title: 'Party reel 02',
+  },
+  {
+    url: 'https://www.instagram.com/reel/DU_FOveIEKa/?utm_source=ig_web_copy_link&igsh=NTc4MTIwNjQ2YQ==',
+    embedUrl: 'https://www.instagram.com/reel/DU_FOveIEKa/embed/',
+    title: 'Party reel 03',
+  },
+  {
+    url: 'https://www.instagram.com/reel/Dau3JRKufJB/?utm_source=ig_web_copy_link&igsh=NTc4MTIwNjQ2YQ==',
+    embedUrl: 'https://www.instagram.com/reel/Dau3JRKufJB/embed/',
+    title: 'Party reel 04',
+  },
+  {
+    url: 'https://www.instagram.com/reel/DZJYhtihpjz/?utm_source=ig_web_copy_link&igsh=NTc4MTIwNjQ2YQ==',
+    embedUrl: 'https://www.instagram.com/reel/DZJYhtihpjz/embed/',
+    title: 'Party reel 05',
+  },
+  {
+    url: 'https://www.instagram.com/reel/DbdPbjCNsW6/?utm_source=ig_web_copy_link&igsh=NTc4MTIwNjQ2YQ==',
+    embedUrl: 'https://www.instagram.com/reel/DbdPbjCNsW6/embed/',
+    title: 'Party reel 06',
+  },
+];
+const quickInfoIcons = [
+  '<svg viewBox="0 0 48 48" aria-hidden="true" fill="none" stroke="#D7FF27" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="24" r="17"/><path d="M24 13v12l9 5"/></svg>',
+  '<svg viewBox="0 0 48 48" aria-hidden="true" fill="none" stroke="#7B3EFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M24 43S39 30.5 39 18.5a15 15 0 1 0-30 0C9 30.5 24 43 24 43Z"/><circle cx="24" cy="18.5" r="4.5"/></svg>',
+  '<svg viewBox="0 0 48 48" aria-hidden="true" fill="none" stroke="#D7FF27" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M16 22a7 7 0 1 0 0-14 7 7 0 0 0 0 14Z"/><path d="M5 40v-3c0-7 5-11 11-11s11 4 11 11v3"/><path d="M32 22a6 6 0 1 0 0-12"/><path d="M31 27c6 1 10 5 10 11v2" stroke="#7B3EFF"/></svg>',
+];
+const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára o'
+  ? ['Registrácia', 'sa uzatvára o']
+  : [page.countdown.title];
+const youthInstagramUrl = 'https://www.instagram.com/newlevel_youth/';
+const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.16c3.2 0 3.58.01 4.85.07 3.25.15 4.77 1.69 4.92 4.92.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.15 3.25-1.67 4.77-4.92 4.92-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-3.25-.15-4.77-1.67-4.92-4.92-.06-1.27-.07-1.65-.07-4.85s.01-3.58.07-4.85c.15-3.25 1.67-4.77 4.92-4.92 1.27-.06 1.65-.07 4.85-.07Zm0 2.13c-3.15 0-3.52.01-4.75.07-2.17.1-2.79 1.13-2.89 2.89-.06 1.23-.07 1.6-.07 4.75s.01 3.52.07 4.75c.1 1.76.72 2.79 2.89 2.89 1.23.06 1.6.07 4.75.07s3.52-.01 4.75-.07c2.17-.1 2.79-1.13 2.89-2.89.06-1.23.07-1.6.07-4.75s-.01-3.52-.07-4.75c-.1-1.76-.72-2.79-2.89-2.89-1.23-.06-1.6-.07-4.75-.07Zm0 3.55a4.16 4.16 0 1 1 0 8.32 4.16 4.16 0 0 1 0-8.32Zm0 2.13a2.03 2.03 0 1 0 0 4.06 2.03 2.03 0 0 0 0-4.06Zm4.4-3.75a1.38 1.38 0 1 1 0 2.76 1.38 1.38 0 0 1 0-2.76Z"></path></svg>';
+---
+
+<BaseLayout title="Youth | New Level Church" description={page.hero.subtitle} currentPage="youth" bodyClass="party-page-body">
+  <div class="party-page-shell">
+    <svg class="poster-filter-defs" width="0" height="0" aria-hidden="true" focusable="false">
+      <filter id="print-distress">
+        <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="9" result="noise"></feTurbulence>
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.4" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
+      </filter>
+    </svg>
+    <!-- Section 1: Hero Poster -->
+    <section
+      class="poster-section hero-poster"
+      id="party-hero"
+      aria-label={heroPhoto.caption}
+      data-hero-photos={JSON.stringify(heroBackgroundPhotos)}
+      style={`--hero-photo: url("${heroPhoto.image}");`}
+    >
+      <div class="poster-noise" aria-hidden="true"></div>
+      <div class="poster-wrap hero-grid">
+        <div class="hero-copy">
+          <h1>
+            <span data-word={page.hero.title}>{page.hero.title}</span>
+            <span data-word={page.hero.titleAccent}>{page.hero.titleAccent}</span>
+          </h1>
+          <span class="hero-badge">{page.hero.badge}</span>
+          <div class="hero-secondary">
+            <p>{page.hero.subtitle}</p>
+            <div class="hero-actions">
+              <a href="#registracia" class="poster-button">Registrovať sa na jedlo</a>
+              <a href={youthInstagramUrl} target="_blank" rel="noopener noreferrer" class="poster-button poster-button-instagram">
+                <span set:html={instagramIcon}></span>
+              </a>
+            </div>
+          </div>
+          <div class="scroll-sticker">
+            <span>Scrolluj nižšie</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M5 9l7 7 7-7"></path>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <script is:inline>
+      (() => {
+        const hero = document.getElementById('party-hero');
+        if (!hero) return;
+
+        const photos = JSON.parse(hero.dataset.heroPhotos || '[]').filter((photo) => photo.image);
+        if (!photos.length) return;
+
+        let lastPhoto = '';
+        try {
+          lastPhoto = window.localStorage.getItem('partyHeroGalleryPhoto') || '';
+        } catch (error) {
+          lastPhoto = '';
+        }
+
+        const options = photos.length > 1 ? photos.filter((photo) => photo.image !== lastPhoto) : photos;
+        const selectedPhoto = options[Math.floor(Math.random() * options.length)] || photos[0];
+
+        hero.style.setProperty('--hero-photo', `url("${selectedPhoto.image}")`);
+        hero.setAttribute('aria-label', selectedPhoto.caption || 'Youth');
+
+        try {
+          window.localStorage.setItem('partyHeroGalleryPhoto', selectedPhoto.image);
+        } catch (error) {
+          // Background rotation should still work when storage is unavailable.
+        }
+      })();
+    </script>
+
+    <!-- Section 2: Quick Info Strip -->
+    <section class="poster-section info-strip-section">
+      <div class="poster-wrap">
+        <div class="quick-strip">
+          {page.quickInfo.map((item: { title: string; text: string }, i: number) => (
+            <div class="quick-strip-item">
+              <span class="quick-strip-icon" set:html={quickInfoIcons[i] || quickInfoIcons[0]}></span>
+              <div>
+                <h2>{item.title}</h2>
+                <p>{item.text}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 2.5: Reels -->
+    <section id="reels" class="poster-section party-reels-section" aria-labelledby="party-reels-title">
+      <div class="poster-wrap party-reels-layout">
+        <div class="party-reels-header">
+          <div>
+            <h2 id="party-reels-title">SLEDUJ ČO JE NOVÉ</h2>
+            <p>@newlevel_youth</p>
+          </div>
+          <a href={youthInstagramUrl} target="_blank" rel="noopener noreferrer" class="party-reels-instagram-cta">
+            <span set:html={instagramIcon}></span>
+            Instagram
+          </a>
+          <div class="party-reels-controls" aria-label="Ovládanie reels">
+            <button type="button" class="party-reels-arrow" data-reels-prev aria-label="Predchádzajúci reel">←</button>
+            <span class="party-reels-counter" data-reels-counter aria-live="polite">01 / {String(partyReels.length).padStart(2, '0')}</span>
+            <button type="button" class="party-reels-arrow" data-reels-next aria-label="Nasledujúci reel">→</button>
+          </div>
+        </div>
+
+        <div
+          class="party-reels-track"
+          data-reels-track
+          tabindex="0"
+          role="region"
+          aria-label="Instagram reels carousel. Použi šípky alebo posuň doľava a doprava."
+        >
+          {partyReels.map((reel, index: number) => (
+            <article class="party-reel-slide" data-reel-slide>
+              <div class="party-reel-embed">
+                <iframe
+                  src={reel.embedUrl}
+                  title={reel.title}
+                  loading={index === 0 ? 'eager' : 'lazy'}
+                  allow="clipboard-write; encrypted-media; picture-in-picture; web-share"
+                  allowfullscreen
+                ></iframe>
+                <a class="party-reel-instagram" href={reel.url} target="_blank" rel="noopener noreferrer" aria-label={`Otvoriť ${reel.title} na Instagrame`}>
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 2.16c3.2 0 3.58.01 4.85.07 3.25.15 4.77 1.69 4.92 4.92.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.15 3.25-1.67 4.77-4.92 4.92-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-3.25-.15-4.77-1.67-4.92-4.92-.06-1.27-.07-1.65-.07-4.85s.01-3.58.07-4.85c.15-3.25 1.67-4.77 4.92-4.92 1.27-.06 1.65-.07 4.85-.07Zm0 2.13c-3.15 0-3.52.01-4.75.07-2.17.1-2.79 1.13-2.89 2.89-.06 1.23-.07 1.6-.07 4.75s.01 3.52.07 4.75c.1 1.76.72 2.79 2.89 2.89 1.23.06 1.6.07 4.75.07s3.52-.01 4.75-.07c2.17-.1 2.79-1.13 2.89-2.89.06-1.23.07-1.6.07-4.75s-.01-3.52-.07-4.75c-.1-1.76-.72-2.79-2.89-2.89-1.23-.06-1.6-.07-4.75-.07Zm0 3.55a4.16 4.16 0 1 1 0 8.32 4.16 4.16 0 0 1 0-8.32Zm0 2.13a2.03 2.03 0 1 0 0 4.06 2.03 2.03 0 0 0 0-4.06Zm4.4-3.75a1.38 1.38 0 1 1 0 2.76 1.38 1.38 0 0 1 0-2.76Z"></path>
+                  </svg>
+                </a>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 3: Weekly Food Menu -->
+    <section id="menu" class="poster-section menu-poster-section">
+      <div class="poster-wrap menu-layout">
+        <div class="poster-heading">
+          <h2>{page.menu.title}</h2>
+          <p>{page.menu.subtitle}</p>
+        </div>
+        <div class="menu-ticket">
+          <div class="menu-emoji" set:html={page.menu.emoji}></div>
+          <div>
+            <h3>{page.menu.dish}</h3>
+            <p>{page.menu.description}</p>
+          </div>
+          <a href="#registracia" class="poster-button">Registrovať sa na jedlo</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 3.5: Countdown Timer & Registration Counter -->
+    <section class="poster-section countdown-poster-section">
+      <div class="poster-wrap countdown-layout">
+        <div id="countdown-section" class="countdown-poster">
+          <div class="poster-heading poster-heading-invert">
+            <h2 aria-label={page.countdown.title}>
+              {countdownTitleLines.map((line) => <span aria-hidden="true">{line}</span>)}
+            </h2>
+          </div>
+          <div class="countdown-grid">
+            <div>
+              <span id="countdown-days" class="countdown-number">--</span>
+              <span>dní</span>
+            </div>
+            <div>
+              <span id="countdown-hours" class="countdown-number">--</span>
+              <span>hodín</span>
+            </div>
+            <div>
+              <span id="countdown-minutes" class="countdown-number">--</span>
+              <span>minút</span>
+            </div>
+            <div>
+              <span id="countdown-seconds" class="countdown-number">--</span>
+              <span>sekúnd</span>
+            </div>
+          </div>
+        </div>
+
+        <div id="deadline-passed" class="deadline-poster hidden">
+          <div class="deadline-copy">
+            <h2 aria-label="Registrácia na jedlo je uzavretá">
+              <span aria-hidden="true">Registrácia</span>
+              <span aria-hidden="true">uzavretá</span>
+            </h2>
+            <div class="deadline-counter">
+              <span id="deadline-counter-value" class="deadline-counter-number">12</span>
+              <span>registrovaných na jedlo</span>
+            </div>
+            <p>Ak sa chceš ešte prihlásiť, zavolaj nám:</p>
+          </div>
+          <div class="deadline-actions">
+            <a href={`tel:${page.countdown.deadlinePhone}`} class="poster-button poster-button-lime">
+              Zavolať {page.countdown.deadlinePhone}
+            </a>
+            <p>Možno ešte stíhame pridať porciu!</p>
+          </div>
+        </div>
+
+        <div id="counter-poster" class="counter-poster">
+          <span id="counter-value" class="counter-number">12</span>
+          <span>registrovaných na jedlo</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 4: Activities Showcase -->
+    <section id="aktivity" class="poster-section activities-poster-section">
+      <div class="poster-wrap activities-layout">
+        <div class="poster-heading">
+          <h2>Čo ťa čaká?</h2>
+          <p>Každý piatok je nabitý aktivitami</p>
+        </div>
+        <div class="activity-row" aria-label="Aktivity">
+          {page.activities.map((item: { emoji: string; title: string; description: string }, index: number) => {
+            const activityPhoto = activityPhotos[index] || partyPhotos[index % partyPhotos.length]?.image;
+            return (
+            <div class={`activity-item activity-item-${(index % 4) + 1}`}>
+              <div class="activity-image">
+                {activityPhoto ? (
+                  <img src={activityPhoto} alt={item.title} loading="lazy" width="520" height="420">
+                ) : (
+                  <span class="activity-emoji-fallback" set:html={item.emoji}></span>
+                )}
+              </div>
+              <div class="activity-copy">
+                <h3>{item.title}</h3>
+                <p>{item.description}</p>
+              </div>
+            </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 5: Photo Gallery -->
+    <section class="poster-section gallery-poster-section">
+      <div class="poster-wrap">
+        <div class="gallery-layout">
+          <div class="poster-heading">
+            <h2>Fotogaléria</h2>
+            <p>Pozri sa, ako to u nás vyzerá</p>
+          </div>
+          <div class="gallery-collage">
+            {partyPhotos.map((photo, index: number) => (
+              <button class={`gallery-item gallery-polaroid gallery-polaroid-${(index % 6) + 1}`} type="button" data-index={index} data-src={photo.image} data-caption={photo.caption}>
+                <img src={photo.image} alt={photo.caption} loading="lazy" width="450" height="600">
+                <span>{photo.caption}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+
+  <!-- Lightbox -->
+  <div id="lightbox" class="lightbox-overlay">
+    <button id="lightbox-close" class="absolute top-4 right-4 text-white hover:text-[var(--color-primary)] transition-colors z-10">
+      <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+      </svg>
+    </button>
+    <button id="lightbox-prev" class="absolute left-4 top-1/2 -translate-y-1/2 text-white hover:text-[var(--color-primary)] transition-colors">
+      <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+      </svg>
+    </button>
+    <button id="lightbox-next" class="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:text-[var(--color-primary)] transition-colors">
+      <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+      </svg>
+    </button>
+    <div class="lightbox-content">
+      <img id="lightbox-image" src="" alt="">
+      <p id="lightbox-caption" class="text-white text-center mt-4 text-lg"></p>
+    </div>
+  </div>
+
+    <!-- Section 6: Registration Form -->
+    <section id="registracia" class="registration-poster-section">
+      <div class="registration-poster-noise" aria-hidden="true"></div>
+      <div class="registration-poster-wrap">
+      <div class="registration-poster-header">
+        <h2>{page.registration.formTitle}</h2>
+        <p>Zaregistruj sa a príď v piatok!</p>
+      </div>
+      <div class="registration-poster-layout">
+        <!-- Info Panel -->
+        <div class="registration-info-poster">
+          <div class="registration-info-list">
+            <div class="registration-info-item">
+              <div class="registration-info-icon">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+              </div>
+              <div>
+                <h3>Kedy</h3>
+                <p>{page.registration.time}</p>
+              </div>
+            </div>
+            <div class="registration-info-item">
+              <div class="registration-info-icon registration-info-icon-lime">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+              </div>
+              <div>
+                <h3>Kde</h3>
+                <p>{contactInfo.address}, {contactInfo.city}, {contactInfo.postalCode}</p>
+              </div>
+            </div>
+            <div class="registration-info-item">
+              <div class="registration-info-icon">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+              </div>
+              <div>
+                <h3>Cena</h3>
+                <p>{page.registration.price}</p>
+              </div>
+            </div>
+          </div>
+          <div class="registration-map">
+            <iframe src={contactInfo.googleMapsEmbed} width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="New Level Church - mapa"></iframe>
+          </div>
+        </div>
+        <!-- Form Card -->
+        <div class="registration-form-poster">
+          <div class="registration-form-inner">
+            <div id="form-success" class="hidden registration-message registration-message-success">
+              <p>Super! Registrácia úspešná. Tešíme sa na teba v piatok!</p>
+            </div>
+            <div id="form-error" class="hidden registration-message registration-message-error">
+              <p>Ups! Niečo sa pokazilo. Skús to prosím znovu.</p>
+            </div>
+            <form id="party-form" class="registration-form">
+              <div class="registration-field">
+                <label for="party-name">Meno</label>
+                <input type="text" id="party-name" name="name" required autocomplete="name" placeholder="Tvoje meno">
+              </div>
+              <div class="registration-field">
+                <label for="party-email">Email</label>
+                <input type="email" id="party-email" name="email" required autocomplete="email" inputmode="email" placeholder="tvoj@email.sk">
+              </div>
+              <div class="registration-field">
+                <label for="party-phone">Telefón (voliteľné)</label>
+                <input type="tel" id="party-phone" name="phone" autocomplete="tel" inputmode="tel" placeholder="+421 ...">
+              </div>
+              <div class="registration-food-option">
+                <input type="checkbox" id="party-food" name="food_registration" value="Ano">
+                <label for="party-food">Objednávam si 1 porciu jedla od šéfkuchára</label>
+              </div>
+              <div class="registration-field">
+                <label for="party-message">Správa (voliteľné)</label>
+                <textarea id="party-message" name="message" rows="3" placeholder="Chceš nám niečo odkázať?"></textarea>
+              </div>
+              <button type="submit" id="party-submit">
+                Odoslať registráciu
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    </section>
+
+    <!-- Section 7: CTA Banner -->
+    <section class="poster-section final-cta-section">
+      <div class="poster-wrap final-cta-layout">
+        <div>
+          <h2>{page.cta.title}</h2>
+          <p>{page.cta.text}</p>
+        </div>
+        <a href={page.cta.buttonUrl} target="_blank" rel="noopener noreferrer" class="poster-button poster-button-lime">
+          {page.cta.buttonText}
+        </a>
+      </div>
+    </section>
+  </div>
+</BaseLayout>
+
+<style is:global>
+  .registration-poster-section {
+    --party-paper: #f6f4ee;
+    --party-ink: #111111;
+    --party-purple: #7b3eff;
+    --party-lime: #d7ff27;
+    --party-gray: #777777;
+    --poster-display: "Barlow Condensed", Impact, "Arial Narrow", Inter, system-ui, sans-serif;
+    --poster-sans: Inter, system-ui, sans-serif;
+    --poster-mono: "Space Mono", "Courier New", monospace;
+    position: relative;
+    overflow: hidden;
+    scroll-margin-top: 5rem;
+    padding: 4.5rem 0;
+    background:
+      linear-gradient(90deg, rgba(17, 17, 17, 0.04) 1px, transparent 1px),
+      linear-gradient(180deg, rgba(17, 17, 17, 0.035) 1px, transparent 1px),
+      var(--party-paper);
+    background-size: 48px 48px, 48px 48px, auto;
+    color: var(--party-ink);
+    font-family: var(--poster-sans);
+    isolation: isolate;
+  }
+
+  .registration-poster-noise {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.52;
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(17, 17, 17, 0.08) 0 1px, transparent 1.5px),
+      radial-gradient(circle at 70% 60%, rgba(17, 17, 17, 0.06) 0 1px, transparent 1.5px);
+    background-size: 15px 15px, 19px 19px;
+    mix-blend-mode: multiply;
+  }
+
+  .registration-poster-wrap {
+    width: min(1120px, calc(100% - 2rem));
+    margin: 0 auto;
+  }
+
+  .registration-poster-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 1rem;
+    align-items: end;
+    margin-bottom: 1.5rem;
+  }
+
+  .registration-poster-header h2 {
+    max-width: 8ch;
+    margin: 0;
+    color: var(--party-ink);
+    font-family: var(--poster-display);
+    font-size: 7rem;
+    font-weight: 900;
+    line-height: 1.02;
+    text-transform: uppercase;
+    letter-spacing: 0;
+    text-wrap: balance;
+  }
+
+  .registration-poster-header p {
+    display: inline-block;
+    margin: 0 0 0.7rem;
+    padding: 0.45rem 0.8rem;
+    background: var(--party-lime);
+    color: var(--party-ink);
+    font-family: var(--poster-sans);
+    font-size: 1rem;
+    font-weight: 800;
+    line-height: 1.25;
+    transform: rotate(-1.5deg);
+    box-shadow: 6px 6px 0 var(--party-ink);
+  }
+
+  .registration-poster-layout {
+    display: grid;
+    grid-template-columns: minmax(15rem, 0.44fr) minmax(320px, 1fr);
+    gap: 0;
+    align-items: stretch;
+  }
+
+  .registration-info-poster,
+  .registration-form-poster {
+    position: relative;
+    border: 2px solid var(--party-ink);
+    background: rgba(246, 244, 238, 0.94);
+    box-shadow: 8px 8px 0 var(--party-ink);
+  }
+
+  .registration-info-poster {
+    display: grid;
+    align-content: start;
+    border-right: 0;
+    padding: 1.35rem;
+  }
+
+  .registration-info-list {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .registration-info-item {
+    display: grid;
+    grid-template-columns: 2.55rem minmax(0, 1fr);
+    gap: 0.8rem;
+    align-items: start;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid rgba(17, 17, 17, 0.14);
+  }
+
+  .registration-info-item:last-child {
+    padding-bottom: 0;
+    border-bottom: 0;
+  }
+
+  .registration-info-icon {
+    display: grid;
+    width: 2.45rem;
+    height: 2.45rem;
+    place-items: center;
+    border: 2px solid var(--party-ink);
+    border-radius: 999px;
+    background: var(--party-purple);
+    color: white;
+  }
+
+  .registration-info-icon-lime {
+    background: var(--party-lime);
+    color: var(--party-ink);
+  }
+
+  .registration-info-icon svg {
+    width: 1.2rem;
+    height: 1.2rem;
+  }
+
+  .registration-info-item h3 {
+    margin: 0 0 0.2rem;
+    color: var(--party-ink);
+    font-size: 0.82rem;
+    font-weight: 900;
+    line-height: 1;
+    text-transform: uppercase;
+    letter-spacing: 0;
+  }
+
+  .registration-info-item p {
+    margin: 0;
+    color: var(--party-gray);
+    font-family: var(--poster-mono);
+    font-size: 0.9rem;
+    font-weight: 700;
+    line-height: 1.28;
+  }
+
+  .registration-map {
+    aspect-ratio: 16 / 10;
+    margin-top: 1.1rem;
+    overflow: hidden;
+    border: 2px solid var(--party-ink);
+    background: var(--party-ink);
+  }
+
+  .registration-form-poster {
+    background: var(--party-paper);
+  }
+
+  .registration-form-inner {
+    position: relative;
+    padding: 2rem;
+  }
+
+  .registration-message {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 4rem;
+    margin-bottom: 1.25rem;
+    padding: 0.9rem 1rem;
+    border: 2px solid var(--party-ink);
+    color: var(--party-ink);
+    text-align: center;
+    transform: rotate(-0.7deg);
+  }
+
+  .registration-message.hidden {
+    display: none;
+  }
+
+  .registration-message p {
+    margin: 0;
+    font-weight: 900;
+    line-height: 1.25;
+  }
+
+  .registration-message-success {
+    background: var(--party-lime);
+  }
+
+  .registration-message-error {
+    background: var(--party-purple);
+    color: white;
+  }
+
+  .registration-form {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .registration-field label,
+  .registration-food-option label {
+    display: block;
+    margin-bottom: 0.45rem;
+    color: var(--party-ink);
+    font-size: 0.76rem;
+    font-weight: 900;
+    line-height: 1.1;
+    text-transform: uppercase;
+    letter-spacing: 0;
+  }
+
+  .registration-field input,
+  .registration-field textarea {
+    width: 100%;
+    border: 2px solid var(--party-ink);
+    border-radius: 0;
+    background: rgba(255, 255, 255, 0.68);
+    color: var(--party-ink);
+    padding: 0.95rem 1rem;
+    font: 700 0.95rem/1.35 var(--poster-mono);
+    outline: none;
+    box-shadow: 4px 4px 0 rgba(17, 17, 17, 0.18);
+    transition: background-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+  }
+
+  .registration-field textarea {
+    min-height: 7rem;
+    resize: vertical;
+  }
+
+  .registration-field input::placeholder,
+  .registration-field textarea::placeholder {
+    color: rgba(119, 119, 119, 0.72);
+    font-weight: 700;
+  }
+
+  .registration-field input:focus,
+  .registration-field textarea:focus {
+    background: white;
+    box-shadow: 6px 6px 0 var(--party-purple);
+    transform: translate(-1px, -1px);
+  }
+
+  .registration-food-option {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.75rem;
+    align-items: start;
+    padding: 1rem;
+    border: 2px solid var(--party-ink);
+    background: var(--party-lime);
+    box-shadow: 4px 4px 0 rgba(17, 17, 17, 0.22);
+  }
+
+  .registration-food-option input {
+    width: 1.25rem;
+    height: 1.25rem;
+    margin: 0.05rem 0 0;
+    accent-color: var(--party-purple);
+  }
+
+  .registration-food-option label {
+    margin: 0;
+    font-size: 0.88rem;
+    line-height: 1.25;
+  }
+
+  #party-submit {
+    width: 100%;
+    min-height: 3.75rem;
+    margin-top: 0.25rem;
+    border: 2px solid var(--party-ink);
+    border-radius: 999px;
+    background: var(--party-purple);
+    color: white;
+    padding: 0.95rem 1.5rem;
+    font: 900 1rem/1 Inter, system-ui, sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0;
+    box-shadow: 6px 6px 0 var(--party-ink);
+    cursor: pointer;
+    transition: transform 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+  }
+
+  #party-submit:hover,
+  #party-submit:focus-visible {
+    background: var(--party-ink);
+    box-shadow: 6px 6px 0 var(--party-lime);
+    transform: translate(-1px, -1px);
+  }
+
+  #party-submit:disabled {
+    cursor: wait;
+    opacity: 0.72;
+    transform: none;
+  }
+
+  @media (max-width: 900px) {
+    .registration-poster-section {
+      padding: 3.5rem 0;
+    }
+
+    .registration-poster-header {
+      grid-template-columns: 1fr;
+      margin-bottom: 1.35rem;
+    }
+
+    .registration-poster-layout {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+
+    .registration-info-poster {
+      border-right: 2px solid var(--party-ink);
+      border-bottom: 0;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .registration-poster-wrap {
+      width: min(100% - 1.25rem, 1120px);
+    }
+
+    .registration-poster-header h2 {
+      max-width: 7.25ch;
+      font-size: 4.15rem;
+      line-height: 1.02;
+    }
+
+    .registration-poster-header p {
+      max-width: calc(100% - 0.5rem);
+      box-shadow: 4px 4px 0 var(--party-ink);
+    }
+
+    .registration-info-poster,
+    .registration-form-poster {
+      box-shadow: 6px 6px 0 var(--party-ink);
+    }
+
+    .registration-info-poster,
+    .registration-form-inner {
+      padding: 1.25rem;
+    }
+
+    .registration-info-item {
+      grid-template-columns: 2.6rem minmax(0, 1fr);
+      gap: 0.8rem;
+    }
+
+    .registration-info-icon {
+      width: 2.6rem;
+      height: 2.6rem;
+    }
+
+    .registration-map {
+      aspect-ratio: 4 / 3;
+    }
+  }
+
+  :global(body) {
+    background: #f6f4ee;
+  }
+
+  body.party-page-body header[data-current-page="youth"] {
+    background: rgba(246, 244, 238, 0.94) !important;
+    border-bottom: 2px solid #111111;
+    box-shadow: none !important;
+    backdrop-filter: blur(10px);
+  }
+
+  body.party-page-body header[data-current-page="youth"] nav a {
+    color: #111111 !important;
+    font-weight: 900 !important;
+    text-transform: uppercase;
+    letter-spacing: 0;
+  }
+
+  body.party-page-body header[data-current-page="youth"] img {
+    filter: invert(1) grayscale(1) contrast(1.8);
+  }
+
+  body.party-page-body header[data-current-page="youth"] nav a[aria-label],
+  body.party-page-body header[data-current-page="youth"] nav a[aria-label] svg {
+    color: #111111 !important;
+  }
+
+  body.party-page-body header[data-current-page="youth"] nav a[data-nav-id="youth"] {
+    color: #7b3eff !important;
+  }
+
+  body.party-page-body header[data-current-page="youth"] nav a:last-child {
+    background: #7b3eff !important;
+    color: #ffffff !important;
+    border: 2px solid #111111;
+    border-radius: 0.25rem !important;
+    box-shadow: 4px 4px 0 #111111;
+  }
+
+  body.party-page-body header[data-current-page="youth"] #mobile-menu {
+    margin: 0 -1rem;
+    padding: 1.25rem 1rem 1.5rem;
+    border-top: 2px solid #111111;
+    background: #f6f4ee;
+  }
+
+  body.party-page-body header[data-current-page="youth"] #mobile-menu > div {
+    gap: 0.35rem;
+  }
+
+  body.party-page-body header[data-current-page="youth"] #mobile-menu a[data-nav-id] {
+    border-radius: 0;
+    color: #111111 !important;
+    font-family: var(--poster-display);
+    font-size: 1.7rem;
+    line-height: 1;
+  }
+
+  body.party-page-body header[data-current-page="youth"] #mobile-menu a[data-nav-id="youth"] {
+    background: #d7ff27 !important;
+    color: #111111 !important;
+    box-shadow: 4px 4px 0 #111111;
+    transform: rotate(-0.6deg);
+  }
+
+  body.party-page-body header[data-current-page="youth"] #mobile-menu a:last-child {
+    margin-top: 0.55rem;
+    border-radius: 0.25rem !important;
+  }
+
+  :global(.social-sidebar-link span:first-child) {
+    background: #111111 !important;
+    color: #f6f4ee !important;
+  }
+
+  .party-page-shell {
+    --party-paper: #f6f4ee;
+    --party-ink: #111111;
+    --party-purple: #7b3eff;
+    --party-lime: #d7ff27;
+    --party-gray: #777777;
+    --poster-display: "Barlow Condensed", Impact, "Arial Narrow", Inter, system-ui, sans-serif;
+    --poster-sans: Inter, system-ui, sans-serif;
+    --poster-mono: "Space Mono", "Courier New", monospace;
+    isolation: isolate;
+    overflow: hidden;
+    background: var(--party-paper);
+    color: var(--party-ink);
+    font-family: var(--poster-sans);
+  }
+
+  .poster-filter-defs {
+    position: absolute;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+  }
+
+  .poster-section {
+    position: relative;
+    overflow: hidden;
+    scroll-margin-top: 5rem;
+    border-bottom: 2px solid rgba(17, 17, 17, 0.22);
+    background:
+      radial-gradient(circle at 20% 30%, rgba(17, 17, 17, 0.04) 0 1px, transparent 1.6px),
+      linear-gradient(90deg, rgba(17, 17, 17, 0.045) 1px, transparent 1px),
+      linear-gradient(180deg, rgba(17, 17, 17, 0.04) 1px, transparent 1px),
+      var(--party-paper);
+    background-size: 21px 21px, 68px 68px, 68px 68px, auto;
+    isolation: isolate;
+  }
+
+  .poster-noise {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.5;
+    background-image:
+      radial-gradient(circle at 12% 18%, rgba(17, 17, 17, 0.15) 0 1px, transparent 1.5px),
+      radial-gradient(circle at 83% 42%, rgba(17, 17, 17, 0.08) 0 1px, transparent 1.5px);
+    background-size: 23px 23px, 31px 31px;
+    mix-blend-mode: multiply;
+  }
+
+  .poster-wrap {
+    width: min(1180px, calc(100% - 2rem));
+    margin: 0 auto;
+  }
+
+  .poster-heading h2,
+  .hero-copy h1,
+  .menu-ticket h3,
+  .countdown-poster h2,
+  .deadline-poster h2,
+  .final-cta-layout h2 {
+    font-family: var(--poster-display);
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0;
+  }
+
+  .poster-heading {
+    max-width: min(100%, 42rem);
+  }
+
+  .poster-heading h2 {
+    max-width: 8.5ch;
+    margin: 0;
+    font-size: 6.25rem;
+    line-height: 1.02;
+    text-wrap: balance;
+  }
+
+  .poster-heading p {
+    display: inline-block;
+    max-width: min(100%, 31rem);
+    margin: 0.85rem 0 0;
+    padding: 0.35rem 0.55rem;
+    background: var(--party-lime);
+    color: var(--party-ink);
+    font-family: var(--poster-sans);
+    font-weight: 900;
+    line-height: 1.2;
+    box-shadow: 5px 5px 0 var(--party-ink);
+    transform: rotate(-1deg);
+  }
+
+  .menu-layout .poster-heading h2 {
+    max-width: 9ch;
+  }
+
+  .countdown-poster .poster-heading h2 {
+    max-width: 13.5ch;
+    font-size: 5rem;
+    line-height: 1.02;
+  }
+
+  .countdown-poster .poster-heading h2 span {
+    display: block;
+    white-space: nowrap;
+  }
+
+  .countdown-poster .poster-heading h2 span + span {
+    margin-top: 0;
+  }
+
+  .activities-poster-section .poster-heading h2 {
+    max-width: 7.15ch;
+  }
+
+  .gallery-poster-section .poster-heading h2 {
+    max-width: 9.5ch;
+  }
+
+  .poster-heading-invert h2,
+  .poster-heading-invert p {
+    color: var(--party-paper);
+  }
+
+  .poster-heading-invert p {
+    color: var(--party-ink);
+  }
+
+  .poster-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 3.1rem;
+    border: 2px solid var(--party-ink);
+    border-radius: 0.25rem;
+    background: var(--party-purple);
+    color: #ffffff;
+    padding: 0.85rem 1.4rem;
+    font-family: var(--poster-sans);
+    font-weight: 900;
+    line-height: 1;
+    text-transform: uppercase;
+    box-shadow: 5px 5px 0 var(--party-ink);
+    transition: transform 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+  }
+
+  .poster-button:hover,
+  .poster-button:focus-visible {
+    background: var(--party-ink);
+    color: #ffffff;
+    box-shadow: 5px 5px 0 var(--party-lime);
+    transform: translate(-1px, -1px);
+  }
+
+  .poster-button-lime {
+    background: var(--party-lime);
+    color: var(--party-ink);
+  }
+
+  .poster-button-instagram {
+    position: relative;
+    width: 2.35rem;
+    min-width: 2.35rem;
+    height: 2.35rem;
+    min-height: 2.35rem;
+    border-radius: 0.28rem;
+    background: rgba(246, 244, 238, 0.94);
+    color: var(--party-ink);
+    padding: 0;
+    border-color: rgba(246, 244, 238, 0.94);
+    box-shadow: none;
+    transform: rotate(-4deg);
+  }
+
+  .poster-button-instagram:hover,
+  .poster-button-instagram:focus-visible {
+    background: var(--party-purple);
+    color: var(--party-ink);
+    border-color: var(--party-purple);
+    box-shadow: none;
+    transform: rotate(0deg) scale(1.04);
+  }
+
+  .poster-button-instagram span,
+  .party-reels-instagram-cta span {
+    display: inline-grid;
+    width: 1.05rem;
+    height: 1.05rem;
+    place-items: center;
+  }
+
+  .poster-button-instagram span {
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+
+  .poster-button-instagram svg,
+  .party-reels-instagram-cta svg {
+    width: 100%;
+    height: 100%;
+    fill: currentColor;
+  }
+
+  .poster-sticker {
+    display: inline-block;
+    background: var(--party-lime);
+    color: var(--party-ink);
+    padding: 0.42rem 0.65rem;
+    font-weight: 900;
+    line-height: 1.05;
+    text-transform: uppercase;
+    box-shadow: 5px 5px 0 var(--party-ink);
+    transform: rotate(-1.5deg);
+  }
+
+  .hero-poster {
+    min-height: clamp(40rem, 82vh, 54rem);
+    padding: clamp(3rem, 6vw, 5.5rem) 0 clamp(3rem, 6vw, 5rem);
+    display: grid;
+    align-items: end;
+    border-bottom-color: var(--party-ink);
+    background:
+      linear-gradient(90deg, rgba(17, 17, 17, 0.9) 0%, rgba(17, 17, 17, 0.74) 44%, rgba(17, 17, 17, 0.36) 100%),
+      linear-gradient(180deg, rgba(17, 17, 17, 0.18) 0%, rgba(17, 17, 17, 0.18) 52%, rgba(17, 17, 17, 0.82) 100%),
+      var(--hero-photo),
+      var(--party-ink);
+    background-position: center 43%;
+    background-size: cover;
+    color: var(--party-paper);
+  }
+
+  .hero-grid {
+    position: relative;
+    z-index: 1;
+    display: block;
+  }
+
+  .hero-copy h1 {
+    position: relative;
+    width: min-content;
+    margin: 0 0 0.35rem;
+    color: var(--party-paper);
+    font-size: clamp(7.4rem, 14vw, 12.6rem);
+    line-height: 0.9;
+    filter: url("#print-distress");
+    text-shadow:
+      0.035em 0.035em 0 rgba(17, 17, 17, 0.72),
+      -0.018em 0.018em 0 rgba(215, 255, 39, 0.22);
+  }
+
+  .hero-copy {
+    max-width: min(100%, 48rem);
+    min-width: 0;
+  }
+
+  .hero-copy h1 span {
+    position: relative;
+    display: block;
+  }
+
+  .hero-copy h1 span:first-child {
+    color: #f3efe7;
+  }
+
+  .hero-copy h1 span:first-child::after {
+    content: attr(data-word);
+    position: absolute;
+    left: 0.028em;
+    top: 0.025em;
+    z-index: -1;
+    color: rgba(123, 62, 255, 0.58);
+  }
+
+  .hero-copy h1 span:first-child {
+    max-width: 4.05em;
+  }
+
+  .hero-copy h1 span:last-child {
+    color: var(--party-purple);
+    width: 3.2em;
+    margin-top: 0.06em;
+    margin-left: 0.03em;
+    font-size: 0.74em;
+    line-height: 0.98;
+    position: relative;
+    transform: rotate(-3.5deg) skewX(-4deg);
+    transform-origin: left center;
+    text-shadow:
+      0.035em 0.045em 0 rgba(17, 17, 17, 0.7);
+  }
+
+  .hero-copy h1 span:last-child::after {
+    content: none;
+  }
+
+  .hero-badge {
+    position: relative;
+    display: inline-block;
+    margin: clamp(0.95rem, 2.6vw, 1.45rem) 0 0;
+    padding: 0.48rem 1.1rem 0.42rem;
+    background: var(--party-lime);
+    color: var(--party-ink);
+    font-family: var(--poster-sans);
+    font-size: 1.05rem;
+    font-style: italic;
+    font-weight: 900;
+    line-height: 1;
+    text-transform: uppercase;
+    transform: rotate(-2deg);
+  }
+
+  .hero-badge::before,
+  .hero-badge::after {
+    content: "";
+    position: absolute;
+    inset: -0.24rem -0.5rem;
+    z-index: -1;
+    background: var(--party-lime);
+    transform: rotate(1.5deg) skewX(-8deg);
+  }
+
+  .hero-badge::after {
+    inset: auto 12% -0.8rem 16%;
+    height: 0.18rem;
+    background: var(--party-purple);
+    transform: rotate(-1deg);
+  }
+
+  .hero-secondary {
+    margin-top: clamp(1.15rem, 3.4vw, 1.9rem);
+  }
+
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem 1rem;
+    align-items: center;
+  }
+
+  .hero-actions .poster-button:not(.poster-button-instagram) {
+    width: min(100%, 26rem);
+  }
+
+  .hero-copy p {
+    max-width: 34rem;
+    margin: 0 0 clamp(1.3rem, 3vw, 2.1rem);
+    color: var(--party-paper);
+    font-family: var(--poster-sans);
+    font-size: 1.12rem;
+    font-weight: 900;
+    line-height: 1.25;
+    text-wrap: balance;
+  }
+
+  .scroll-sticker {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: clamp(2.1rem, 5vw, 3.4rem);
+    color: rgba(246, 244, 238, 0.72);
+    font-size: 0.82rem;
+    font-weight: 900;
+    text-transform: uppercase;
+  }
+
+  .scroll-sticker svg {
+    width: 1.15rem;
+    height: 1.15rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 3;
+  }
+
+  .info-strip-section {
+    padding: clamp(1.2rem, 3vw, 2rem) 0;
+    background: var(--party-ink);
+  }
+
+  .quick-strip {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(1rem, 3vw, 2.4rem);
+    align-items: start;
+  }
+
+  .quick-strip-item {
+    display: grid;
+    grid-template-columns: 2.4rem minmax(0, 1fr);
+    gap: 0.85rem;
+    align-items: center;
+    min-width: 0;
+    color: var(--party-paper);
+  }
+
+  .quick-strip-icon {
+    display: grid;
+    width: 2.25rem;
+    height: 2.25rem;
+    place-items: center;
+  }
+
+  .quick-strip-icon svg {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  .quick-strip-item h2 {
+    margin: 0;
+    color: var(--party-paper);
+    font-family: var(--poster-display);
+    font-size: clamp(1.6rem, 3vw, 2.45rem);
+    line-height: 1;
+    text-transform: uppercase;
+  }
+
+  .quick-strip-item p {
+    margin: 0.1rem 0 0;
+    color: rgba(246, 244, 238, 0.72);
+    font-family: var(--poster-mono);
+    font-size: clamp(0.78rem, 1.18vw, 0.98rem);
+    font-weight: 700;
+    line-height: 1.18;
+  }
+
+  .menu-poster-section,
+  .party-reels-section,
+  .activities-poster-section,
+  .gallery-poster-section,
+  .registration-poster-section {
+    padding: clamp(3.5rem, 7vw, 6rem) 0;
+  }
+
+  .party-reels-section {
+    background: var(--party-paper);
+  }
+
+  .party-reels-layout {
+    display: grid;
+    gap: clamp(1.25rem, 3vw, 2rem);
+  }
+
+  .party-reels-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 1rem;
+    align-items: end;
+  }
+
+  .party-reels-header h2 {
+    max-width: 10.5ch;
+    margin: 0;
+    color: var(--party-ink);
+    font-family: var(--poster-display);
+    font-size: clamp(3.9rem, 8.2vw, 7rem);
+    font-weight: 900;
+    letter-spacing: 0;
+    line-height: 0.92;
+    text-transform: uppercase;
+  }
+
+  .party-reels-header p {
+    margin: 0.65rem 0 0;
+    color: var(--party-gray);
+    font-family: var(--poster-mono);
+    font-size: clamp(0.95rem, 1.8vw, 1.08rem);
+    font-weight: 700;
+    line-height: 1.25;
+  }
+
+  .party-reels-instagram-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    min-height: 2.55rem;
+    border: 2px solid var(--party-ink);
+    border-radius: 999px;
+    background: var(--party-lime);
+    color: var(--party-ink);
+    padding: 0.62rem 0.95rem;
+    font-family: var(--poster-sans);
+    font-size: 0.82rem;
+    font-weight: 950;
+    line-height: 1;
+    text-decoration: none;
+    text-transform: uppercase;
+    white-space: nowrap;
+    box-shadow: 4px 4px 0 var(--party-ink);
+    transition: transform 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+  }
+
+  .party-reels-instagram-cta:hover,
+  .party-reels-instagram-cta:focus-visible {
+    background: var(--party-ink);
+    color: var(--party-paper);
+    box-shadow: 4px 4px 0 var(--party-purple);
+    transform: translate(-1px, -1px);
+    outline: none;
+  }
+
+  .party-reels-controls {
+    display: grid;
+    grid-template-columns: 2.75rem 4.8rem 2.75rem;
+    gap: 0.55rem;
+    align-items: center;
+  }
+
+  .party-reels-arrow {
+    display: grid;
+    width: 2.75rem;
+    height: 2.75rem;
+    place-items: center;
+    border: 2px solid var(--party-ink);
+    border-radius: 999px;
+    background: var(--party-ink);
+    color: var(--party-paper);
+    font: 900 1.05rem/1 var(--poster-sans);
+    cursor: pointer;
+    transition: background-color 160ms ease, color 160ms ease, transform 160ms ease;
+  }
+
+  .party-reels-arrow:hover,
+  .party-reels-arrow:focus-visible {
+    background: var(--party-lime);
+    color: var(--party-ink);
+    transform: translateY(-1px);
+    outline: none;
+  }
+
+  .party-reels-counter {
+    color: var(--party-ink);
+    font-family: var(--poster-mono);
+    font-size: 0.85rem;
+    font-weight: 900;
+    line-height: 1;
+    text-align: center;
+  }
+
+  .party-reels-track {
+    display: grid;
+    grid-auto-columns: minmax(17.5rem, min(76vw, 25rem));
+    grid-auto-flow: column;
+    gap: clamp(1rem, 2.8vw, 1.6rem);
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 0.1rem max(1rem, calc((100vw - 1180px) / 2 + 1rem)) 1rem 0;
+    scroll-padding-left: 0;
+    scroll-snap-type: x mandatory;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    cursor: grab;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .party-reels-track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .party-reels-track:focus-visible {
+    outline: 3px solid var(--party-purple);
+    outline-offset: 0.35rem;
+  }
+
+  .party-reels-track.is-dragging {
+    cursor: grabbing;
+    scroll-snap-type: none;
+    user-select: none;
+  }
+
+  .party-reel-slide {
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+
+  .party-reel-embed {
+    position: relative;
+    aspect-ratio: 9 / 16;
+    overflow: hidden;
+    border: 0;
+    border-radius: clamp(1.1rem, 3vw, 1.8rem);
+    background: #000000;
+    box-shadow: 0 1.25rem 3rem rgba(17, 17, 17, 0.2);
+    isolation: isolate;
+  }
+
+  .party-reel-embed iframe {
+    position: absolute;
+    top: -4.8rem;
+    left: 0;
+    display: block;
+    width: 100%;
+    height: calc(100% + 9.6rem);
+    border: 0;
+    background: #000000;
+  }
+
+  .party-reel-instagram {
+    position: absolute;
+    right: 0.75rem;
+    top: 0.75rem;
+    z-index: 10;
+    display: grid;
+    width: 3.2rem;
+    height: 3.2rem;
+    place-items: center;
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.58);
+    color: #ffffff;
+    backdrop-filter: blur(12px);
+    pointer-events: auto;
+    transition: background-color 160ms ease, color 160ms ease, transform 160ms ease;
+  }
+
+  .party-reel-instagram svg {
+    width: 1.45rem;
+    height: 1.45rem;
+    fill: currentColor;
+  }
+
+  .party-reel-instagram:hover,
+  .party-reel-instagram:focus-visible {
+    background: var(--party-lime);
+    color: var(--party-ink);
+    transform: translateY(-1px);
+    outline: none;
+  }
+
+  .menu-layout {
+    display: grid;
+    grid-template-columns: minmax(260px, 0.78fr) minmax(0, 1fr);
+    gap: clamp(1.5rem, 4vw, 4rem);
+    align-items: center;
+  }
+
+  .menu-ticket {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 1.4rem;
+    align-items: center;
+    border: 2px solid var(--party-ink);
+    background: var(--party-paper);
+    padding: clamp(1.5rem, 4vw, 3rem);
+    box-shadow: 10px 10px 0 var(--party-ink);
+    transform: rotate(0.8deg);
+  }
+
+  .menu-ticket > div {
+    min-width: 0;
+  }
+
+  .menu-ticket::after {
+    content: "";
+    position: absolute;
+    right: 1rem;
+    bottom: 1rem;
+    width: 8rem;
+    height: 2rem;
+    background: var(--party-lime);
+    transform: rotate(-3deg);
+    z-index: -1;
+  }
+
+  .menu-emoji {
+    display: grid;
+    width: 5rem;
+    height: 5rem;
+    place-items: center;
+    border: 2px solid var(--party-ink);
+    border-radius: 999px;
+    background: var(--party-lime);
+    font-size: 2.35rem;
+  }
+
+  .menu-ticket h3 {
+    margin: 0;
+    color: var(--party-purple);
+    font-size: 5rem;
+    line-height: 1.12;
+    text-wrap: balance;
+    overflow-wrap: anywhere;
+  }
+
+  .menu-ticket p {
+    margin: 0.55rem 0 0;
+    color: var(--party-ink);
+    font-family: var(--poster-mono);
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.25;
+  }
+
+  .menu-ticket .poster-button {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+
+  .countdown-poster-section {
+    padding: clamp(3rem, 6vw, 5rem) 0;
+    background: var(--party-ink);
+  }
+
+  .countdown-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 18rem;
+    gap: 1.25rem;
+    align-items: stretch;
+  }
+
+  .countdown-poster,
+  .deadline-poster,
+  .counter-poster {
+    border: 2px solid var(--party-paper);
+    padding: clamp(1.5rem, 4vw, 2.5rem);
+  }
+
+  .countdown-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.8rem;
+    margin-top: 2rem;
+  }
+
+  .countdown-grid div {
+    border: 2px solid var(--party-paper);
+    background: var(--party-lime);
+    color: var(--party-ink);
+    padding: 1rem 0.75rem;
+    text-align: center;
+  }
+
+  .countdown-number {
+    display: block;
+    font-family: var(--poster-display);
+    font-size: 4.8rem;
+    font-weight: 900;
+    line-height: 1;
+  }
+
+  .countdown-grid span:last-child,
+  .counter-poster span:last-child {
+    display: block;
+    margin-top: 0.35rem;
+    font-weight: 900;
+    text-transform: uppercase;
+  }
+
+  .deadline-poster {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(14rem, 0.36fr);
+    gap: clamp(1.25rem, 4vw, 3rem);
+    align-items: end;
+    grid-column: 1 / -1;
+    color: var(--party-paper);
+    text-align: left;
+  }
+
+  .deadline-poster.hidden {
+    display: none;
+  }
+
+  .deadline-poster h2 {
+    max-width: 13ch;
+    margin: 0;
+    font-size: clamp(3.2rem, 7.4vw, 6.1rem);
+    line-height: 0.96;
+  }
+
+  .deadline-poster h2 span {
+    display: block;
+  }
+
+  .deadline-counter {
+    display: inline-grid;
+    grid-template-columns: auto minmax(0, 8.5rem);
+    gap: 0.75rem;
+    align-items: center;
+    margin-top: 1.15rem;
+    padding: 0.55rem 0.7rem;
+    border: 2px solid rgba(246, 244, 238, 0.86);
+    color: var(--party-paper);
+  }
+
+  .deadline-counter-number {
+    font-family: var(--poster-display);
+    font-size: clamp(2.25rem, 5vw, 3.6rem);
+    font-weight: 900;
+    line-height: 0.88;
+  }
+
+  .deadline-counter span:last-child {
+    color: rgba(246, 244, 238, 0.7);
+    font-size: 0.72rem;
+    font-weight: 900;
+    line-height: 1.05;
+    text-transform: uppercase;
+  }
+
+  .deadline-poster p {
+    max-width: 28rem;
+    margin: 1rem 0 0;
+    font-family: var(--poster-mono);
+    color: rgba(246, 244, 238, 0.78);
+    font-weight: 700;
+    line-height: 1.28;
+  }
+
+  .deadline-actions {
+    display: grid;
+    gap: 0.8rem;
+    justify-items: start;
+  }
+
+  .deadline-actions .poster-button {
+    width: 100%;
+    justify-content: center;
+    white-space: nowrap;
+  }
+
+  .deadline-actions p {
+    margin: 0;
+    color: var(--party-lime);
+    font-size: 0.9rem;
+  }
+
+  .counter-poster {
+    display: grid;
+    align-content: center;
+    background: var(--party-purple);
+    color: var(--party-paper);
+    text-align: center;
+  }
+
+  .counter-poster.hidden {
+    display: none;
+  }
+
+  .counter-number {
+    font-family: var(--poster-display);
+    font-size: 8rem;
+    font-weight: 900;
+    line-height: 0.95;
+  }
+
+  .activity-row {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 0.8rem;
+    margin-top: 2.2rem;
+  }
+
+  .activity-item {
+    position: relative;
+    min-height: 19rem;
+    overflow: hidden;
+    border-top: 2px solid var(--party-ink);
+    padding: 0.7rem 0.5rem 0;
+    text-align: left;
+  }
+
+  .activity-image {
+    position: relative;
+    overflow: hidden;
+    border: 2px solid var(--party-ink);
+    background: var(--party-ink);
+  }
+
+  .activity-image img {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    filter: saturate(1.06) contrast(1.05);
+  }
+
+  .activity-image::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 0;
+    height: 40%;
+    background: linear-gradient(180deg, transparent, rgba(17, 17, 17, 0.68));
+    pointer-events: none;
+  }
+
+  .activity-emoji-fallback {
+    display: grid;
+    min-height: 12rem;
+    place-items: center;
+    font-size: 4rem;
+  }
+
+  .activity-copy {
+    padding-top: 0.9rem;
+  }
+
+  .activity-item h3 {
+    margin: 0;
+    color: var(--party-ink);
+    font-family: var(--poster-display);
+    font-size: 1.95rem;
+    font-weight: 900;
+    line-height: 1.05;
+    text-transform: uppercase;
+  }
+
+  .activity-item p {
+    margin: 0.65rem 0 0;
+    color: var(--party-gray);
+    font-family: var(--poster-mono);
+    font-size: 0.78rem;
+    font-weight: 700;
+    line-height: 1.28;
+  }
+
+  .gallery-layout {
+    display: grid;
+    grid-template-columns: minmax(30rem, 0.55fr) minmax(0, 1fr);
+    gap: clamp(2rem, 5vw, 4.5rem);
+    align-items: start;
+  }
+
+  .gallery-collage {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 0.8rem;
+  }
+
+  .gallery-polaroid {
+    position: relative;
+    display: block;
+    grid-column: span 2;
+    min-width: 0;
+    border: 2px solid var(--party-ink);
+    background: var(--party-paper);
+    padding: 0.5rem 0.5rem 2.4rem;
+    box-shadow: 6px 6px 0 rgba(17, 17, 17, 0.85);
+    cursor: pointer;
+    transition: transform 180ms ease, box-shadow 180ms ease;
+  }
+
+  .gallery-polaroid:hover,
+  .gallery-polaroid:focus-visible {
+    transform: rotate(0deg) translateY(-0.25rem) !important;
+    box-shadow: 8px 8px 0 var(--party-ink);
+    outline: none;
+  }
+
+  .gallery-polaroid img {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    filter: saturate(1.06) contrast(1.05);
+  }
+
+  .gallery-polaroid span {
+    position: absolute;
+    left: 0.65rem;
+    right: 0.65rem;
+    bottom: 0.55rem;
+    overflow: hidden;
+    color: var(--party-ink);
+    font-weight: 900;
+    line-height: 1;
+    text-align: left;
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .gallery-polaroid-1,
+  .gallery-polaroid-5 {
+    transform: rotate(-1.5deg);
+  }
+
+  .gallery-polaroid-2,
+  .gallery-polaroid-6 {
+    transform: rotate(1.2deg);
+  }
+
+  .gallery-polaroid-3 {
+    transform: rotate(-0.4deg);
+  }
+
+  .gallery-polaroid-4 {
+    transform: rotate(1.8deg);
+  }
+
+  .registration-poster-section {
+    background:
+      radial-gradient(circle at 20% 30%, rgba(17, 17, 17, 0.055) 0 1px, transparent 1.6px),
+      linear-gradient(90deg, rgba(17, 17, 17, 0.045) 1px, transparent 1px),
+      linear-gradient(180deg, rgba(17, 17, 17, 0.04) 1px, transparent 1px),
+      var(--party-paper);
+    background-size: 17px 17px, 58px 58px, 58px 58px, auto;
+  }
+
+  .registration-form-poster {
+    background: var(--party-paper);
+  }
+
+  .final-cta-section {
+    padding: clamp(3.5rem, 7vw, 6rem) 0;
+    background: var(--party-lime);
+  }
+
+  .final-cta-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 1.5rem;
+    align-items: center;
+  }
+
+  .final-cta-layout h2 {
+    max-width: 7.5ch;
+    margin: 0;
+    font-size: 7rem;
+    line-height: 1.02;
+    text-wrap: balance;
+  }
+
+  .final-cta-layout p {
+    display: inline-block;
+    margin: 1rem 0 0;
+    padding: 0.5rem 0.8rem;
+    background: var(--party-ink);
+    color: var(--party-paper);
+    font-family: var(--poster-mono);
+    font-weight: 700;
+    line-height: 1.25;
+    transform: rotate(-1deg);
+  }
+
+  @media (max-width: 980px) {
+    .menu-layout,
+    .countdown-layout,
+    .gallery-layout,
+    .final-cta-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .activity-row {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .counter-poster {
+      min-height: 12rem;
+    }
+
+    .hero-copy h1 {
+      font-size: clamp(6.5rem, 17vw, 9rem);
+    }
+
+    .poster-heading h2 {
+      font-size: 5.25rem;
+    }
+
+    .party-reels-header {
+      grid-template-columns: 1fr;
+    }
+
+    .party-reels-instagram-cta {
+      justify-self: start;
+    }
+
+    .party-reels-controls {
+      justify-self: start;
+    }
+
+    .final-cta-layout h2 {
+      font-size: 5.8rem;
+    }
+  }
+
+  @media (max-width: 1180px) {
+    .gallery-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .gallery-collage {
+      max-width: 58rem;
+    }
+  }
+
+  @media (max-width: 680px) {
+    .hero-poster {
+      min-height: calc(100svh - 5rem);
+      padding: 5.2rem 0 2.6rem;
+      background:
+        linear-gradient(90deg, rgba(17, 17, 17, 0.9) 0%, rgba(17, 17, 17, 0.72) 52%, rgba(17, 17, 17, 0.5) 100%),
+        linear-gradient(180deg, rgba(17, 17, 17, 0.12) 0%, rgba(17, 17, 17, 0.18) 44%, rgba(17, 17, 17, 0.86) 100%),
+        var(--hero-photo),
+        var(--party-ink);
+      background-position: 58% 45%;
+      background-size: cover;
+    }
+
+    .hero-grid {
+      display: block;
+    }
+
+    .hero-copy {
+      display: block;
+      max-width: 100%;
+      transform: translateY(-3vh);
+    }
+
+    .hero-copy h1 {
+      font-size: clamp(4.65rem, 22vw, 6.45rem);
+      line-height: 0.92;
+    }
+
+    .poster-heading {
+      max-width: 100%;
+    }
+
+    .poster-heading h2 {
+      max-width: 6.75ch;
+      font-size: 4.45rem;
+      line-height: 1.02;
+    }
+
+    .menu-layout .poster-heading h2 {
+      max-width: 8.8ch;
+      font-size: 4.2rem;
+    }
+
+    .countdown-poster .poster-heading h2 {
+      max-width: 13ch;
+      font-size: 3.15rem;
+      line-height: 1.02;
+    }
+
+    .activities-poster-section .poster-heading h2 {
+      max-width: 6.45ch;
+    }
+
+    .gallery-poster-section .poster-heading h2 {
+      max-width: 8.6ch;
+    }
+
+    .poster-heading p {
+      max-width: min(100%, 21rem);
+      margin-top: 0.7rem;
+      font-size: 1.08rem;
+      line-height: 1.1;
+    }
+
+    .party-reels-section {
+      padding: 3rem 0;
+    }
+
+    .party-reels-header h2 {
+      font-size: 4.1rem;
+    }
+
+    .party-reels-header p {
+      max-width: 18rem;
+      font-size: 0.95rem;
+    }
+
+    .party-reels-controls {
+      justify-self: start;
+    }
+
+    .party-reels-track {
+      width: calc(100% + 1rem);
+      grid-auto-columns: minmax(15.5rem, 72vw);
+      margin-left: -0.25rem;
+      padding-left: 0.25rem;
+      padding-right: 1rem;
+      scroll-padding-left: 0.25rem;
+    }
+
+    .party-reel-embed {
+      border-radius: 1.25rem;
+    }
+
+    .party-reel-instagram {
+      right: 0.65rem;
+      top: 0.65rem;
+      width: 2.45rem;
+      height: 2.45rem;
+    }
+
+    .party-reel-instagram svg {
+      width: 1.15rem;
+      height: 1.15rem;
+    }
+
+    .hero-badge {
+      margin-top: 1.05rem;
+      margin-left: 0.25rem;
+      max-width: calc(100vw - 4rem);
+      padding: 0.42rem 0.75rem 0.36rem;
+      font-size: 0.78rem;
+      white-space: nowrap;
+    }
+
+    .hero-badge::before {
+      inset: -0.18rem -0.28rem;
+    }
+
+    .hero-badge::after {
+      inset: auto 10% -0.65rem 14%;
+    }
+
+    .hero-secondary {
+      margin-top: 1.35rem;
+    }
+
+    .hero-copy p {
+      max-width: 22rem;
+      font-size: 1rem;
+      line-height: 1.22;
+    }
+
+    .hero-copy .poster-button {
+      width: min(88vw, 22rem);
+    }
+
+    .hero-actions {
+      max-width: 24.5rem;
+      gap: 0.8rem;
+      align-items: center;
+    }
+
+    .hero-copy .poster-button-instagram {
+      width: 2.35rem;
+      min-width: 2.35rem;
+      height: 2.35rem;
+      min-height: 2.35rem;
+      flex: 0 0 2.35rem;
+    }
+
+    .scroll-sticker {
+      margin-top: 2.6rem;
+    }
+
+    .quick-strip {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.95rem;
+      width: 100%;
+      margin-left: 0;
+      overflow: visible;
+      padding: 0;
+      border: 0;
+      background: transparent;
+    }
+
+    .quick-strip-item {
+      grid-template-columns: 2.25rem minmax(0, 1fr);
+      gap: 0.8rem;
+      min-width: 0;
+      min-height: 0;
+      padding: 0;
+    }
+
+    .quick-strip-icon {
+      width: 2.1rem;
+      height: 2.1rem;
+    }
+
+    .quick-strip-item h2 {
+      font-size: 1.75rem;
+      line-height: 1;
+      overflow-wrap: anywhere;
+    }
+
+    .quick-strip-item p {
+      font-size: 0.98rem;
+      line-height: 1.08;
+      overflow-wrap: anywhere;
+    }
+
+    .quick-strip::after {
+      content: none;
+    }
+
+    .menu-ticket {
+      grid-template-columns: 1fr;
+      width: 100%;
+      max-width: 100%;
+      overflow: visible;
+      padding: 1.25rem;
+      transform: rotate(0.35deg);
+    }
+
+    .menu-ticket h3 {
+      max-width: 100%;
+      font-size: clamp(2.45rem, 11.5vw, 3.15rem);
+      line-height: 1.12;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
+    .menu-ticket p {
+      font-size: 1.05rem;
+    }
+
+    .menu-ticket .poster-button {
+      width: min(100%, 20rem);
+    }
+
+    .countdown-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .deadline-poster {
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+      padding: 1.35rem;
+    }
+
+    .deadline-poster h2 {
+      max-width: 10.5ch;
+      font-size: 3.25rem;
+    }
+
+    .deadline-poster p {
+      margin-top: 0.75rem;
+      font-size: 0.9rem;
+    }
+
+    .deadline-counter {
+      grid-template-columns: auto minmax(0, 7.25rem);
+      gap: 0.6rem;
+      margin-top: 0.9rem;
+      padding: 0.5rem 0.6rem;
+    }
+
+    .deadline-counter span:last-child {
+      font-size: 0.66rem;
+    }
+
+    .deadline-actions {
+      max-width: 21rem;
+    }
+
+    .activity-row {
+      display: flex;
+      grid-template-columns: none;
+      gap: 1rem;
+      width: calc(100% + 1rem);
+      margin-top: 1.75rem;
+      margin-left: -0.25rem;
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 0.25rem 1rem 1.2rem 0.25rem;
+      scroll-padding-left: 0.25rem;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+      overscroll-behavior-x: contain;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .activity-row::-webkit-scrollbar {
+      display: none;
+    }
+
+    .activity-item {
+      flex: 0 0 min(82vw, 21rem);
+      min-height: 0;
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+      border: 2px solid var(--party-ink);
+      background: var(--party-paper);
+      padding: 0.65rem 0.65rem 0.9rem;
+      box-shadow: 7px 7px 0 var(--party-ink);
+      transform: rotate(-0.8deg);
+    }
+
+    .activity-item:nth-child(even) {
+      transform: rotate(0.8deg);
+    }
+
+    .activity-item-2 {
+      background: var(--party-paper);
+    }
+
+    .activity-item-3 {
+      background: var(--party-paper);
+    }
+
+    .activity-image {
+      transform: rotate(-1deg);
+    }
+
+    .activity-item:nth-child(even) .activity-image {
+      transform: rotate(1deg);
+    }
+
+    .activity-image img {
+      aspect-ratio: 16 / 10.5;
+    }
+
+    .activity-copy {
+      padding: 0.8rem 0.25rem 0;
+    }
+
+    .activity-item h3 {
+      max-width: 13rem;
+      font-size: 3rem;
+      line-height: 1.05;
+    }
+
+    .activity-item p {
+      max-width: 17rem;
+      margin-top: 0.7rem;
+      font-size: 0.98rem;
+      line-height: 1.18;
+    }
+
+    .activity-row::after {
+      content: "";
+      flex: 0 0 0.15rem;
+    }
+
+    .gallery-collage {
+      display: flex;
+      grid-template-columns: none;
+      gap: 1rem;
+      width: calc(100% + 1rem);
+      margin-left: -0.25rem;
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 0.25rem 1rem 1.2rem 0.25rem;
+      scroll-padding-left: 0.25rem;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+      overscroll-behavior-x: contain;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .gallery-collage::-webkit-scrollbar {
+      display: none;
+    }
+
+    .gallery-polaroid {
+      flex: 0 0 min(82vw, 21rem);
+      grid-column: auto;
+      padding: 0.55rem 0.55rem 2.1rem;
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+      box-shadow: 7px 7px 0 var(--party-ink);
+    }
+
+    .gallery-polaroid img {
+      aspect-ratio: 4 / 3.1;
+    }
+
+    .gallery-collage::after {
+      content: "";
+      flex: 0 0 0.15rem;
+    }
+
+    .final-cta-layout .poster-button {
+      justify-self: start;
+    }
+  }
+
+  @media (max-width: 420px) {
+    .hero-poster {
+      min-height: calc(100svh - 4.5rem);
+      padding-top: 4.7rem;
+      background-position: 58% 44%;
+    }
+
+    .hero-copy {
+      transform: translateY(-2vh);
+    }
+
+    .hero-copy h1 {
+      font-size: clamp(4.2rem, 21.5vw, 5.45rem);
+    }
+
+    .poster-heading h2 {
+      font-size: 3.8rem;
+    }
+
+    .menu-layout .poster-heading h2 {
+      max-width: 8.6ch;
+      font-size: 3.55rem;
+    }
+
+    .quick-strip-item h2 {
+      font-size: 1.55rem;
+    }
+
+    .menu-ticket h3 {
+      font-size: 2.55rem;
+    }
+
+    .countdown-poster .poster-heading h2 {
+      font-size: 2.85rem;
+    }
+
+    .registration-poster-header h2 {
+      font-size: 3.65rem;
+    }
+
+    .activity-item h3 {
+      font-size: 2.55rem;
+    }
+
+    .final-cta-layout h2 {
+      font-size: 4.35rem;
+    }
+  }
+
+  /* Party page custom styles */
+  .party-hero {
+    background: linear-gradient(135deg, #0f0f0f 0%, #1a1a2e 50%, #16213e 100%);
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 20px rgba(0, 247, 255, 0.3); }
+    50% { box-shadow: 0 0 40px rgba(0, 247, 255, 0.6); }
+  }
+
+  .cta-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+
+  .emoji-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  @keyframes neon-pulse {
+    0%, 100% { text-shadow: 0 0 10px rgba(0, 247, 255, 0.5), 0 0 20px rgba(0, 247, 255, 0.3); }
+    50% { text-shadow: 0 0 20px rgba(0, 247, 255, 0.8), 0 0 40px rgba(0, 247, 255, 0.5), 0 0 60px rgba(0, 247, 255, 0.3); }
+  }
+
+  .neon-text {
+    animation: neon-pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes counter-pop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+  }
+
+  .counter-pop {
+    animation: counter-pop 0.4s ease-out;
+  }
+
+  .lightbox-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  .lightbox-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .lightbox-content {
+    max-width: 90vw;
+    max-height: 90vh;
+  }
+
+  .lightbox-content img {
+    max-width: 100%;
+    max-height: 80vh;
+    object-fit: contain;
+  }
+</style>
+
+<script type="module">
+(() => {
+  const track = document.querySelector('[data-reels-track]');
+  const slides = Array.from(document.querySelectorAll('[data-reel-slide]'));
+  const prev = document.querySelector('[data-reels-prev]');
+  const next = document.querySelector('[data-reels-next]');
+  const counter = document.querySelector('[data-reels-counter]');
+
+  if (!track || !slides.length || !counter) return;
+
+  let active = 0;
+  let startX = 0;
+  let startScroll = 0;
+  let pointerDown = false;
+  let dragging = false;
+  let scrollTimer = 0;
+
+  function format(index) {
+    counter.textContent = `${String(index + 1).padStart(2, '0')} / ${String(slides.length).padStart(2, '0')}`;
+  }
+
+  function nearestIndex() {
+    const trackLeft = track.getBoundingClientRect().left;
+    return slides.reduce((best, slide, index) => {
+      const distance = Math.abs(slide.getBoundingClientRect().left - trackLeft);
+      return distance < best.distance ? { index, distance } : best;
+    }, { index: 0, distance: Number.POSITIVE_INFINITY }).index;
+  }
+
+  function setActive(index) {
+    active = Math.max(0, Math.min(index, slides.length - 1));
+    format(active);
+  }
+
+  function goTo(index) {
+    const target = slides[Math.max(0, Math.min(index, slides.length - 1))];
+    if (!target) return;
+
+    target.scrollIntoView({
+      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+      block: 'nearest',
+      inline: 'start',
+    });
+  }
+
+  prev?.addEventListener('click', () => goTo(active - 1));
+  next?.addEventListener('click', () => goTo(active + 1));
+
+  track.addEventListener('keydown', (event) => {
+    if (event.key === 'ArrowLeft') {
+      event.preventDefault();
+      goTo(active - 1);
+    }
+
+    if (event.key === 'ArrowRight') {
+      event.preventDefault();
+      goTo(active + 1);
+    }
+  });
+
+  track.addEventListener('scroll', () => {
+    window.clearTimeout(scrollTimer);
+    scrollTimer = window.setTimeout(() => setActive(nearestIndex()), 80);
+  }, { passive: true });
+
+  track.addEventListener('pointerdown', (event) => {
+    if (event.pointerType === 'touch') return;
+    pointerDown = true;
+    dragging = false;
+    startX = event.clientX;
+    startScroll = track.scrollLeft;
+  });
+
+  track.addEventListener('pointermove', (event) => {
+    if (!pointerDown || event.pointerType === 'touch') return;
+    const distance = event.clientX - startX;
+    if (Math.abs(distance) > 4) {
+      dragging = true;
+      track.classList.add('is-dragging');
+      track.scrollLeft = startScroll - distance;
+    }
+  });
+
+  function stopDrag() {
+    if (!pointerDown) return;
+    pointerDown = false;
+    track.classList.remove('is-dragging');
+
+    if (dragging) {
+      goTo(nearestIndex());
+      window.setTimeout(() => {
+        dragging = false;
+      }, 0);
+    }
+  }
+
+  track.addEventListener('pointerup', stopDrag);
+  track.addEventListener('pointercancel', stopDrag);
+  track.addEventListener('pointerleave', stopDrag);
+
+  track.addEventListener('click', (event) => {
+    if (dragging) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  }, true);
+
+  format(active);
+})();
+</script>
+
+<script type="module">
+const items=document.querySelectorAll(".gallery-item"),lb=document.getElementById("lightbox"),lbImg=document.getElementById("lightbox-image"),lbCap=document.getElementById("lightbox-caption"),closeBtn=document.getElementById("lightbox-close"),prevBtn=document.getElementById("lightbox-prev"),nextBtn=document.getElementById("lightbox-next");let idx=0;const data=Array.from(items).map(i=>({src:i.getAttribute("data-src")||"",caption:i.getAttribute("data-caption")||""}));function open(i){idx=i;update();lb?.classList.add("active");document.body.style.overflow="hidden";}function close(){lb?.classList.remove("active");document.body.style.overflow="";}function update(){if(lbImg&&lbCap){lbImg.src=data[idx].src;lbCap.textContent=data[idx].caption;}}function next(){idx=(idx+1)%data.length;update();}function prev(){idx=(idx-1+data.length)%data.length;update();}items.forEach((el,i)=>{el.addEventListener("click",()=>open(i));});closeBtn?.addEventListener("click",close);nextBtn?.addEventListener("click",next);prevBtn?.addEventListener("click",prev);lb?.addEventListener("click",e=>{if(e.target===lb)close();});document.addEventListener("keydown",e=>{if(lb?.classList.contains("active")){if(e.key==="Escape")close();if(e.key==="ArrowRight")next();if(e.key==="ArrowLeft")prev();}});
+</script>
+
+<script type="module">
+(function() {
+  const daysEl = document.getElementById('countdown-days');
+  const hoursEl = document.getElementById('countdown-hours');
+  const minutesEl = document.getElementById('countdown-minutes');
+  const secondsEl = document.getElementById('countdown-seconds');
+  const countdownSection = document.getElementById('countdown-section');
+  const deadlinePassed = document.getElementById('deadline-passed');
+  const counterPoster = document.getElementById('counter-poster');
+  const counterEl = document.getElementById('counter-value');
+  const deadlineCounterEl = document.getElementById('deadline-counter-value');
+  const fixedFoodRegistrationCount = 12;
+
+  function getNextThursdayMidnight() {
+    const now = new Date();
+    const day = now.getDay(); // 0=Sun, 4=Thu
+    let daysUntilThursday = (4 - day + 7) % 7;
+    // If it's Thursday, check if we're past midnight
+    if (daysUntilThursday === 0) {
+      // Thursday - deadline is end of today (23:59:59)
+      const endOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+      if (now <= endOfToday) {
+        return endOfToday;
+      }
+      // Past Thursday midnight, next Thursday
+      daysUntilThursday = 7;
+    }
+    const target = new Date(now.getFullYear(), now.getMonth(), now.getDate() + daysUntilThursday, 23, 59, 59, 999);
+    return target;
+  }
+
+  function isDeadlinePassed() {
+    const now = new Date();
+    const day = now.getDay();
+    const hour = now.getHours();
+    // Friday (5) = deadline passed (until new week resets on next Monday-ish, but we show it until Saturday)
+    // After Thursday midnight = Friday
+    if (day === 5) return true;
+    if (day === 6) return true; // Saturday too
+    return false;
+  }
+
+  function updateCountdown() {
+    if (isDeadlinePassed()) {
+      countdownSection?.classList.add('hidden');
+      deadlinePassed?.classList.remove('hidden');
+      counterPoster?.classList.add('hidden');
+      return;
+    }
+
+    countdownSection?.classList.remove('hidden');
+    deadlinePassed?.classList.add('hidden');
+    counterPoster?.classList.remove('hidden');
+
+    const now = new Date();
+    const target = getNextThursdayMidnight();
+    const diff = target - now;
+
+    if (diff <= 0) {
+      // Just passed - show deadline passed
+      countdownSection?.classList.add('hidden');
+      deadlinePassed?.classList.remove('hidden');
+      counterPoster?.classList.add('hidden');
+      return;
+    }
+
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+    if (daysEl) daysEl.textContent = days;
+    if (hoursEl) hoursEl.textContent = hours.toString().padStart(2, '0');
+    if (minutesEl) minutesEl.textContent = minutes.toString().padStart(2, '0');
+    if (secondsEl) secondsEl.textContent = seconds.toString().padStart(2, '0');
+  }
+
+  function setFixedCounter() {
+    if (deadlineCounterEl) deadlineCounterEl.textContent = fixedFoodRegistrationCount;
+    if (counterEl) counterEl.textContent = fixedFoodRegistrationCount;
+  }
+
+  // Start countdown
+  updateCountdown();
+  setInterval(updateCountdown, 1000);
+
+  setFixedCounter();
+})();
+</script>
+
+<script type="module">
+const form=document.getElementById("party-form"),successMsg=document.getElementById("form-success"),errorMsg=document.getElementById("form-error"),submitBtn=document.getElementById("party-submit");
+const savedRegistrationKey="newlevel-party-registration";
+const savedRegistrationMaxAge=1000*60*60*24*180;
+
+function getSavedRegistration(){
+  try{
+    const raw=localStorage.getItem(savedRegistrationKey);
+    if(!raw)return null;
+    const saved=JSON.parse(raw);
+    if(!saved.savedAt||Date.now()-saved.savedAt>savedRegistrationMaxAge){
+      localStorage.removeItem(savedRegistrationKey);
+      return null;
+    }
+    return saved;
+  }catch{
+    return null;
+  }
+}
+
+function prefillRegistration(){
+  if(!form)return;
+  const saved=getSavedRegistration();
+  if(!saved)return;
+  const name=form.querySelector('[name="name"]');
+  const email=form.querySelector('[name="email"]');
+  const phone=form.querySelector('[name="phone"]');
+  const food=form.querySelector('[name="food_registration"]');
+  if(name&&!name.value)name.value=saved.name||"";
+  if(email&&!email.value)email.value=saved.email||"";
+  if(phone&&!phone.value)phone.value=saved.phone||"";
+  if(food)food.checked=Boolean(saved.food_registration);
+}
+
+function saveRegistration(fd){
+  try{
+    localStorage.setItem(savedRegistrationKey,JSON.stringify({
+      name:fd.name||"",
+      email:fd.email||"",
+      phone:fd.phone||"",
+      food_registration:Boolean(fd.food_registration),
+      savedAt:Date.now()
+    }));
+  }catch{
+    // Browser storage can be unavailable in some private modes.
+  }
+}
+
+prefillRegistration();
+
+form?.addEventListener("submit",async(e)=>{
+  e.preventDefault();
+  submitBtn.disabled=true;
+  submitBtn.textContent="Odosielam...";
+  successMsg?.classList.add("hidden");
+  errorMsg?.classList.add("hidden");
+  try{
+    const fd=Object.fromEntries(new FormData(form));
+    const res=await fetch("/api/register",{method:"POST",headers:{"Content-Type":"application/json","Accept":"application/json"},body:JSON.stringify({name:fd.name,email:fd.email,phone:fd.phone||'',food_registration:fd.food_registration||'',message:fd.message||''})});
+    const data=await res.json();
+    if(data.success){
+      saveRegistration(fd);
+      successMsg?.classList.remove("hidden");
+      form.reset();
+      window.dispatchEvent(new CustomEvent("party-counter-refresh"));
+    }else{
+      errorMsg?.classList.remove("hidden");
+    }
+  }catch(err){
+    errorMsg?.classList.remove("hidden");
+  }finally{
+    submitBtn.disabled=false;
+    submitBtn.textContent="Odoslať registráciu";
+  }
+});
+</script>

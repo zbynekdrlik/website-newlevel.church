@@ -1,4 +1,6 @@
 ---
+import { existsSync, readdirSync } from 'node:fs';
+import { join } from 'node:path';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import hero from '../content/homepage/hero.json';
 import aboutPreview from '../content/homepage/about-preview.json';
@@ -7,32 +9,17 @@ import youtube from '../content/homepage/youtube.json';
 import joinUs from '../content/homepage/join-us.json';
 import contact from '../content/settings/contact.json';
 
-function getYoutubeVideoId(url: string): string | null {
-  try {
-    const parsedUrl = new URL(url);
-
-    if (parsedUrl.hostname === 'youtu.be') {
-      return parsedUrl.pathname.replace('/', '') || null;
-    }
-
-    if (parsedUrl.hostname.includes('youtube.com')) {
-      if (parsedUrl.pathname === '/watch') {
-        return parsedUrl.searchParams.get('v');
-      }
-
-      const match = parsedUrl.pathname.match(/\/(?:embed|shorts)\/([^/?]+)/);
-      return match?.[1] ?? null;
-    }
-  } catch {
-    return null;
-  }
-
-  return null;
-}
-
-const heroYoutubeId = getYoutubeVideoId(hero.ctaSecondary.url);
-const heroThumbnail = heroYoutubeId ? `https://i.ytimg.com/vi/${heroYoutubeId}/maxresdefault.jpg` : hero.image;
-const heroThumbnailFallback = heroYoutubeId ? `https://i.ytimg.com/vi/${heroYoutubeId}/hqdefault.jpg` : hero.image;
+const heroBackgroundDirectory = 'images/uploads/shared/drive-download-20260803T134920Z-1-001';
+const heroBackgroundPath = join(process.cwd(), 'public', heroBackgroundDirectory);
+const heroBackgrounds = existsSync(heroBackgroundPath)
+  ? readdirSync(heroBackgroundPath)
+      .filter((file) => /\.(jpe?g|png|webp|avif)$/i.test(file))
+      .sort()
+      .map((file) => `/${heroBackgroundDirectory}/${file}`)
+  : [];
+const heroBackgroundFallback = heroBackgrounds[0] ?? hero.backgroundImage;
+const heroVideoPreviewImage = hero.videoPreviewImage ?? `/${heroBackgroundDirectory}/_MG_7324.jpg`;
+const heroVideoPreviewAlt = hero.videoPreviewAlt ?? hero.imageAlt;
 
 const iconPaths: Record<string, string> = {
   heart: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />',
@@ -55,25 +42,45 @@ const iconCircleMap: Record<string, string> = {
 
 <BaseLayout title="Domov | New Level Church" description={hero.subtitle} currentPage="">
   <!-- Hero Section -->
-  <section class="relative bg-gradient-to-br from-[var(--color-primary-light)] via-[var(--color-background)] to-[var(--color-accent-light)] overflow-hidden">
-    <!-- Decorative elements -->
-    <div class="absolute top-0 right-0 w-96 h-96 bg-[var(--color-primary)]/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-    <div class="absolute bottom-0 left-0 w-72 h-72 bg-[var(--color-accent)]/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
-    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 lg:py-32">
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+  <section class="relative overflow-hidden bg-stone-950 text-white" data-hero-backgrounds={JSON.stringify(heroBackgrounds)}>
+    <div class="absolute inset-0" aria-hidden="true">
+      <img
+        src={heroBackgroundFallback}
+        alt=""
+        class="absolute inset-0 h-full w-full object-cover object-center opacity-100 transition-opacity duration-1000 ease-in-out"
+        data-hero-bg-current
+        width="5472"
+        height="3648"
+        fetchpriority="high"
+        decoding="async"
+      />
+      <img
+        src=""
+        alt=""
+        class="absolute inset-0 h-full w-full object-cover object-center opacity-0 transition-opacity duration-1000 ease-in-out"
+        data-hero-bg-next
+        width="5472"
+        height="3648"
+        decoding="async"
+      />
+    </div>
+    <div class="absolute inset-0 bg-gradient-to-r from-black/85 via-black/60 to-black/35"></div>
+    <div class="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-black/20"></div>
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-20 lg:py-24">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
         <!-- Text Content -->
         <div class="text-center lg:text-left">
-          <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-[var(--color-text)] leading-tight mb-6">
+          <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6 drop-shadow-lg">
             {hero.title} <span class="text-[var(--color-primary)]">{hero.titleAccent}</span> {hero.titleSuffix}
           </h1>
-          <p class="text-lg md:text-xl text-[var(--color-text-light)] mb-8 max-w-xl mx-auto lg:mx-0">
+          <p class="text-lg md:text-xl text-white/90 mb-8 max-w-xl mx-auto lg:mx-0 drop-shadow">
             {hero.subtitle}
           </p>
           <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
             <a href={hero.ctaPrimary.url} class="inline-flex items-center justify-center px-8 py-4 bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-white font-semibold rounded-full transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
               {hero.ctaPrimary.text}
             </a>
-            <a href={hero.ctaSecondary.url} target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center px-8 py-4 bg-[var(--color-background)] hover:bg-[var(--color-background-alt)] text-[var(--color-text-light)] font-semibold rounded-full transition-all duration-200 shadow-md hover:shadow-lg border border-[var(--color-text-muted)]">
+            <a href={hero.ctaSecondary.url} target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center px-8 py-4 bg-white/95 hover:bg-white text-[var(--color-text)] font-semibold rounded-full transition-all duration-200 shadow-md hover:shadow-lg border border-white/40">
               <svg class="w-5 h-5 mr-2 text-[var(--color-primary)]" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"></path>
               </svg>
@@ -83,25 +90,120 @@ const iconCircleMap: Record<string, string> = {
         </div>
         <!-- Video Preview -->
         <div class="relative">
-          <div class="absolute -inset-4 bg-gradient-to-br from-[var(--color-primary)]/10 to-[var(--color-accent)]/30 rounded-[2rem] blur-2xl"></div>
-          <div class="relative rounded-[2rem] bg-gradient-to-br from-stone-950 via-stone-900 to-stone-800 p-2 shadow-2xl ring-1 ring-white/20">
-            <div class="absolute left-1/2 top-1.5 z-10 h-1 w-16 -translate-x-1/2 rounded-full bg-white/20"></div>
-            <div class="relative aspect-video overflow-hidden rounded-[1.5rem] bg-black">
-              <img src={heroThumbnail} alt={hero.imageAlt} class="w-full h-full object-cover" width="1280" height="720" fetchpriority="high" decoding="async" onerror={`this.onerror=null;this.src='${heroThumbnailFallback}';`}>
-              <!-- Play button overlay -->
-              <a href={hero.ctaSecondary.url} target="_blank" rel="noopener noreferrer" class="absolute inset-0 flex items-center justify-center bg-black/30 hover:bg-black/40 transition-colors duration-200 group">
-                <div class="w-20 h-20 bg-[var(--color-primary)] rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-200">
-                  <svg class="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M8 5v14l11-7z"></path>
-                  </svg>
-                </div>
-              </a>
-              </div>
-          </div>
+          <div class="absolute -inset-5 rounded-[2rem] bg-gradient-to-br from-[var(--color-primary)]/25 via-white/5 to-[var(--color-accent)]/35 blur-2xl"></div>
+          <a href={hero.ctaSecondary.url} target="_blank" rel="noopener noreferrer" class="group relative block overflow-hidden rounded-[1.6rem] bg-stone-950 shadow-2xl ring-1 ring-white/20">
+            <img
+              src={heroVideoPreviewImage}
+              alt={heroVideoPreviewAlt}
+              class="aspect-[16/10] w-full object-cover transition-transform duration-500 group-hover:scale-[1.035]"
+              width="1920"
+              height="1280"
+              fetchpriority="high"
+              decoding="async"
+            />
+            <span class="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent"></span>
+            <span class="absolute inset-0 flex items-center justify-center bg-black/10 transition-colors duration-200 group-hover:bg-black/20">
+              <span class="flex h-20 w-20 items-center justify-center rounded-full bg-[var(--color-primary)] shadow-xl transition-transform duration-200 group-hover:scale-110">
+                <svg class="ml-1 h-8 w-8 text-white" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M8 5v14l11-7z"></path>
+                </svg>
+              </span>
+            </span>
+          </a>
         </div>
       </div>
     </div>
   </section>
+
+  <script>
+    const heroSection = document.querySelector<HTMLElement>('[data-hero-backgrounds]');
+    const currentBackground = heroSection?.querySelector<HTMLImageElement>('[data-hero-bg-current]');
+    const nextBackground = heroSection?.querySelector<HTMLImageElement>('[data-hero-bg-next]');
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function shuffleImages(images: string[]) {
+      const shuffled = [...images];
+
+      for (let i = shuffled.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+
+      return shuffled;
+    }
+
+    function readLastHeroImage() {
+      try {
+        return window.localStorage.getItem('newlevel:lastHeroBackground');
+      } catch {
+        return null;
+      }
+    }
+
+    function saveLastHeroImage(image: string) {
+      try {
+        window.localStorage.setItem('newlevel:lastHeroBackground', image);
+      } catch {
+        return;
+      }
+    }
+
+    function pickFreshImage(images: string[], lastImage: string | null) {
+      const candidates = images.filter((image) => image !== lastImage);
+      const pool = candidates.length > 0 ? candidates : images;
+
+      return pool[Math.floor(Math.random() * pool.length)];
+    }
+
+    if (heroSection && currentBackground && nextBackground) {
+      const backgrounds = JSON.parse(heroSection.dataset.heroBackgrounds ?? '[]') as string[];
+
+      if (backgrounds.length > 1) {
+        let activeImage = pickFreshImage(backgrounds, readLastHeroImage());
+        let queue = shuffleImages(backgrounds.filter((image) => image !== activeImage));
+
+        currentBackground.src = activeImage;
+        saveLastHeroImage(activeImage);
+
+        if (!prefersReducedMotion) {
+          window.setInterval(() => {
+            if (queue.length === 0) {
+              queue = shuffleImages(backgrounds.filter((image) => image !== activeImage));
+            }
+
+            const upcomingImage = queue.shift();
+
+            if (!upcomingImage) {
+              return;
+            }
+
+            nextBackground.onload = () => {
+              nextBackground.onload = null;
+              nextBackground.classList.remove('opacity-0');
+              nextBackground.classList.add('opacity-100');
+              currentBackground.classList.remove('opacity-100');
+              currentBackground.classList.add('opacity-0');
+
+              window.setTimeout(() => {
+                currentBackground.src = upcomingImage;
+                currentBackground.classList.remove('opacity-0');
+                currentBackground.classList.add('opacity-100');
+                nextBackground.classList.remove('opacity-100');
+                nextBackground.classList.add('opacity-0');
+                activeImage = upcomingImage;
+                saveLastHeroImage(activeImage);
+              }, 1000);
+            };
+            nextBackground.src = upcomingImage;
+
+            if (nextBackground.complete) {
+              nextBackground.onload?.(new Event('load'));
+            }
+          }, 9000);
+        }
+      }
+    }
+  </script>
 
   <!-- About Preview Section -->
   <section class="py-16 md:py-24 bg-[var(--color-background)]">
