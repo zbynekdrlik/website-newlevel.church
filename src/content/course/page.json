@@ -1,0 +1,274 @@
+{
+  "eyebrow": "Vzdelávacia cesta spoločenstva",
+  "title": "Cesta viery",
+  "description": "Päť lekcií, ktoré ťa krok za krokom prevedú základmi viery. Pozeraj videá vlastným tempom, stiahni si materiály a over si, čo si sa naučil.",
+  "stats": [
+    {
+      "label": "Lekcií",
+      "value": "5"
+    },
+    {
+      "label": "Kvíz",
+      "value": "1"
+    },
+    {
+      "label": "Materiály",
+      "value": "PDF"
+    }
+  ],
+  "heroImages": [
+    {
+      "src": "/images/uploads/bohosluzba.jpg",
+      "alt": "Bohoslužba New Level Church"
+    },
+    {
+      "src": "/images/uploads/komunita.jpg",
+      "alt": "Komunita New Level Church"
+    },
+    {
+      "src": "/images/uploads/chvaly.jpg",
+      "alt": "Chvály New Level Church"
+    }
+  ],
+  "mapIntro": {
+    "titleAccent": "pre mladých",
+    "subtitle": "Objavuj pravdu, buduj vzťah s Bohom a ži život, ktorý má zmysel.",
+    "hint": "Klikni na bod cesty a otvor lekciu"
+  },
+  "mapLabels": {
+    "intro": "Úvod do kurzu",
+    "god": "Kto je Boh?",
+    "bible": "Biblia ako Boží list",
+    "inspire": "Inšpirácia Písma",
+    "prayer": "Modlitba a komunikácia",
+    "community": "Vzťahy a spoločenstvo",
+    "life": "Život v spoločenstve",
+    "mission": "Poslanie a služba",
+    "world": "Vplývame na svet"
+  },
+  "lessons": [
+    {
+      "id": "lekcia-1",
+      "order": 1,
+      "title": "Kto je Boh?",
+      "subtitle": "Prvé zoznámenie",
+      "videoThumbnail": "/images/course/lekcia-1.png",
+      "videoUrl": "",
+      "duration": "8:30",
+      "estimatedTime": "Zaberie približne 12 minút",
+      "preview": "Spoločne si otvoríme otázku, ktorá stojí na začiatku každej cesty viery - kto je Boh a prečo na tom záleží práve pre teba.",
+      "objectives": [
+        "Pochopíš, ako sa Boh predstavuje v Biblii",
+        "Spoznáš rozdiel medzi vierou a náboženstvom",
+        "Nájdeš prvý osobný dôvod, prečo pokračovať ďalej"
+      ],
+      "tips": [
+        "Nájdi si tiché miesto bez rušenia",
+        "Zapíš si jednu otázku, ktorá ti počas videa napadne"
+      ],
+      "summary": "V tejto úvodnej lekcii sa pozrieme na to, ako Boh vstupuje do príbehu človeka. Nejde o zložité pojmy, ale o vzťah. Ukážeme si, že vieru netreba mať hotovú - stačí byť otvorený a ochotný hľadať. Na konci lekcie budeš mať jasnejší obraz o tom, kam táto cesta smeruje.",
+      "encouragement": "Skvelý začiatok! Prvý krok je vždy ten najdôležitejší.",
+      "materials": [
+        {
+          "label": "Pracovný list k lekcii 1",
+          "kind": "PDF",
+          "href": ""
+        },
+        {
+          "label": "Verše na zamyslenie",
+          "kind": "PDF",
+          "href": ""
+        }
+      ],
+      "status": "completed",
+      "requiresQuiz": false
+    },
+    {
+      "id": "lekcia-2",
+      "order": 2,
+      "title": "Biblia ako Boží list",
+      "subtitle": "Ako čítať Písmo",
+      "videoThumbnail": "/images/course/lekcia-2.png",
+      "videoUrl": "",
+      "duration": "10:15",
+      "estimatedTime": "Zaberie približne 15 minút",
+      "preview": "Biblia môže na prvý pohľad pôsobiť ako veľká a náročná kniha. Ukážeme si jednoduchý spôsob, ako ju čítať s porozumením a radosťou.",
+      "objectives": [
+        "Zorientuješ sa v základnej stavbe Biblie",
+        "Naučíš sa jednoduchú metódu čítania Písma",
+        "Vyberieš si prvú knihu, ktorú prečítaš"
+      ],
+      "tips": [
+        "Začni Evanjeliom podľa Marka - je krátke a živé",
+        "Čítaj radšej kratšie úseky, ale pravidelne"
+      ],
+      "summary": "Biblia nie je len historická kniha, ale list adresovaný aj tebe. V tejto lekcii si vysvetlíme, ako je usporiadaná, čím sa líšia Starý a Nový zákon a ako pristupovať k textu s otvoreným srdcom. Získaš praktický návod, aby sa čítanie stalo prirodzenou súčasťou tvojho dňa.",
+      "encouragement": "Ide ti to výborne - držíš sa cesty a to sa počíta.",
+      "materials": [
+        {
+          "label": "Plán čítania na 7 dní",
+          "kind": "PDF",
+          "href": ""
+        },
+        {
+          "label": "Prehľad kníh Biblie",
+          "kind": "PDF",
+          "href": ""
+        },
+        {
+          "label": "Odporúčaná aplikácia",
+          "kind": "Odkaz",
+          "href": ""
+        }
+      ],
+      "status": "completed",
+      "requiresQuiz": false
+    },
+    {
+      "id": "lekcia-3",
+      "order": 3,
+      "title": "Modlitba a rozhovor s Bohom",
+      "subtitle": "Byť v spojení",
+      "videoThumbnail": "/images/course/lekcia-3.png",
+      "videoUrl": "",
+      "duration": "9:05",
+      "estimatedTime": "Zaberie približne 12 minút",
+      "preview": "Modlitba nie je predpísaná formulka, ale úprimný rozhovor. Objavíš, že môžeš hovoriť s Bohom vlastnými slovami, kdekoľvek a kedykoľvek.",
+      "objectives": [
+        "Pochopíš, čo modlitba je a čo nie je",
+        "Vyskúšaš si jednoduchú štruktúru modlitby",
+        "Vytvoríš si vlastný malý modlitebný zvyk"
+      ],
+      "tips": [
+        "Nemusíš mať dokonalé slová - buď úprimný",
+        "Skús každý deň jednu vetu vďaky"
+      ],
+      "summary": "Táto lekcia ti pomôže prekonať pocit, že nevieš, ako sa modliť. Prejdeme si rôzne podoby modlitby - vďaku, prosbu, stíšenie - a ukážeme, že najdôležitejšia je úprimnosť. Na konci lekcie ťa čaká kvíz, ktorý ti pomôže upevniť základy z prvých troch lekcií.",
+      "encouragement": "Zvládol si prvú tretinu cesty. Pripravený overiť si vedomosti?",
+      "materials": [
+        {
+          "label": "Sprievodca modlitbou",
+          "kind": "PDF",
+          "href": ""
+        },
+        {
+          "label": "Karta na každý deň",
+          "kind": "PDF",
+          "href": ""
+        }
+      ],
+      "status": "current",
+      "requiresQuiz": false
+    },
+    {
+      "id": "lekcia-4",
+      "order": 4,
+      "title": "Život v spoločenstve",
+      "subtitle": "Nie sme na to sami",
+      "videoThumbnail": "/images/course/lekcia-4.png",
+      "videoUrl": "",
+      "duration": "11:40",
+      "estimatedTime": "Zaberie približne 15 minút",
+      "preview": "Viera rastie najlepšie vo vzťahoch. Pozrieme sa na to, prečo je spoločenstvo dôležité a ako v ňom nájsť svoje miesto.",
+      "objectives": [
+        "Spoznáš hodnotu spoločenstva veriacich",
+        "Zistíš, ako sa zapojiť do života zboru",
+        "Objavíš svoje dary pre druhých"
+      ],
+      "tips": [
+        "Nájdi jednu skupinku, do ktorej môžeš prísť",
+        "Priateľstvá vo viere buduj bez tlaku, prirodzene"
+      ],
+      "summary": "Spoločenstvo je miesto, kde sa viera stáva žitou skúsenosťou. V tejto lekcii sa pozrieme na to, ako vyzerá zdravé spoločenstvo, prečo doň patrí aj tvoj príbeh a ako môžeš prispieť. Povzbudíme ťa urobiť konkrétny krok k zapojeniu.",
+      "encouragement": "Otvára sa pred tebou nová časť cesty - vitaj!",
+      "materials": [
+        {
+          "label": "Prehľad skupiniek",
+          "kind": "PDF",
+          "href": ""
+        },
+        {
+          "label": "Ako sa zapojiť",
+          "kind": "Odkaz",
+          "href": ""
+        }
+      ],
+      "status": "locked",
+      "requiresQuiz": true
+    },
+    {
+      "id": "lekcia-5",
+      "order": 5,
+      "title": "Poslanie a služba",
+      "subtitle": "Odovzdávať ďalej",
+      "videoThumbnail": "/images/course/lekcia-5.png",
+      "videoUrl": "",
+      "duration": "12:20",
+      "estimatedTime": "Zaberie približne 16 minút",
+      "preview": "Cesta viery nekončí pri nás - pokračuje v tom, čo odovzdávame ďalej. Objavíš, ako môžeš slúžiť podľa svojich obdarovaní.",
+      "objectives": [
+        "Pochopíš, čo znamená poslanie v každodennom živote",
+        "Rozpoznáš oblasti, kde môžeš slúžiť",
+        "Naplánuješ si prvý krok v službe"
+      ],
+      "tips": [
+        "Služba nemusí byť veľká - stačí začať tam, kde si",
+        "Spoj svoje dary s potrebou, ktorú vidíš okolo seba"
+      ],
+      "summary": "Posledná lekcia spája všetko, čo si sa naučil, a smeruje k praktickému kroku. Pozrieme sa na to, že každý má svoje jedinečné poslanie a že služba prináša radosť nielen druhým, ale aj tebe. Zakončíme cestu povzbudením pokračovať ďalej vo vlastnom tempe.",
+      "encouragement": "Si na konci cesty - a zároveň na začiatku niečoho nového.",
+      "materials": [
+        {
+          "label": "Mapa darov a služieb",
+          "kind": "PDF",
+          "href": ""
+        },
+        {
+          "label": "Osobný akčný plán",
+          "kind": "DOCX",
+          "href": ""
+        }
+      ],
+      "status": "locked",
+      "requiresQuiz": true
+    }
+  ],
+  "quiz": {
+    "title": "Kontrolný bod: Overenie základov",
+    "intro": "Krátky kvíz z prvých troch lekcií. Po jeho úspešnom zvládnutí sa ti odomknú lekcie 4 a 5.",
+    "afterLessonOrder": 3,
+    "passThreshold": 2,
+    "questions": [
+      {
+        "id": "q1",
+        "question": "Ako by sme najlepšie opísali vieru podľa prvej lekcie?",
+        "options": [
+          "Zbierka pravidiel, ktoré treba dodržiavať",
+          "Vzťah a dôvera, ktorá rastie",
+          "Niečo, čo musí byť hneď dokonalé"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": "q2",
+        "question": "Ktoré evanjelium sme odporučili čítať ako prvé?",
+        "options": [
+          "Podľa Jána",
+          "Podľa Marka",
+          "Podľa Matúša"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": "q3",
+        "question": "Čo je pri modlitbe najdôležitejšie?",
+        "options": [
+          "Správne a naučené slová",
+          "Dĺžka modlitby",
+          "Úprimnosť srdca"
+        ],
+        "correctIndex": 2
+      }
+    ]
+  }
+}

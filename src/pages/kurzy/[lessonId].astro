@@ -1,0 +1,234 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { course, type Lesson } from '../../data/course';
+
+export function getStaticPaths() {
+  return course.lessons.map((lesson) => ({
+    params: { lessonId: lesson.id },
+    props: { lesson },
+  }));
+}
+
+interface Props {
+  lesson: Lesson;
+}
+
+const { lesson } = Astro.props;
+const videoUrl = lesson.videoFile || lesson.videoUrl || '';
+const videoIsExternal = /^https?:\/\//.test(videoUrl);
+const materials = lesson.materials.map((material) => ({
+  ...material,
+  url: material.file || material.href || '',
+}));
+const hasQuiz = lesson.order === course.quiz.afterLessonOrder;
+---
+
+<BaseLayout
+  title={`${lesson.title} | Kurzy | New Level Church`}
+  description={lesson.preview}
+  currentPage="kurzy"
+>
+  <section class="course-surface bg-[var(--color-background)] py-8 md:py-12">
+    <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+      <a href="/kurzy" class="mb-6 inline-flex items-center gap-2 rounded-full bg-[var(--color-primary-light)] px-4 py-2 text-sm font-bold text-[var(--color-primary)] transition-colors hover:bg-[var(--color-primary)] hover:text-white">
+        <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+        Späť na mapu kurzu
+      </a>
+
+      <div class="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
+        <article class="overflow-hidden rounded-3xl border border-[var(--color-text-muted)]/20 bg-white shadow-sm">
+          <div class="p-5 md:p-7">
+            <p class="text-sm font-black uppercase tracking-widest text-[var(--color-primary)]">
+              Lekcia {String(lesson.order).padStart(2, '0')} · {lesson.subtitle}
+            </p>
+            <h1 class="mt-3 text-4xl font-black leading-tight text-[var(--color-text)] md:text-5xl">
+              {lesson.title}
+            </h1>
+            <p class="mt-4 text-lg leading-relaxed text-[var(--color-text-light)]">
+              {lesson.preview}
+            </p>
+          </div>
+
+          <div class="px-5 pb-5 md:px-7 md:pb-7">
+            <div class="relative overflow-hidden rounded-2xl border border-[var(--color-text-muted)]/20 bg-[var(--color-background-alt)]">
+              <img
+                src={lesson.videoThumbnail}
+                alt={`Náhľad videa: ${lesson.title}`}
+                class="h-[18rem] w-full object-cover md:h-[24rem]"
+                width="1200"
+                height="675"
+                loading="eager"
+                decoding="async"
+              />
+              {videoUrl ? (
+                <a
+                  href={videoUrl}
+                  target={videoIsExternal ? '_blank' : undefined}
+                  rel={videoIsExternal ? 'noopener noreferrer' : undefined}
+                  class="absolute inset-0 flex items-center justify-center bg-black/10 transition-colors hover:bg-black/20"
+                  aria-label={`Prehrať video: ${lesson.title}`}
+                >
+                  <span class="flex size-20 items-center justify-center rounded-full bg-white text-[var(--color-primary)] shadow-xl">
+                    <svg class="ml-1 size-9" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M8 5v14l11-7z"></path>
+                    </svg>
+                  </span>
+                </a>
+              ) : (
+                <span class="absolute inset-0 flex items-center justify-center bg-black/10">
+                  <span class="rounded-full bg-white/95 px-4 py-2 text-sm font-bold text-[var(--color-text-light)] shadow">
+                    Video doplníš v admine
+                  </span>
+                </span>
+              )}
+              <span class="absolute bottom-3 right-3 rounded-lg bg-black/75 px-3 py-1 text-sm font-black text-white">
+                {lesson.duration}
+              </span>
+            </div>
+          </div>
+        </article>
+
+        <aside class="space-y-4">
+          <section class="rounded-3xl border border-[var(--color-text-muted)]/20 bg-white p-5 shadow-sm">
+            <h2 class="text-xl font-black text-[var(--color-text)]">Materiály</h2>
+            <div class="mt-4 space-y-2">
+              {materials.map((material) => {
+                const isExternal = /^https?:\/\//.test(material.url);
+                return (
+                  <a
+                    href={material.url || '#'}
+                    target={isExternal ? '_blank' : undefined}
+                    rel={isExternal ? 'noopener noreferrer' : undefined}
+                    aria-disabled={!material.url}
+                    class={`flex items-center justify-between rounded-xl border border-[var(--color-text-muted)]/20 px-4 py-3 text-sm font-bold transition-colors ${
+                      material.url
+                        ? 'hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]'
+                        : 'pointer-events-none opacity-50'
+                    }`}
+                  >
+                    <span>{material.label}</span>
+                    <span class="text-xs uppercase text-[var(--color-text-muted)]">{material.kind}</span>
+                  </a>
+                );
+              })}
+            </div>
+          </section>
+
+          <section class="rounded-3xl border border-[var(--color-text-muted)]/20 bg-white p-5 shadow-sm">
+            <h2 class="text-xl font-black text-[var(--color-text)]">Čo sa naučíš</h2>
+            <ul class="mt-4 space-y-2">
+              {lesson.objectives.map((item) => (
+                <li class="flex gap-3 text-sm leading-relaxed text-[var(--color-text-light)]">
+                  <span class="mt-2 size-2 shrink-0 rounded-full bg-[var(--color-primary)]"></span>
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          {hasQuiz && (
+            <section class="rounded-3xl border border-[var(--color-accent)]/50 bg-[var(--color-background-alt)] p-5 shadow-sm">
+              <p class="text-sm font-black uppercase tracking-widest text-[var(--color-accent-dark)]">Test</p>
+              <h2 class="mt-2 text-xl font-black text-[var(--color-text)]">{course.quiz.title}</h2>
+              <p class="mt-2 text-sm leading-relaxed text-[var(--color-text-light)]">{course.quiz.intro}</p>
+              <form class="mt-4 space-y-4" data-course-quiz>
+                {course.quiz.questions.map((question, questionIndex) => (
+                  <fieldset class="rounded-2xl bg-white p-4" data-correct={question.correctIndex}>
+                    <legend class="text-sm font-bold text-[var(--color-text)]">
+                      {questionIndex + 1}. {question.question}
+                    </legend>
+                    <div class="mt-3 space-y-2">
+                      {question.options.map((option, optionIndex) => (
+                        <label class="flex cursor-pointer gap-2 rounded-xl border border-[var(--color-text-muted)]/20 px-3 py-2 text-sm text-[var(--color-text-light)]">
+                          <input type="radio" name={question.id} value={optionIndex} />
+                          <span>{option}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </fieldset>
+                ))}
+                <button type="button" class="rounded-full bg-[var(--color-primary)] px-5 py-2.5 text-sm font-black text-white" data-evaluate-quiz>
+                  Vyhodnotiť test
+                </button>
+                <p class="hidden rounded-xl bg-white px-4 py-3 text-sm font-bold text-[var(--color-text)]" data-quiz-result></p>
+              </form>
+            </section>
+          )}
+        </aside>
+      </div>
+
+      <section class="mt-8 grid gap-4 md:grid-cols-2">
+        <div class="rounded-3xl bg-[var(--color-background-alt)] p-6">
+          <h2 class="text-xl font-black text-[var(--color-text)]">Praktické tipy</h2>
+          <ul class="mt-4 space-y-2">
+            {lesson.tips.map((tip) => (
+              <li class="flex gap-3 text-sm leading-relaxed text-[var(--color-text-light)]">
+                <span class="mt-2 size-2 shrink-0 rounded-full bg-[var(--color-accent)]"></span>
+                <span>{tip}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div class="rounded-3xl bg-[var(--color-primary-light)] p-6">
+          <h2 class="text-xl font-black text-[var(--color-text)]">Zhrnutie</h2>
+          <p class="mt-4 text-sm leading-relaxed text-[var(--color-text-light)]">{lesson.summary}</p>
+          <p class="mt-5 rounded-2xl bg-white px-4 py-3 text-sm font-bold italic text-[var(--color-primary)]">
+            {lesson.encouragement}
+          </p>
+        </div>
+      </section>
+    </div>
+  </section>
+
+  <script is:inline>
+    document.querySelector('[data-evaluate-quiz]')?.addEventListener('click', () => {
+      const form = document.querySelector('[data-course-quiz]');
+      const result = document.querySelector('[data-quiz-result]');
+
+      if (!form || !result) return;
+
+      const fieldsets = [...form.querySelectorAll('fieldset[data-correct]')];
+      let correct = 0;
+      let answered = 0;
+
+      fieldsets.forEach((fieldset) => {
+        const checked = fieldset.querySelector('input[type="radio"]:checked');
+        if (!checked) return;
+        answered += 1;
+        if (String(checked.value) === fieldset.dataset.correct) {
+          correct += 1;
+        }
+      });
+
+      result.classList.remove('hidden');
+      result.textContent =
+        answered < fieldsets.length
+          ? 'Odpovedz najprv na všetky otázky.'
+          : `Máš ${correct} z ${fieldsets.length} správne.`;
+    });
+  </script>
+
+  <style>
+    .course-surface {
+      --background: var(--color-background);
+      --foreground: var(--color-text);
+      --card: #ffffff;
+      --primary: var(--color-primary);
+      --primary-foreground: #ffffff;
+      --secondary: var(--color-background-alt);
+      --muted: var(--color-primary-light);
+      --muted-foreground: var(--color-text-muted);
+      --accent: var(--color-accent);
+      --accent-foreground: var(--color-text);
+      --destructive: #dc2626;
+      --border: color-mix(in srgb, var(--color-text-muted) 28%, transparent);
+      --input: color-mix(in srgb, var(--color-text-muted) 35%, transparent);
+      --ring: var(--color-primary);
+      --path: color-mix(in srgb, var(--color-primary) 25%, transparent);
+      --path-active: var(--color-primary);
+    }
+  </style>
+</BaseLayout>

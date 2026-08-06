@@ -1,0 +1,733 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { CourseJourney } from '../components/course/CourseJourney';
+import { course } from '../data/course';
+---
+
+<BaseLayout
+  title="Kurzy | New Level Church"
+  description={course.description}
+  currentPage="kurzy"
+>
+  <section class="course-surface">
+    <CourseJourney />
+  </section>
+
+  <style is:global>
+    .course-surface {
+      background:
+        radial-gradient(circle at 76% 26%, rgba(62, 187, 192, 0.16), transparent 28rem),
+        radial-gradient(circle at 12% 36%, rgba(221, 14, 24, 0.16), transparent 24rem),
+        linear-gradient(135deg, #111820 0%, #0a1016 46%, #111820 100%);
+      color: #ffffff;
+      min-height: calc(100svh - 5rem);
+      overflow: hidden;
+    }
+
+    .course-board {
+      position: relative;
+      min-height: calc(100svh - 5rem);
+      max-width: 100rem;
+      margin: 0 auto;
+      padding: clamp(2.2rem, 3vw, 4rem) clamp(1.25rem, 3vw, 4rem) 3.8rem;
+      isolation: isolate;
+    }
+
+    .course-board::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -2;
+      background:
+        linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+      background-size: 4.5rem 4.5rem;
+      mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.95), transparent 86%);
+    }
+
+    .course-board::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      background: radial-gradient(circle at center, transparent 0 42%, rgba(0, 0, 0, 0.32) 78%);
+      pointer-events: none;
+    }
+
+    .course-board__intro {
+      position: absolute;
+      left: clamp(1.25rem, 3vw, 4rem);
+      top: clamp(2rem, 4vw, 4.5rem);
+      z-index: 5;
+      max-width: 24rem;
+    }
+
+    .course-board__intro h1 {
+      font-family: "Barlow Condensed", "Inter", sans-serif;
+      font-size: clamp(3.5rem, 5.1vw, 6.1rem);
+      font-weight: 900;
+      line-height: 0.93;
+      letter-spacing: 0;
+      text-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    }
+
+    .course-board__intro span {
+      display: block;
+      color: var(--color-primary);
+    }
+
+    .course-board__intro p {
+      margin-top: 1.35rem;
+      max-width: 29rem;
+      color: rgba(255, 255, 255, 0.78);
+      font-size: clamp(1rem, 1.4vw, 1.35rem);
+      font-weight: 700;
+      line-height: 1.45;
+    }
+
+    .course-board__track {
+      position: absolute;
+      inset: 8.5rem -1rem 3.8rem -1rem;
+      z-index: 1;
+    }
+
+    .course-board__track svg {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+
+    .course-board__road-shadow,
+    .course-board__road-base,
+    .course-board__road-border,
+    .course-board__road-inner,
+    .course-board__segment,
+    .course-board__road-line {
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      vector-effect: non-scaling-stroke;
+    }
+
+    .course-board__road-shadow {
+      stroke: rgba(0, 0, 0, 0.55);
+      stroke-width: 122;
+      filter: url(#course-road-shadow);
+    }
+
+    .course-board__road-base {
+      stroke: rgba(11, 14, 17, 0.94);
+      stroke-width: 112;
+    }
+
+    .course-board__road-border {
+      stroke: rgba(255, 255, 255, 0.34);
+      stroke-width: 118;
+    }
+
+    .course-board__road-inner {
+      stroke: rgba(12, 15, 18, 0.96);
+      stroke-width: 102;
+    }
+
+    .course-board__segment {
+      stroke-width: 94;
+    }
+
+    .course-board__segment--red {
+      stroke: url(#course-red);
+    }
+
+    .course-board__segment--teal {
+      stroke: url(#course-teal);
+    }
+
+    .course-board__segment--locked {
+      stroke: url(#course-locked);
+    }
+
+    .course-board__road-line {
+      stroke: rgba(255, 255, 255, 0.72);
+      stroke-width: 2.2;
+      stroke-dasharray: 240 18;
+      opacity: 0.7;
+    }
+
+    .course-board__label {
+      position: absolute;
+      z-index: 3;
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.3rem;
+      color: rgba(255, 255, 255, 0.78);
+      font-family: "Barlow Condensed", "Inter", sans-serif;
+      font-size: clamp(1rem, 1.35vw, 1.55rem);
+      font-weight: 900;
+      letter-spacing: 0.04em;
+      line-height: 0.95;
+      text-align: center;
+      text-transform: uppercase;
+      text-shadow: 0 3px 10px rgba(0, 0, 0, 0.55);
+      pointer-events: none;
+    }
+
+    .course-board__label svg {
+      width: 1.5rem;
+      height: 1.5rem;
+      opacity: 0.55;
+      stroke-width: 1.7;
+    }
+
+    .course-board__label--intro {
+      left: 27%;
+      top: 32%;
+      transform: rotate(-6deg);
+    }
+
+    .course-board__label--god {
+      left: 12%;
+      top: 47%;
+      transform: rotate(-12deg);
+      color: rgba(255, 255, 255, 0.54);
+    }
+
+    .course-board__label--bible {
+      left: 50%;
+      top: 25%;
+      transform: rotate(-16deg);
+    }
+
+    .course-board__label--inspire {
+      left: 63%;
+      top: 12%;
+      transform: rotate(-3deg);
+    }
+
+    .course-board__label--prayer {
+      left: 75%;
+      top: 15%;
+      transform: rotate(12deg);
+    }
+
+    .course-board__label--community {
+      left: 73%;
+      top: 60%;
+      transform: rotate(-18deg);
+    }
+
+    .course-board__label--life {
+      left: 63%;
+      top: 67%;
+      transform: rotate(0deg);
+    }
+
+    .course-board__label--mission {
+      left: 38%;
+      top: 74%;
+      transform: rotate(-10deg);
+    }
+
+    .course-board__label--world {
+      left: 4%;
+      top: 78%;
+      transform: rotate(-4deg);
+    }
+
+    .course-board__card {
+      position: absolute;
+      z-index: 18;
+      display: block;
+      width: min(17.5rem, 20vw);
+      min-width: 13.75rem;
+      padding: 1rem;
+      border: 1px solid rgba(255, 255, 255, 0.82);
+      border-radius: 1.15rem;
+      background: rgba(255, 255, 255, 0.96);
+      color: #141414;
+      box-shadow: 0 1.3rem 2.4rem rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(18px);
+      transition:
+        transform 180ms ease,
+        box-shadow 180ms ease,
+        border-color 180ms ease;
+    }
+
+    .course-board__card:hover,
+    .course-board__card:focus-visible {
+      transform: translateY(-0.3rem);
+      border-color: rgba(255, 255, 255, 1);
+      box-shadow: 0 1.75rem 3rem rgba(0, 0, 0, 0.38);
+      outline: none;
+    }
+
+    .course-board__card::after {
+      content: "";
+      position: absolute;
+      width: 1.7rem;
+      height: 1.7rem;
+      background: rgba(255, 255, 255, 0.96);
+      border-right: 1px solid rgba(255, 255, 255, 0.85);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.85);
+      transform: rotate(45deg);
+    }
+
+    .course-board__card--one {
+      left: 6%;
+      top: 33%;
+    }
+
+    .course-board__card--one::after {
+      left: -0.85rem;
+      top: 64%;
+    }
+
+    .course-board__card--two {
+      left: 36%;
+      top: 1.8rem;
+      width: min(18.5rem, 21vw);
+    }
+
+    .course-board__card--two::after {
+      left: 43%;
+      bottom: -0.85rem;
+    }
+
+    .course-board__card--three {
+      right: 2.3%;
+      top: 34%;
+      width: min(17.5rem, 20vw);
+    }
+
+    .course-board__card--three::after {
+      left: -0.85rem;
+      top: 43%;
+    }
+
+    .course-board__card--four {
+      left: 46%;
+      top: 56%;
+      width: min(17rem, 20vw);
+    }
+
+    .course-board__card--four::after {
+      left: 48%;
+      top: -0.85rem;
+      border: 0;
+      border-left: 1px solid rgba(255, 255, 255, 0.85);
+      border-top: 1px solid rgba(255, 255, 255, 0.85);
+    }
+
+    .course-board__card--five {
+      left: 15%;
+      top: 65%;
+      width: min(17rem, 20vw);
+    }
+
+    .course-board__card--five::after {
+      left: 40%;
+      top: -0.85rem;
+      border: 0;
+      border-left: 1px solid rgba(255, 255, 255, 0.85);
+      border-top: 1px solid rgba(255, 255, 255, 0.85);
+    }
+
+    .course-board__mini {
+      display: inline-flex;
+      width: 2.55rem;
+      height: 2.55rem;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 0.75rem;
+      border-radius: 999px;
+      color: #ffffff;
+      box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.18);
+    }
+
+    .course-board__mini svg {
+      width: 1.55rem;
+      height: 1.55rem;
+      fill: currentColor;
+      stroke-width: 2.4;
+    }
+
+    .course-board__mini--red {
+      background: var(--color-primary);
+    }
+
+    .course-board__mini--teal {
+      background: var(--color-accent);
+    }
+
+    .course-board__mini--dark {
+      background: #8a8a8a;
+    }
+
+    .course-board__card h2 {
+      font-size: clamp(1.08rem, 1.25vw, 1.35rem);
+      font-weight: 900;
+      line-height: 1.08;
+      letter-spacing: 0;
+    }
+
+    .course-board__card p {
+      display: -webkit-box;
+      overflow: hidden;
+      margin-top: 0.8rem;
+      color: #454545;
+      font-size: clamp(0.84rem, 0.85vw, 0.96rem);
+      font-weight: 600;
+      line-height: 1.48;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 3;
+    }
+
+    .course-board__actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      margin-top: 0.85rem;
+    }
+
+    .course-board__pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.32rem;
+      min-height: 1.85rem;
+      padding: 0.3rem 0.58rem;
+      border: 1px solid currentColor;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.6);
+      font-size: 0.78rem;
+      font-weight: 900;
+      line-height: 1;
+      box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.035);
+    }
+
+    .course-board__pill svg {
+      width: 1rem;
+      height: 1rem;
+      flex: 0 0 auto;
+      stroke-width: 2.4;
+    }
+
+    .course-board__pill--red {
+      color: var(--color-primary);
+      background: rgba(221, 14, 24, 0.06);
+    }
+
+    .course-board__pill--teal {
+      color: #1c9199;
+      background: rgba(62, 187, 192, 0.08);
+    }
+
+    .course-board__pill--dark {
+      color: #5b5b5b;
+      background: rgba(0, 0, 0, 0.05);
+    }
+
+    .course-board__pill--disabled {
+      opacity: 0.42;
+    }
+
+    .course-board__detail {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 4.55rem;
+      min-height: 2rem;
+      margin-top: 0.82rem;
+      border-radius: 0.65rem;
+      color: #ffffff;
+      font-size: 0.9rem;
+      font-weight: 900;
+    }
+
+    .course-board__detail--red {
+      background: var(--color-primary);
+    }
+
+    .course-board__detail--teal {
+      background: #178f98;
+    }
+
+    .course-board__detail--dark {
+      background: #333;
+    }
+
+    .course-board__node {
+      position: absolute;
+      z-index: 8;
+      display: flex;
+      width: clamp(5.6rem, 6.6vw, 7.2rem);
+      height: clamp(5.6rem, 6.6vw, 7.2rem);
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      border: 0.34rem solid rgba(255, 255, 255, 0.9);
+      border-radius: 999px;
+      color: #ffffff;
+      cursor: pointer;
+      box-shadow:
+        0 1rem 1.8rem rgba(0, 0, 0, 0.38),
+        inset 0 0 0 0.18rem rgba(255, 255, 255, 0.16);
+      transition:
+        transform 180ms ease,
+        box-shadow 180ms ease;
+    }
+
+    .course-board__node:hover,
+    .course-board__node:focus-visible {
+      transform: scale(1.06);
+      outline: none;
+      box-shadow:
+        0 1.3rem 2.2rem rgba(0, 0, 0, 0.46),
+        0 0 0 0.35rem rgba(255, 255, 255, 0.15),
+        inset 0 0 0 0.18rem rgba(255, 255, 255, 0.16);
+    }
+
+    .course-board__tooltip {
+      position: absolute;
+      left: 50%;
+      bottom: calc(100% + 0.9rem);
+      width: max-content;
+      max-width: 14rem;
+      transform: translateX(-50%) translateY(0.35rem);
+      border: 1px solid rgba(255, 255, 255, 0.82);
+      border-radius: 0.85rem;
+      background: rgba(255, 255, 255, 0.96);
+      color: #151515;
+      padding: 0.65rem 0.8rem;
+      font-family: "Inter", sans-serif;
+      font-size: 0.86rem;
+      font-weight: 900;
+      line-height: 1.15;
+      opacity: 0;
+      pointer-events: none;
+      text-align: left;
+      box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.28);
+      transition:
+        opacity 160ms ease,
+        transform 160ms ease;
+    }
+
+    .course-board__tooltip::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      bottom: -0.45rem;
+      width: 0.9rem;
+      height: 0.9rem;
+      background: rgba(255, 255, 255, 0.96);
+      transform: translateX(-50%) rotate(45deg);
+    }
+
+    .course-board__tooltip small {
+      display: block;
+      margin-top: 0.25rem;
+      color: var(--color-primary);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .course-board__node:hover .course-board__tooltip,
+    .course-board__node:focus-visible .course-board__tooltip {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .course-board__hint {
+      position: absolute;
+      left: 50%;
+      bottom: 1.35rem;
+      z-index: 20;
+      transform: translateX(-50%);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 0.5rem 0.9rem;
+      color: rgba(255, 255, 255, 0.72);
+      font-size: 0.82rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      backdrop-filter: blur(12px);
+    }
+
+    .course-board__mobile-list {
+      display: none;
+    }
+
+    .course-board__node strong {
+      font-family: "Barlow Condensed", "Inter", sans-serif;
+      font-size: clamp(2.2rem, 3vw, 3.5rem);
+      font-weight: 900;
+      line-height: 0.85;
+      letter-spacing: 0;
+    }
+
+    .course-board__node svg {
+      width: 1.25rem;
+      height: 1.25rem;
+      margin-top: 0.35rem;
+      stroke-width: 2.7;
+    }
+
+    .course-board__node--done {
+      background: #188f98;
+    }
+
+    .course-board__node--current {
+      background: var(--color-primary);
+    }
+
+    .course-board__node--locked {
+      background: #2c2f32;
+      color: rgba(255, 255, 255, 0.92);
+    }
+
+    .course-board__node--one {
+      left: 2.9%;
+      top: 46.5%;
+    }
+
+    .course-board__node--two {
+      left: 42.4%;
+      top: 41%;
+    }
+
+    .course-board__node--three {
+      right: 15.4%;
+      top: 48.2%;
+    }
+
+    .course-board__node--four {
+      right: 27.2%;
+      bottom: 17.4%;
+    }
+
+    .course-board__node--five {
+      left: 29.5%;
+      bottom: 17%;
+    }
+
+    .course-board__legend {
+      position: absolute;
+      right: clamp(1.25rem, 3vw, 4rem);
+      bottom: 1.35rem;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1.25rem;
+      color: rgba(255, 255, 255, 0.72);
+      font-size: 0.95rem;
+      font-weight: 800;
+    }
+
+    .course-board__legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      white-space: nowrap;
+    }
+
+    .course-board__legend svg {
+      width: 1.05rem;
+      height: 1.05rem;
+      color: rgba(255, 255, 255, 0.55);
+    }
+
+    .course-board__dot {
+      display: inline-block;
+      width: 0.95rem;
+      height: 0.95rem;
+      border-radius: 999px;
+    }
+
+    .course-board__dot--done {
+      background: var(--color-accent);
+    }
+
+    .course-board__dot--current {
+      background: var(--color-primary);
+    }
+
+    @media (max-width: 1180px) {
+      .course-board {
+        min-height: 56rem;
+      }
+
+      .course-board__card {
+        min-width: 14rem;
+        padding: 1rem;
+      }
+
+      .course-board__card--three {
+        right: 0.8rem;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .course-board {
+        min-height: 0;
+        padding: 2rem 1rem 2.4rem;
+      }
+
+      .course-board__intro,
+      .course-board__track,
+      .course-board__node,
+      .course-board__legend {
+        position: static;
+      }
+
+      .course-board__intro {
+        max-width: 100%;
+        margin-bottom: 1.5rem;
+      }
+
+      .course-board__intro h1 {
+        font-size: clamp(3.1rem, 15vw, 4.8rem);
+      }
+
+      .course-board__track,
+      .course-board__node {
+        display: none;
+      }
+
+      .course-board__hint {
+        display: none;
+      }
+
+      .course-board__mobile-list {
+        display: grid;
+        gap: 1rem;
+      }
+
+      .course-board__card {
+        position: relative;
+        inset: auto;
+        width: 100%;
+        min-width: 0;
+        margin-bottom: 1rem;
+      }
+
+      .course-board__card:hover,
+      .course-board__card:focus-visible {
+        transform: none;
+      }
+
+      .course-board__card::after {
+        display: none;
+      }
+
+      .course-board__legend {
+        display: flex;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+        margin-top: 1rem;
+      }
+    }
+  </style>
+</BaseLayout>
