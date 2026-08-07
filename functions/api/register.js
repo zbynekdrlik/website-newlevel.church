@@ -56,6 +56,34 @@ function registrationKey(eventDate, emailHash) {
   return `event:${eventDate}:food_email:${emailHash}`;
 }
 
+function registrationPrefix(eventDate) {
+  return `event:${eventDate}:food_email:`;
+}
+
+function getBaseCount(env) {
+  const count = Number(env.FOOD_REGISTRATION_BASE_COUNT || 0);
+  return Number.isFinite(count) && count > 0 ? Math.floor(count) : 0;
+}
+
+async function countRegistrations(env, eventDate) {
+  let cursor;
+  let count = 0;
+
+  do {
+    const page = await env.PARTY_COUNTER.list({
+      prefix: registrationPrefix(eventDate),
+      cursor,
+    });
+
+    count += page.keys.length;
+    cursor = page.cursor;
+
+    if (page.list_complete) break;
+  } while (cursor);
+
+  return count;
+}
+
 export async function onRequest(context) {
   const { request, env } = context;
   const headers = {
@@ -97,6 +125,8 @@ export async function onRequest(context) {
 
     const data = await res.json();
 
+    let foodRegistrationCount;
+
     if (res.ok && data.success && wantsFood(body.food_registration) && env.PARTY_COUNTER) {
       const emailHash = await hashEmail(email);
       const key = registrationKey(eventDate, emailHash);
@@ -108,9 +138,14 @@ export async function onRequest(context) {
           submittedAt: new Date().toISOString(),
         }));
       }
+
+      foodRegistrationCount = getBaseCount(env) + await countRegistrations(env, eventDate);
     }
 
-    return json(data, { status: res.status }, headers);
+    return json({
+      ...data,
+      ...(typeof foodRegistrationCount === "number" ? { count: foodRegistrationCount } : {}),
+    }, { status: res.status }, headers);
   } catch (err) {
     return json({ success: false, error: "Server error" }, { status: 500 }, headers);
   }

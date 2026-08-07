@@ -465,6 +465,8 @@ collections:
                   widget: string,
                 }
               - { name: subtitle, label: "Podtitulok", widget: text }
+              - { name: verse, label: "Biblick\u00fd ver\u0161 v hero sekcii", widget: text }
+              - { name: verseReference, label: "Odkaz na ver\u0161", widget: string }
           - name: quickInfo
             label: "R\u00fdchle info"
             widget: list
@@ -496,6 +498,7 @@ collections:
                   label: "Telef\u00f3n po uz\u00e1vierke",
                   widget: string,
                 }
+              - { name: foodRegistrationBaseCount, label: "Počiatočný počet registrovaných na jedlo", widget: number, value_type: int, min: 0, hint: "Aktuálny ručne nastavený základ. Nové online registrácie na jedlo sa pripočítajú k tomuto číslu." }
           - name: activities
             label: "Aktivity"
             widget: list
