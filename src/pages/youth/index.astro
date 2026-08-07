@@ -61,6 +61,7 @@ const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára 
   ? ['Registrácia', 'sa uzatvára o']
   : [page.countdown.title];
 const youthInstagramUrl = 'https://www.instagram.com/newlevel_youth/';
+const foodRegistrationBaseCount = Number(page.countdown.foodRegistrationBaseCount ?? 12);
 const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.16c3.2 0 3.58.01 4.85.07 3.25.15 4.77 1.69 4.92 4.92.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.15 3.25-1.67 4.77-4.92 4.92-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-3.25-.15-4.77-1.67-4.92-4.92-.06-1.27-.07-1.65-.07-4.85s.01-3.58.07-4.85c.15-3.25 1.67-4.77 4.92-4.92 1.27-.06 1.65-.07 4.85-.07Zm0 2.13c-3.15 0-3.52.01-4.75.07-2.17.1-2.79 1.13-2.89 2.89-.06 1.23-.07 1.6-.07 4.75s.01 3.52.07 4.75c.1 1.76.72 2.79 2.89 2.89 1.23.06 1.6.07 4.75.07s3.52-.01 4.75-.07c2.17-.1 2.79-1.13 2.89-2.89.06-1.23.07-1.6.07-4.75s-.01-3.52-.07-4.75c-.1-1.76-.72-2.79-2.89-2.89-1.23-.06-1.6-.07-4.75-.07Zm0 3.55a4.16 4.16 0 1 1 0 8.32 4.16 4.16 0 0 1 0-8.32Zm0 2.13a2.03 2.03 0 1 0 0 4.06 2.03 2.03 0 0 0 0-4.06Zm4.4-3.75a1.38 1.38 0 1 1 0 2.76 1.38 1.38 0 0 1 0-2.76Z"></path></svg>';
 ---
 
@@ -255,7 +256,7 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
               <span aria-hidden="true">uzavretá</span>
             </h2>
             <div class="deadline-counter">
-              <span id="deadline-counter-value" class="deadline-counter-number">12</span>
+              <span id="deadline-counter-value" class="deadline-counter-number">{foodRegistrationBaseCount}</span>
               <span>registrovaných na jedlo</span>
             </div>
             <p>Ak sa chceš ešte prihlásiť, zavolaj nám:</p>
@@ -269,7 +270,7 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
         </div>
 
         <div id="counter-poster" class="counter-poster">
-          <span id="counter-value" class="counter-number">12</span>
+          <span id="counter-value" class="counter-number">{foodRegistrationBaseCount}</span>
           <span>registrovaných na jedlo</span>
         </div>
       </div>
@@ -1260,7 +1261,7 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
     display: flex;
     align-items: center;
     gap: 0.4rem;
-    margin-top: clamp(2.1rem, 5vw, 3.4rem);
+    margin-top: clamp(1.75rem, 4vw, 2.8rem);
     color: rgba(246, 244, 238, 0.72);
     font-size: 0.82rem;
     font-weight: 900;
@@ -2138,7 +2139,7 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
     }
 
     .scroll-sticker {
-      margin-top: 2.6rem;
+      margin-top: 2.15rem;
     }
 
     .quick-strip {
@@ -2379,6 +2380,10 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
       font-size: clamp(4.2rem, 21.5vw, 5.45rem);
     }
 
+    .scroll-sticker {
+      margin-top: 1.55rem;
+    }
+
     .poster-heading h2 {
       font-size: 3.8rem;
     }
@@ -2611,7 +2616,38 @@ const items=document.querySelectorAll(".gallery-item"),lb=document.getElementByI
   const counterPoster = document.getElementById('counter-poster');
   const counterEl = document.getElementById('counter-value');
   const deadlineCounterEl = document.getElementById('deadline-counter-value');
-  const fixedFoodRegistrationCount = 12;
+  const fallbackFoodRegistrationCount = Number(counterEl?.textContent || deadlineCounterEl?.textContent || 12);
+
+  function setCounterValue(value, animate = false) {
+    const count = Number.isFinite(Number(value)) ? Number(value) : fallbackFoodRegistrationCount;
+    [counterEl, deadlineCounterEl].forEach((el) => {
+      if (!el) return;
+      el.textContent = String(count);
+      if (animate) {
+        el.classList.remove('counter-pop');
+        void el.offsetWidth;
+        el.classList.add('counter-pop');
+      }
+    });
+  }
+
+  async function loadFoodRegistrationCount(animate = false) {
+    try {
+      const res = await fetch(`/api/counter?ts=${Date.now()}`, {
+        headers: { Accept: 'application/json' },
+        cache: 'no-store',
+      });
+
+      if (!res.ok) throw new Error('Counter request failed');
+
+      const data = await res.json();
+      if (typeof data.count !== 'number') throw new Error('Invalid counter response');
+
+      setCounterValue(data.count, animate);
+    } catch {
+      setCounterValue(fallbackFoodRegistrationCount, false);
+    }
+  }
 
   function getNextThursdayMidnight() {
     const now = new Date();
@@ -2677,16 +2713,12 @@ const items=document.querySelectorAll(".gallery-item"),lb=document.getElementByI
     if (secondsEl) secondsEl.textContent = seconds.toString().padStart(2, '0');
   }
 
-  function setFixedCounter() {
-    if (deadlineCounterEl) deadlineCounterEl.textContent = fixedFoodRegistrationCount;
-    if (counterEl) counterEl.textContent = fixedFoodRegistrationCount;
-  }
-
   // Start countdown
   updateCountdown();
   setInterval(updateCountdown, 1000);
 
-  setFixedCounter();
+  loadFoodRegistrationCount();
+  window.addEventListener('party-counter-refresh', () => loadFoodRegistrationCount(true));
 })();
 </script>
 
@@ -2752,6 +2784,17 @@ form?.addEventListener("submit",async(e)=>{
     const data=await res.json();
     if(data.success){
       saveRegistration(fd);
+      if(typeof data.count==="number"){
+        const counterEl=document.getElementById("counter-value");
+        const deadlineCounterEl=document.getElementById("deadline-counter-value");
+        [counterEl,deadlineCounterEl].forEach((el)=>{
+          if(!el)return;
+          el.textContent=String(data.count);
+          el.classList.remove("counter-pop");
+          void el.offsetWidth;
+          el.classList.add("counter-pop");
+        });
+      }
       successMsg?.classList.remove("hidden");
       form.reset();
       window.dispatchEvent(new CustomEvent("party-counter-refresh"));

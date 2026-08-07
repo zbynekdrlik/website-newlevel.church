@@ -3,7 +3,9 @@
     "badge": "Každý piatok o 18:00",
     "title": "New Level",
     "titleAccent": "Youth",
-    "subtitle": "Jedlo, hry, karaoke a skvelá atmosféra. Každý piatok pre mladých 15-25 rokov."
+    "subtitle": "Jedlo, hry, karaoke a skvelá atmosféra. Každý piatok pre mladých 15-25 rokov.",
+    "verse": "Pamätaj na svojho Stvoriteľa v dňoch svojej mladosti, skôr, ako prídu zlé dni a priblížia sa roky, o ktorých povieš: Nemám v nich záľubu.",
+    "verseReference": "Kohelet — Kazateľ 12:1"
   },
   "quickInfo": [
     {
@@ -31,7 +33,8 @@
   },
   "countdown": {
     "title": "Registrácia sa uzatvára o",
-    "deadlinePhone": "+421 950 889 182"
+    "deadlinePhone": "+421 950 889 182",
+    "foodRegistrationBaseCount": 12
   },
   "activities": [
     {

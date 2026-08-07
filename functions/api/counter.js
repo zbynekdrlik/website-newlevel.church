@@ -52,6 +52,11 @@ function registrationPrefix(eventDate) {
   return `event:${eventDate}:food_email:`;
 }
 
+function getBaseCount(env) {
+  const count = Number(env.FOOD_REGISTRATION_BASE_COUNT || 0);
+  return Number.isFinite(count) && count > 0 ? Math.floor(count) : 0;
+}
+
 async function countRegistrations(env, eventDate) {
   let cursor;
   let count = 0;
@@ -108,10 +113,13 @@ export async function onRequest(context) {
   if (request.method === "GET") {
     const url = new URL(request.url);
     const eventDate = url.searchParams.get("eventDate") || getCurrentEventDate();
-    const count = await countRegistrations(env, eventDate);
+    const registrationsCount = await countRegistrations(env, eventDate);
+    const baseCount = getBaseCount(env);
 
     return json({
-      count,
+      count: baseCount + registrationsCount,
+      baseCount,
+      registrationsCount,
       eventDate,
       source: "PARTY_COUNTER_EVENT_EMAILS",
     }, {}, headers);
@@ -147,8 +155,16 @@ export async function onRequest(context) {
       }));
     }));
 
-    const count = await countRegistrations(env, eventDate);
-    return json({ success: true, count, eventDate, source: "PARTY_COUNTER_EVENT_EMAILS" }, {}, headers);
+    const registrationsCount = await countRegistrations(env, eventDate);
+    const baseCount = getBaseCount(env);
+    return json({
+      success: true,
+      count: baseCount + registrationsCount,
+      baseCount,
+      registrationsCount,
+      eventDate,
+      source: "PARTY_COUNTER_EVENT_EMAILS",
+    }, {}, headers);
   }
 
   return json({ error: "Method not allowed" }, { status: 405 }, headers);
