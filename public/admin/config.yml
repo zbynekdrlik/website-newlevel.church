@@ -414,6 +414,120 @@ collections:
                 }
               - { name: buttonUrl, label: "URL tla\u010didla", widget: string }
 
+  - name: course
+    label: "Kurzy"
+    media_folder: "public/images/course"
+    public_folder: "/images/course"
+    editor:
+      preview: false
+    files:
+      - name: page
+        label: "Stránka Kurzy"
+        file: "src/content/course/page.json"
+        fields:
+          - { name: eyebrow, label: "Štítok", widget: string }
+          - { name: title, label: "Nadpis", widget: string }
+          - { name: description, label: "Popis", widget: text }
+          - name: stats
+            label: "Rýchle údaje v hlavičke"
+            widget: list
+            fields:
+              - { name: value, label: "Hodnota", widget: string }
+              - { name: label, label: "Popis", widget: string }
+          - name: heroImages
+            label: "Fotky v hlavičke"
+            widget: list
+            allow_add: true
+            min: 1
+            max: 3
+            fields:
+              - { name: src, label: "Fotka", widget: image }
+              - { name: alt, label: "Alt text", widget: string }
+          - name: mapIntro
+            label: "Úvod mapy kurzu"
+            widget: object
+            fields:
+              - { name: titleAccent, label: "Červený text v nadpise", widget: string, hint: "Napríklad: pre mladých" }
+              - { name: subtitle, label: "Krátky text pod nadpisom", widget: text }
+              - { name: hint, label: "Pomocný text pod mapou", widget: string }
+          - name: mapLabels
+            label: "Texty v hadíkovi"
+            widget: object
+            hint: "Tieto texty sa zobrazujú priamo na kurzovej mape. Krátke texty fungujú najlepšie."
+            fields:
+              - { name: intro, label: "Úvodná časť", widget: string }
+              - { name: god, label: "Text pri bode 01", widget: string }
+              - { name: bible, label: "Text pri bode 02", widget: string }
+              - { name: inspire, label: "Horný text po bode 02", widget: string }
+              - { name: prayer, label: "Text pri bode 03", widget: string }
+              - { name: community, label: "Text pri spoločenstve", widget: string }
+              - { name: life, label: "Text pri bode 04", widget: string }
+              - { name: mission, label: "Text pri bode 05", widget: string }
+              - { name: world, label: "Spodný ľavý text", widget: string }
+          - name: lessons
+            label: "Lekcie"
+            widget: list
+            allow_add: true
+            summary: "Lekcia {{fields.order}} - {{fields.title}}"
+            fields:
+              - { name: id, label: "ID lekcie", widget: string, hint: "Napríklad lekcia-1. Musí byť jedinečné." }
+              - { name: order, label: "Poradie", widget: number, value_type: int }
+              - { name: title, label: "Názov lekcie", widget: string }
+              - { name: subtitle, label: "Podtitul", widget: string }
+              - { name: videoThumbnail, label: "Náhľad videa", widget: image }
+              - { name: videoUrl, label: "Video URL", widget: string, required: false, hint: "Vlož YouTube/Vimeo/link na video. Použije sa, keď nie je nahratý video súbor." }
+              - { name: videoFile, label: "Nahrať video súbor", widget: file, required: false, hint: "Voliteľné. Ak nahráš súbor, stránka použije tento súbor namiesto URL." }
+              - { name: duration, label: "Dĺžka videa", widget: string }
+              - { name: estimatedTime, label: "Odhadovaný čas", widget: string }
+              - { name: preview, label: "Krátky náhľad", widget: text }
+              - name: objectives
+                label: "Čo sa naučíš"
+                widget: list
+                field: { name: item, label: "Bod", widget: string }
+              - name: tips
+                label: "Praktické tipy"
+                widget: list
+                field: { name: tip, label: "Tip", widget: string }
+              - { name: summary, label: "Zhrnutie a poznámky", widget: text }
+              - { name: encouragement, label: "Povzbudenie", widget: string }
+              - name: materials
+                label: "Dokumenty a materiály"
+                widget: list
+                allow_add: true
+                fields:
+                  - { name: label, label: "Názov", widget: string }
+                  - { name: kind, label: "Typ", widget: string, hint: "Napríklad PDF, DOCX alebo Odkaz." }
+                  - { name: href, label: "URL odkazu", widget: string, required: false, hint: "Vlož URL, ak materiál nechceš nahrávať ako súbor." }
+                  - { name: file, label: "Nahrať súbor", widget: file, required: false, hint: "Voliteľné. Ak nahráš súbor, použije sa namiesto URL odkazu." }
+              - name: status
+                label: "Stav"
+                widget: select
+                options:
+                  - { label: "Dokončené", value: "completed" }
+                  - { label: "Aktuálna lekcia", value: "current" }
+                  - { label: "Uzamknuté", value: "locked" }
+              - { name: requiresQuiz, label: "Uzamknúť do dokončenia kvízu", widget: boolean, default: false, required: false }
+          - name: quiz
+            label: "Kvíz"
+            widget: object
+            fields:
+              - { name: title, label: "Nadpis", widget: string }
+              - { name: intro, label: "Úvod", widget: text }
+              - { name: afterLessonOrder, label: "Zobraziť po lekcii číslo", widget: number, value_type: int }
+              - { name: passThreshold, label: "Minimum správnych odpovedí", widget: number, value_type: int }
+              - name: questions
+                label: "Otázky"
+                widget: list
+                fields:
+                  - { name: id, label: "ID otázky", widget: string }
+                  - { name: question, label: "Otázka", widget: string }
+                  - name: options
+                    label: "Odpovede"
+                    widget: list
+                    min: 2
+                    field: { name: option, label: "Odpoveď", widget: string }
+                  - { name: correctIndex, label: "Index správnej odpovede", widget: number, value_type: int, hint: "Počíta sa od 0. Prvá odpoveď = 0, druhá = 1." }
+
   - name: gallery-photos
     label: "Galéria - Fotky"
     folder: "src/content/gallery/photos"

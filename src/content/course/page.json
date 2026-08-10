@@ -1,0 +1,983 @@
+{
+  "eyebrow": "Vzdelávacia cesta spoločenstva",
+  "title": "Cesta viery",
+  "description": "Päť lekcií, ktoré ťa krok za krokom prevedú základmi viery. Pozeraj videá vlastným tempom, stiahni si materiály a over si, čo si sa naučil.",
+  "stats": [
+    {
+      "value": "6",
+      "label": "Lekcií"
+    },
+    {
+      "value": "6",
+      "label": "Testov"
+    },
+    {
+      "value": "Text",
+      "label": "Podklady"
+    }
+  ],
+  "heroImages": [
+    {
+      "src": "/images/uploads/bohosluzba.jpg",
+      "alt": "Bohoslužba New Level Church"
+    },
+    {
+      "src": "/images/uploads/komunita.jpg",
+      "alt": "Komunita New Level Church"
+    },
+    {
+      "src": "/images/uploads/chvaly.jpg",
+      "alt": "Chvály New Level Church"
+    }
+  ],
+  "mapIntro": {
+    "titleAccent": "pre mladých",
+    "subtitle": "Rozmýšľam o Tvojich rozkazoch a hľadím na Tvoje chodníky. V Tvojich ustanoveniach sa kochám, na Tvoje slovo nezabúdam.",
+    "reference": "Žalmy 119:15-16",
+    "hint": "Klikni na bod cesty a otvor lekciu"
+  },
+  "mapLabels": {
+    "intro": "Úvod do kurzu",
+    "god": "Kto je základ?",
+    "bible": "Pokánie",
+    "inspire": "Inšpirácia Písma",
+    "prayer": "Viera",
+    "community": "Krst",
+    "life": "Kladenie rúk",
+    "mission": "Zmŕtvychvstanie",
+    "world": "Večný súd"
+  },
+  "lessons": [
+    {
+      "id": "lekcia-1",
+      "order": 1,
+      "title": "Kto je základ",
+      "subtitle": "Biblické základy",
+      "videoThumbnail": "/images/course/lekcia-1.png",
+      "videoUrl": "https://www.youtube.com/watch?v=LOaeyf7IKrA",
+      "duration": "Video",
+      "estimatedTime": "Zaberie približne podľa dĺžky videa a testu",
+      "preview": "Prvá lekcia ukazuje, že základ života nemôže byť položený na ničom inom ako na Ježišovi Kristovi. Pozrieme sa na obraz domu na skale a na to, čo znamená počuť a činiť Ježišove slová.",
+      "objectives": [
+        "Pochopíš, prečo je Ježiš jediný pevný základ",
+        "Spoznáš rozdiel medzi počutím Božieho slova a poslušnosťou",
+        "Uvidíš, prečo sa život bez základu zrúti, keď príde skúška"
+      ],
+      "tips": [
+        "Prečítaj si Lukáš 6:46-49 a označ tri kroky staviteľa",
+        "Zapíš si, na čom dnes reálne stojí tvoj život",
+        "Pri teste sa vráť k veršom a odpovedaj podľa nich"
+      ],
+      "summary": "Lekcia 1 stavia pred nás otázku základu. Ježiš hovorí, že človek, ktorý prichádza k nemu, počúva jeho slová a činí ich, je ako staviteľ, ktorý kopal hlboko a položil základ na skale. Písmo ďalej ukazuje, že iný základ nemôže nikto položiť mimo toho, ktorým je Ježiš Kristus. Ak sa odoberie pravý základ, nič ďalšie ho nevie nahradiť.",
+      "encouragement": "Začínaš na správnom mieste. Pevný život sa stavia na pevnom základe.",
+      "materials": [
+        {
+          "label": "Verše k lekcii 1",
+          "kind": "Text",
+          "href": ""
+        },
+        {
+          "label": "Biblické základy - test č. 1",
+          "kind": "Test",
+          "href": ""
+        }
+      ],
+      "status": "current",
+      "requiresQuiz": true,
+      "scriptures": [
+        {
+          "reference": "Lukáš 6:46-49",
+          "text": "A čo ma voláte: Pane, Pane, a nečiníte, čo hovorím? Každý, kto prichádza ku mne a čuje moje slová a činí ich - ukážem vám, komu je podobný. Podobný je človekovi, staväjúcemu dom, ktorý kopal a išiel hlboko a položil základ na skale. A keď prišla povodeň, oborila sa rieka na ten dom, ale nemohla ním pohnúť, pretože bol dobre založený na skale. Ale ten, kto počul a neučinil, podobný je človekovi, postavivšiemu dom na zemi bez základu, na ktorý sa oborila rieka, a hneď sa zrútil, a pád toho domu bol veliký."
+        },
+        {
+          "reference": "Efezanom 2:20-22",
+          "text": "Vybudovaní na základe apoštolov a prorokov, kde je uholným kameňom sám Ježiš Kristus, v ktorom každé stavänie prístojne dovedna pojené rastie v svätý chrám v Pánovi, v ktorom sa aj vy spolu budujete v príbytok Boží."
+        },
+        {
+          "reference": "1. Korinťanom 3:9-15",
+          "text": "Lebo sme Božími spolupracovníkmi; Božou roľou, Božou stavbou ste. Podľa milosti Božej, ktorá mi je daná, jako múdry staviteľ položil som základ, a iný stavia naň. Ale každý nech hľadí, jako naň stavia. Lebo iný základ nemôže nikto položiť mimo toho, ktorý je položený, ktorým je Ježiš Kristus. A jestli niekto stavia na ten základ zlato, striebro, drahé kamene, drevo, seno, slamu - jedného každého dielo vyjde najavo, pretože to ten deň ukáže, lebo sa zjaví v ohni. A jedného každého dielo, jaké ktoré je, sám ten oheň zkúsi. Ak ostane niečie dielo, ktoré postavil na základ, dostane mzdu; ak zhorí niečie dielo, bude mať škodu, a on sám bude zachránený, ale tak ako skrze oheň."
+        },
+        {
+          "reference": "1. Petra 5:10",
+          "text": "Ale Bôh každej milosti, ktorý nás povolal do svojej večnej slávy v Kristu Ježišovi, keď ešte málo potrpíte, on sám vás dokoná, upevní, zmocní, položí na pevný základ."
+        },
+        {
+          "reference": "Židom 6:1-2",
+          "text": "Preto zanechajúc počiatky učenia o Kristu nesme sa k dokonalosti a neklaďme zase základu pokánia z mŕtvych skutkov a viery na Boha, učenia o umývaniach, o vzkladaní rúk, o zmŕtvychvstaní mŕtvych a o večnom súde."
+        }
+      ],
+      "commonMistakes": [
+        "Ďalší základ nemôže byť položený.",
+        "Základov nie je viac. Základ je taká vec, ktorá keď sa odoberie, nič ďalšie ju nevie nahradiť.",
+        "Mária, pápež, omša ani eucharistia nemôžu nahradiť základ, ktorým je Ježiš Kristus."
+      ],
+      "quiz": {
+        "title": "Biblické základy - test č. 1",
+        "intro": "Test k prvej lekcii. Po úspešnom zvládnutí a označení videa ako dopozeraného sa ti otvorí ďalší krok.",
+        "passThreshold": 4,
+        "questions": [
+          {
+            "id": "l1q1",
+            "type": "multi",
+            "question": "Na základe podobenstva v Lukášovi 6 vyber správne 3 kroky potrebné k vybudovaniu života tak, aby sa pri búrke nepohol.",
+            "options": [
+              "Modliť sa",
+              "Pôstiť sa",
+              "Činiť čo Ježiš hovorí",
+              "Hovoriť jazykmi",
+              "Čítať Roháčka",
+              "Poslúchať čo Ježiš hovorí",
+              "Padnúť na zem pri modlitbe",
+              "Slúžiť vo chválach",
+              "Prichádzať k Ježišovi",
+              "Upratovať zborové záchody"
+            ],
+            "correctIndexes": [
+              2,
+              5,
+              8
+            ]
+          },
+          {
+            "id": "l1q2",
+            "question": "Kto je najväčším základom/skalou - uholným kameňom podľa Biblie?",
+            "options": [
+              "Pápež",
+              "Mária",
+              "Ježiš",
+              "Pavol"
+            ],
+            "correctIndex": 2
+          },
+          {
+            "id": "l1q3",
+            "question": "Čo sa stane so stavbou, ktorá nemá základ na skale, keď je pokojné počasie?",
+            "options": [
+              "Navonok môže vyzerať, že stojí",
+              "Okamžite sa zrúti bez skúšky",
+              "Stane sa pevnejšou ako dom na skale"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "id": "l1q4",
+            "question": "Čo sa stane so stavbou, ktorá nemá základ na skale, keď príde búrka?",
+            "options": [
+              "Nič, lebo základ nie je dôležitý",
+              "Hneď sa zrúti a jej pád je veľký",
+              "Presunie sa na skalu"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "id": "l1q5",
+            "question": "Na základe Židom 6:1 Pavol túži, aby sme zase nekládli základy a niesli sa k čomu?",
+            "options": [
+              "K obľúbenosti",
+              "K dokonalosti",
+              "K tradícii"
+            ],
+            "correctIndex": 1
+          }
+        ]
+      },
+      "videoFile": ""
+    },
+    {
+      "id": "lekcia-2",
+      "order": 2,
+      "title": "Pokánie",
+      "subtitle": "Zbierka",
+      "videoThumbnail": "/images/course/lekcia-2.png",
+      "videoUrl": "https://www.youtube.com/watch?v=zDY1AMKWh4M",
+      "duration": "Video",
+      "estimatedTime": "Zaberie približne podľa dĺžky videa a testu",
+      "preview": "Pokánie nie je iba ľútosť alebo plač. Je to metanoia - zmena myslenia, obrátenie sa o 180 stupňov a celoživotná cesta späť k Otcovi.",
+      "objectives": [
+        "Pochopíš, čo znamená pokánie podľa Biblie",
+        "Rozlíšiš pokánie od ľútosti, plaču a zúfalstva",
+        "Uvidíš pokánie v príbehu márnotratného syna"
+      ],
+      "tips": [
+        "Prečítaj si Lukáš 15:11-24 a sleduj kroky návratu k Otcovi",
+        "Porovnaj úzku a širokú cestu v Matúšovi 7:13-14",
+        "Pomenuj jednu oblasť, kde potrebuješ zmeniť myslenie podľa Božieho slova"
+      ],
+      "summary": "Pokánie je základné učenie Krista. Nejde iba o emóciu, smútok alebo chvíľkový plač, ale o obrátenie sa k Bohu a zmenu myslenia. Metanoia znamená, že myšlienky, ktoré hýbu človekom, sa menia cez počúvanie a činenie Božieho slova. Svedomie oživované Svätým Duchom nám pomáha rozpoznávať pravdu. Pokánie je celoživotná činnosť - návrat z vlastnej cesty k Otcovi.",
+      "encouragement": "Pokánie nie je koniec, ale návrat domov. Otec čaká a cesta späť je otvorená.",
+      "materials": [
+        {
+          "label": "Verše k lekcii 2",
+          "kind": "Text",
+          "href": ""
+        },
+        {
+          "label": "Biblické základy - test č. 2",
+          "kind": "Test",
+          "href": ""
+        }
+      ],
+      "status": "locked",
+      "requiresQuiz": true,
+      "scriptures": [
+        {
+          "reference": "Židom 6:1-2",
+          "text": "Preto zanechajúc počiatky učenia o Kristu nesme sa k dokonalosti a neklaďme zase základu pokánia z mŕtvych skutkov a viery na Boha, učenia o umývaniach, o vzkladaní rúk, o zmŕtvychvstaní mŕtvych a o večnom súde."
+        },
+        {
+          "reference": "Skutky 3:19",
+          "text": "Čiňte pokánie a obráťte sa, aby sa vytreli vaše hriechy."
+        },
+        {
+          "reference": "Matúš 3:2; Matúš 4:17; Marek 6:12; Lukáš 15:7",
+          "text": "Čiňte pokánie. Písmo opakovane volá človeka k obráteniu, zmene myslenia a návratu k Bohu."
+        },
+        {
+          "reference": "Lukáš 15:11-24",
+          "text": "Podobenstvo o márnotratnom synovi ukazuje pokánie prakticky: vstúpil do seba, priznal svoj hriech, pohol sa k otcovi a odišiel z miesta, kde bol medzi sviňami."
+        },
+        {
+          "reference": "Matúš 7:13-14",
+          "text": "Vchádzajte tesnou bránou. Široká cesta vedie do zahynutia a úzka cesta vedie do života."
+        }
+      ],
+      "commonMistakes": [
+        "Pokánie nie je iba ľútosť a plač.",
+        "Pokánie nie je zúfalstvo ani nechuť žiť.",
+        "Pokánie je obrátenie sa o 180 stupňov a celoživotná zmena myslenia podľa Božieho slova."
+      ],
+      "quiz": {
+        "title": "Biblické základy - test č. 2",
+        "intro": "Test k druhej lekcii o pokání. Po úspešnom zvládnutí a označení videa ako dopozeraného sa ti otvorí ďalší krok.",
+        "passThreshold": 4,
+        "questions": [
+          {
+            "id": "l2q1",
+            "type": "multi",
+            "question": "Ktoré výrazy sa správne týkajú pokánia?",
+            "options": [
+              "Životný štýl",
+              "Plač",
+              "Nechuť žiť",
+              "Metanoia",
+              "Obrátenie",
+              "Paranoia",
+              "Zúfalstvo",
+              "Zmena myslenia",
+              "Ľútosť",
+              "180 stupňov"
+            ],
+            "correctIndexes": [
+              0,
+              3,
+              4,
+              7,
+              9
+            ]
+          },
+          {
+            "id": "l2q2",
+            "question": "Ktorá cesta ide do zahynutia?",
+            "options": [
+              "Široká",
+              "Úzka"
+            ],
+            "correctIndex": 0
+          },
+          {
+            "id": "l2q3",
+            "question": "Po ktorej ceste idú mnohí?",
+            "options": [
+              "Po úzkej",
+              "Po širokej"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "id": "l2q4",
+            "question": "Na základe Lukáša 15:11 o márnotratnom synovi je pokánie najlepšie vyjadrené ako:",
+            "options": [
+              "Keď povedal v sebe, že sa vráti k otcovi",
+              "Keď sa stretol s otcom a vyznal svoje hriechy",
+              "Keď sa radoval s otcom v dome otca",
+              "Keď prijal nové rúcho, obuv a prsteň",
+              "Celý návrat k otcovi: rozhodnutie, priznanie, návrat a nový život s otcom",
+              "Žiť prostopašne",
+              "Ponížil sa a bol ochotný jesť zbytky pre prasiatka"
+            ],
+            "correctIndex": 4
+          },
+          {
+            "id": "l2q5",
+            "question": "Doplň prázdne miesta: Preto zanechajúc počiatky učenia o Kristu nesme sa k ________ a neklaďme zase ________ pokánia z mŕtvych skutkov a viery na Boha.",
+            "options": [
+              "dokonalosti / základu",
+              "zúfalstvu / skutkov",
+              "ľútosti / plaču"
+            ],
+            "correctIndex": 0
+          }
+        ]
+      },
+      "videoFile": ""
+    },
+    {
+      "id": "lekcia-3",
+      "order": 3,
+      "title": "Viera",
+      "subtitle": "Zbierka",
+      "videoThumbnail": "/images/course/lekcia-3.png",
+      "videoUrl": "https://www.youtube.com/watch?v=WdB12AZEvYQ",
+      "duration": "Video",
+      "estimatedTime": "Zaberie približne podľa dĺžky videa a testu",
+      "preview": "Viera je obrovské presvedčenie, plná istota a život bez pochybnosti. Nie je pasívna - vieru je vidieť, pretože je činná.",
+      "objectives": [
+        "Pochopíš, že viera je plná istota a presvedčenie o neviditeľnom",
+        "Rozlíšiš vieru od strachu, utiahnutosti, strnulosti a pasivity",
+        "Uvidíš, že viera rastie z počutia Božieho slova"
+      ],
+      "tips": [
+        "Prečítaj si Židom 11 a označ, ako sa viera prejavila skutkami",
+        "Pomenuj oblasť, kde ťa strach vedie k pasivite",
+        "Vyznávaj Božie slovo smerom k viere, nie iba svoju aktuálnu neistotu"
+      ],
+      "summary": "Viera je podstatou toho, na čo sa človek nádeje, a presvedčením o veciach, ktoré sa nevidia. Boh hľadá vieru a bez viery nie je možné ľúbiť sa Bohu. Viera môže byť veľká alebo malá a jej opakom je strach, utiahnutosť, strnulosť a pasivita. Vieru je vidieť, pretože sa prejavuje v činoch. Rastie z počutia a počutie prichádza skrze Božie slovo.",
+      "encouragement": "Viera rastie, keď počúvaš Božie slovo a konáš podľa neho.",
+      "materials": [
+        {
+          "label": "Verše k lekcii 3",
+          "kind": "Text",
+          "href": ""
+        },
+        {
+          "label": "Biblické základy - test č. 3",
+          "kind": "Test",
+          "href": ""
+        }
+      ],
+      "status": "locked",
+      "requiresQuiz": true,
+      "scriptures": [
+        {
+          "reference": "Lukáš 18:8",
+          "text": "Avšak keď prijde Syn človeka, či aj najde vieru na zemi?"
+        },
+        {
+          "reference": "Matúš 8:10; Matúš 8:26; Matúš 9:2",
+          "text": "Ježiš hovorí o veľkej viere, ale aj o malej viere. Opakom viery je strach, utiahnutosť, strnulosť a pasivita. Vieru je vidieť, pretože viera je činná."
+        },
+        {
+          "reference": "Židom 11:1-13",
+          "text": "Viera je podstatou toho, na čo sa človek nadeje, presvedčením o veciach, ktoré sa nevidia. Vierou rozumieme, že sú veky ustrojené slovom Božím. Vierou Ábel priniesol väčšiu obeť, vierou bol Enoch prenesený, vierou Noe pripravil koráb a vierou Abrahám poslúchol, hoci nevedel, kam ide."
+        },
+        {
+          "reference": "Židom 11:6",
+          "text": "Bez viery nie je možné ľúbiť sa Bohu. Ten, kto prichádza k Bohu, musí veriť, že je, a že tým, ktorí ho snažne hľadajú, je odplatiteľom."
+        },
+        {
+          "reference": "Židom 10:22",
+          "text": "Pristupujme s pravdivým srdcom v plnej istote viery, majúc pokropené srdcia a tak očistené od zlého svedomia."
+        },
+        {
+          "reference": "Rimanom 10:9-11",
+          "text": "Keď vyznáš Pána Ježiša svojimi ústami a uveríš vo svojom srdci, že ho Boh vzkriesil z mŕtvych, budeš spasený. Srdcom sa verí na spravodlivosť a ústami sa vyznáva na spasenie. Nikto, kto verí v neho, nebude zahanbený."
+        },
+        {
+          "reference": "Rimanom 10:17",
+          "text": "Tak teda viera z počutia a počutie skrze slovo Božie."
+        }
+      ],
+      "commonMistakes": [
+        "Viera nie je iba názor, ale plná istota a presvedčenie.",
+        "Opakom viery je strach, utiahnutosť, strnulosť a pasivita.",
+        "Vieru je vidieť, pretože viera je činná.",
+        "Vyznávame ku viere, nie iba vieru."
+      ],
+      "quiz": {
+        "title": "Biblické základy - test č. 3",
+        "intro": "Test k tretej lekcii o viere. Textové odpovede píš stručne; systém berie odpovede tolerantne na diakritiku.",
+        "passThreshold": 5,
+        "questions": [
+          {
+            "id": "l3q1",
+            "type": "text",
+            "question": "Čo očakáva Ježiš, že nájde, keď sa vráti na zem?",
+            "acceptedAnswers": [
+              "vieru",
+              "viera"
+            ],
+            "placeholder": "Napr. vieru"
+          },
+          {
+            "id": "l3q2",
+            "type": "multi",
+            "question": "Čo je opakom viery na základe Matúša 8:26?",
+            "options": [
+              "Strach",
+              "Utiahnutosť",
+              "Strnulosť",
+              "Pasivita",
+              "Radosť",
+              "Plná istota"
+            ],
+            "correctIndexes": [
+              0,
+              1,
+              2,
+              3
+            ]
+          },
+          {
+            "id": "l3q3",
+            "type": "text",
+            "question": "Z čoho rastie viera podľa Rimanom 10:17?",
+            "acceptedAnswers": [
+              "z pocutia",
+              "pocutia",
+              "zo slova bozieho",
+              "skrze slovo bozie"
+            ],
+            "placeholder": "Napr. z počutia Božieho slova"
+          },
+          {
+            "id": "l3q4",
+            "type": "text",
+            "question": "Doplň podľa Židom 11:1: Viera je podstatou toho, na čo sa človek nadeje, ________ o veciach, ktoré sa nevidia.",
+            "acceptedAnswers": [
+              "presvedcenim",
+              "presvedcenie"
+            ],
+            "placeholder": "Doplň chýbajúce slovo"
+          },
+          {
+            "id": "l3q5",
+            "type": "text",
+            "question": "Zakry si predchádzajúcu odpoveď a doplň: Viera je podstatou toho, na čo sa človek nadeje, ________ o veciach, ktoré sa ________.",
+            "acceptedAnswers": [
+              "presvedcenim o veciach ktore sa nevidia",
+              "presvedcenim nevidia",
+              "presvedcenie nevidia"
+            ],
+            "placeholder": "Doplň chýbajúce časti"
+          },
+          {
+            "id": "l3q6",
+            "type": "text",
+            "question": "Zakry si predchádzajúce odpovede a doplň: A ________ ________ podstatou toho, na čo sa človek nadeje, ________ o veciach, ktoré sa ________.",
+            "acceptedAnswers": [
+              "viera je presvedcenim nevidia",
+              "viera je presvedcenie nevidia",
+              "viera je podstatou presvedcenim nevidia"
+            ],
+            "placeholder": "Doplň chýbajúce časti"
+          },
+          {
+            "id": "l3q7",
+            "type": "text",
+            "question": "Bonus: napíš spamäti Židom 11:1.",
+            "acceptedAnswers": [
+              "viera je podstatou toho na co sa clovek nadeje presvedcenim o veciach ktore sa nevidia"
+            ],
+            "placeholder": "A viera je..."
+          }
+        ]
+      },
+      "videoFile": ""
+    },
+    {
+      "id": "lekcia-4",
+      "order": 4,
+      "title": "Krst",
+      "subtitle": "Zbierka",
+      "duration": "16 min",
+      "preview": "Krst nie je iba symbol. Je to ponorenie do Krista, nový krok viery a začiatok života v novote.",
+      "detail": "Pozrieme sa na biblický význam krstu, rozdiel medzi umytím a ponorením, prečo sa krstí v mene Ježiša Krista a čo znamená byť oblečený v Krista.",
+      "encouragement": "Krst je jasný krok poslušnosti. Staré zostáva pod vodou, nové vstáva s Kristom.",
+      "thumbnail": "/images/course/lekcia-4.png",
+      "status": "locked",
+      "requiresQuiz": true,
+      "materials": [
+        {
+          "label": "Verše k lekcii 4",
+          "type": "TEXT",
+          "href": "#podklady"
+        },
+        {
+          "label": "Biblické základy - test č. 4",
+          "type": "TEST",
+          "href": "#test"
+        }
+      ],
+      "outcomes": [
+        "Pochopíš význam slova baptizo: ponoriť a umyť",
+        "Uvidíš, prečo je krst krokom viery po pokání",
+        "Spoznáš, čo znamená byť pokrstený v Krista"
+      ],
+      "scriptures": [
+        {
+          "reference": "Židom 6:1-2",
+          "text": "Preto zanechajúc počiatky učenia o Kristu nesme sa k dokonalosti a neklaďme zase základu pokánia z mŕtvych skutkov a viery na Boha, učenia o umývaniach, o vzkladaní rúk, o zmŕtvychvstaní mŕtvych a o večnom súde."
+        },
+        {
+          "reference": "Matúš 28:19",
+          "text": "Choďte teda, čiňte učeníkmi všetky národy, krstiac ich v meno Otca i Syna i Svätého Ducha."
+        },
+        {
+          "reference": "Marek 16:16",
+          "text": "Kto uverí a pokrstí sa, bude spasený."
+        },
+        {
+          "reference": "Skutky 2:38",
+          "text": "Čiňte pokánie a nech sa každý z vás pokrstí na meno Ježiša Krista na odpustenie svojich hriechov."
+        },
+        {
+          "reference": "Skutky 8",
+          "text": "Eunuch počul evanjelium, uveril a hneď chcel byť pokrstený. Viera bola hlavnou podmienkou krstu."
+        },
+        {
+          "reference": "Galaťanom 3:27",
+          "text": "Lebo všetci, ktorí ste pokrstení v Krista, Krista ste obliekli."
+        },
+        {
+          "reference": "Kolosanom 2:12",
+          "text": "Pohrobení s ním v krste, v ktorom ste boli aj spolu vzkriesení skrze vieru."
+        },
+        {
+          "reference": "Rimanom 6:3-4",
+          "text": "Krstom sme pohrobení v smrť, aby sme aj my chodili v novote života."
+        },
+        {
+          "reference": "2 Korinťanom 5:17",
+          "text": "Ak je niekto v Kristovi, je nové stvorenie."
+        },
+        {
+          "reference": "Filipanom 4:13",
+          "text": "Všetko vládzem v tom, ktorý ma posilňuje, v Kristovi."
+        }
+      ],
+      "commonMistakes": [
+        "Grécke baptizo znamená ponoriť alebo umyť.",
+        "Jánov krst ukazoval očistenie od hriechov, krst v mene Ježiša ide hlbšie: je ponorením do Krista.",
+        "Krst je druhý jasný krok po uverení a pokání.",
+        "Krstiť majú zodpovední služobníci alebo presbyteri a ideálne v tečúcej, živej vode.",
+        "Biblický krst sa nedá nahradiť iba tradíciou alebo náboženským zvykom."
+      ],
+      "quiz": {
+        "title": "Biblické základy - test č. 4",
+        "passThreshold": 5,
+        "questions": [
+          {
+            "question": "Napíš dva významy slova krst - baptizo.",
+            "type": "text",
+            "acceptedAnswers": [
+              "ponorit a umyt",
+              "umyt a ponorit",
+              "ponorenie a umytie",
+              "umytie a ponorenie",
+              "ponorit umyt",
+              "umyt ponorit"
+            ],
+            "placeholder": "Napr. ponoriť a umyť"
+          },
+          {
+            "question": "Ktorý význam je správny pre novozmluvný krst?",
+            "options": [
+              "Iba vonkajšie umytie",
+              "Ponorenie do Krista",
+              "Rodinný zvyk",
+              "Náboženský titul"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "question": "Do čoho krstíme podľa Biblie?",
+            "type": "text",
+            "acceptedAnswers": [
+              "do krista",
+              "v meno jezisa krista",
+              "v meno otca syna svateho ducha",
+              "do mena jezisa krista"
+            ],
+            "placeholder": "Napíš svoju odpoveď"
+          },
+          {
+            "question": "Na základe Skutkov 8, čo je hlavnou podmienkou krstu?",
+            "type": "text",
+            "acceptedAnswers": [
+              "viera",
+              "uverit",
+              "verit z celeho srdca",
+              "uveril"
+            ],
+            "placeholder": "Napíš podmienku"
+          },
+          {
+            "question": "Kto môže krstiť?",
+            "type": "text",
+            "acceptedAnswers": [
+              "presbyteri",
+              "sluzobnici",
+              "sluzobnik",
+              "starsí",
+              "starsi",
+              "povereny sluzobnik"
+            ],
+            "placeholder": "Napíš odpoveď"
+          },
+          {
+            "question": "Doplň verš: Fil 4:13 Všetko vládzem ................., ktorý ma posilňuje, ......................",
+            "type": "text",
+            "acceptedAnswers": [
+              "v tom v kristovi",
+              "tom v kristovi",
+              "v tom ktory ma posilnuje v kristovi",
+              "v kristovi"
+            ],
+            "placeholder": "Doplň chýbajúce časti"
+          }
+        ]
+      },
+      "videoThumbnail": "/images/course/lekcia-4.png",
+      "videoUrl": "https://www.youtube.com/watch?v=G2bR_VOtnIE",
+      "videoFile": "",
+      "tips": [
+        "Prečítaj si Skutky 8 a všimni si, ako rýchlo nasledoval krst po uverení.",
+        "Napíš vlastnými slovami, čo znamená byť ponorený do Krista.",
+        "Porozprávaj sa so zodpovedným služobníkom, ak chceš krst riešiť osobne."
+      ]
+    },
+    {
+      "id": "lekcia-5",
+      "order": 5,
+      "title": "Kladenie rúk",
+      "subtitle": "Zbierka",
+      "duration": "14 min",
+      "preview": "Kladením rúk sa v Biblii odovzdáva uzdravenie, požehnanie, Duch Svätý aj služba.",
+      "detail": "Prejdeme si, ako Ježiš a apoštoli používali kladenie rúk, prečo to nie je prázdne gesto a prečo je pri tom dôležitá múdrosť a zodpovednosť.",
+      "encouragement": "Boh používa ruky veriacich ako konkrétny nástroj služby, uzdravenia a požehnania.",
+      "thumbnail": "/images/course/lekcia-5.png",
+      "status": "locked",
+      "requiresQuiz": true,
+      "materials": [
+        {
+          "label": "Verše k lekcii 5",
+          "type": "TEXT",
+          "href": "#podklady"
+        },
+        {
+          "label": "Biblické základy - test č. 5",
+          "type": "TEST",
+          "href": "#test"
+        }
+      ],
+      "outcomes": [
+        "Spoznáš, čo sa v Biblii odovzdáva kladením rúk",
+        "Uvidíš, ako Ježiš uvoľňoval uzdravenie cez ruky",
+        "Pochopíš aj opatrnosť pri skladaní rúk"
+      ],
+      "scriptures": [
+        {
+          "reference": "Židom 6:1-2",
+          "text": "Preto zanechajúc počiatky učenia o Kristu nesme sa k dokonalosti a neklaďme zase základu pokánia z mŕtvych skutkov a viery na Boha, učenia o umývaniach, o vzkladaní rúk, o zmŕtvychvstaní mŕtvych a o večnom súde."
+        },
+        {
+          "reference": "Matúš 8:3, 8:15, 9:18, 9:25; Lukáš 4:40",
+          "text": "Ježiš sa dotýkal ľudí a kládol ruky na chorých. Uzdravenie nebolo iba myšlienka, ale konkrétny dotyk viery."
+        },
+        {
+          "reference": "Marek 6:2",
+          "text": "Ľudia sa pýtali, aké divy sa dejú skrze jeho ruky."
+        },
+        {
+          "reference": "Marek 6:5",
+          "text": "Aj v atmosfére malej viery Ježiš vložil ruky na nemocných a uzdravoval ich."
+        },
+        {
+          "reference": "Marek 16:18",
+          "text": "Na nemocných budú klásť ruky a tí sa budú mať dobre."
+        },
+        {
+          "reference": "Jakub 5:14",
+          "text": "Ak je niekto chorý, má zavolať presbyterov zboru, aby sa nad ním modlili a pomazali ho olejom."
+        },
+        {
+          "reference": "Skutky 8:17-19; 19:6",
+          "text": "Kladením rúk sa odovzdával Duch Svätý. Táto moc sa nedá kúpiť."
+        },
+        {
+          "reference": "1 Timoteovi 4:14",
+          "text": "Dary milosti a služba boli odovzdávané aj cez vzkladanie rúk."
+        },
+        {
+          "reference": "1 Timoteovi 5:22",
+          "text": "Na nikoho neskladaj ruky unáhlene."
+        }
+      ],
+      "commonMistakes": [
+        "Kladenie rúk nie je magický úkon, ale služba viery v poslušnosti Bohu.",
+        "Odovzdáva sa ním uzdravenie, Duch Svätý, požehnanie aj poverenie do služby.",
+        "Nie je múdre skladať ruky unáhlene na každého bez rozlišovania.",
+        "To, čo robil Ježiš, majú robiť aj veriaci: modliť sa za chorých a slúžiť ľuďom."
+      ],
+      "quiz": {
+        "title": "Biblické základy - test č. 5",
+        "passThreshold": 6,
+        "questions": [
+          {
+            "question": "Ako uzdravoval Ježiš nemocných?",
+            "type": "text",
+            "acceptedAnswers": [
+              "kladenim ruk",
+              "vkladal ruky",
+              "polozil ruky",
+              "rukami"
+            ],
+            "placeholder": "Napíš odpoveď"
+          },
+          {
+            "question": "Cez čo sa diali zázraky pri Ježišovi na základe Marek 6:2?",
+            "type": "text",
+            "acceptedAnswers": [
+              "skrze jeho ruky",
+              "cez jeho ruky",
+              "ruky"
+            ],
+            "placeholder": "Napíš odpoveď"
+          },
+          {
+            "question": "Ako uvoľnil Ježiš uzdravenie v atmosfére nevery? Marek 6:5",
+            "type": "text",
+            "acceptedAnswers": [
+              "vlozil ruky",
+              "vkladal ruky",
+              "kladol ruky",
+              "polozil ruky"
+            ],
+            "placeholder": "Napíš odpoveď"
+          },
+          {
+            "question": "Keď je v zbore niekto chorý, čo má robiť podľa Jakub 5:14?",
+            "type": "text",
+            "acceptedAnswers": [
+              "zavolat presbyterov",
+              "zavolat starsich",
+              "pomazat olejom",
+              "modlit sa"
+            ],
+            "placeholder": "Napíš odpoveď"
+          },
+          {
+            "question": "Ako činili zázraky apoštoli? Skutky 5:12",
+            "type": "text",
+            "acceptedAnswers": [
+              "skrze ruky apostolov",
+              "cez ruky apostolov",
+              "rukami apostolov"
+            ],
+            "placeholder": "Napíš odpoveď"
+          },
+          {
+            "question": "Podľa 1 Tim 5:22 je potrebné na každého čím skôr položiť ruky?",
+            "options": [
+              "Áno",
+              "Nie"
+            ],
+            "correctIndex": 1
+          },
+          {
+            "question": "Patrí kladenie rúk medzi základné učenia o Kristovi a týka sa každého veriaceho podľa Žid 6:2 a Marek 16:18?",
+            "options": [
+              "Áno",
+              "Nie"
+            ],
+            "correctIndex": 0
+          }
+        ]
+      },
+      "videoThumbnail": "/images/course/lekcia-5.png",
+      "videoUrl": "",
+      "videoFile": "",
+      "tips": [
+        "Všímaj si, kde Ježiš pri uzdravovaní používal dotyk alebo ruky.",
+        "Premysli si rozdiel medzi vierou a unáhleným gestom bez rozlišovania.",
+        "Modli sa za chorých s pokorou a vierou, nie ako za náboženský výkon."
+      ]
+    },
+    {
+      "id": "lekcia-6",
+      "order": 6,
+      "title": "Zmŕtvychvstanie",
+      "subtitle": "Zbierka",
+      "duration": "15 min",
+      "preview": "Vzkriesenie je jadro evanjelia: smrť nie je všemocná a Kristus je prvotina vzkriesených.",
+      "detail": "Táto lekcia ukazuje, prečo je vzkriesenie jednou z najdôležitejších správ Biblie, čo učil Ježiš a čo zvestovali apoštoli.",
+      "encouragement": "Smrť nemá posledné slovo. Kristus vstal a v ňom je nový život.",
+      "thumbnail": "/images/course/lekcia-5.png",
+      "status": "locked",
+      "requiresQuiz": true,
+      "materials": [
+        {
+          "label": "Verše k lekcii 6",
+          "type": "TEXT",
+          "href": "#podklady"
+        },
+        {
+          "label": "Biblické základy - test č. 6",
+          "type": "TEST",
+          "href": "#test"
+        }
+      ],
+      "outcomes": [
+        "Pochopíš, prečo je vzkriesenie základná správa Biblie",
+        "Spoznáš Krista ako prvotinu vzkriesených",
+        "Uvidíš rozdiel medzi vzkriesením života a vzkriesením súdu"
+      ],
+      "scriptures": [
+        {
+          "reference": "Židom 6:1-2",
+          "text": "Preto zanechajúc počiatky učenia o Kristu nesme sa k dokonalosti a neklaďme zase základu pokánia z mŕtvych skutkov a viery na Boha, učenia o umývaniach, o vzkladaní rúk, o zmŕtvychvstaní mŕtvych a o večnom súde."
+        },
+        {
+          "reference": "Matúš 16:21; 17:9; 17:23",
+          "text": "Ježiš opakovane hovoril, že bude zabitý a tretieho dňa vstane z mŕtvych."
+        },
+        {
+          "reference": "Marek 12:26-27",
+          "text": "Boh nie je Bohom mŕtvych, ale živých."
+        },
+        {
+          "reference": "Marek 16:14",
+          "text": "Nevera vo vzkriesenie je spojená s tvrdosťou srdca."
+        },
+        {
+          "reference": "Lukáš 24:1-10",
+          "text": "Príbeh vzkriesenia ukazuje prázdny hrob a správu, že Ježiš žije."
+        },
+        {
+          "reference": "Ján 5:24-29",
+          "text": "Tí, čo počujú hlas Syna človeka, budú žiť. Jedni budú vzkriesení k životu a iní k súdu."
+        },
+        {
+          "reference": "Skutky 2:31",
+          "text": "Kristova duša nezostala v ríši smrti a jeho telo nevidelo porušenie."
+        },
+        {
+          "reference": "Skutky 4:33",
+          "text": "Apoštoli s veľkou mocou vydávali svedectvo o zmŕtvychvstaní Pána Ježiša."
+        },
+        {
+          "reference": "Rimanom 6:9",
+          "text": "Kristus vstanúc z mŕtvych už viac neumiera, smrť nad ním viac nepanuje."
+        },
+        {
+          "reference": "1 Korinťanom 15:12-26",
+          "text": "Kristus je prvotina tých, ktorí zosnuli. Vo vzkriesení je víťazstvo nad smrťou."
+        },
+        {
+          "reference": "Kolosanom 3",
+          "text": "Ak ste boli vzkriesení s Kristom, hľadajte to, čo je hore."
+        }
+      ],
+      "commonMistakes": [
+        "Zmŕtvychvstanie nie je obyčajný návrat späť do starého tela.",
+        "Smrť nie je bohom ani všemocným väzením. V Kristovi sa dá nad smrťou zvíťaziť.",
+        "Apoštoli nezvestovali iba morálku, ale vzkrieseného Krista.",
+        "Vzkriesenie patrí medzi základné učenia o Kristovi."
+      ],
+      "quiz": {
+        "title": "Biblické základy - test č. 6",
+        "passThreshold": 3,
+        "questions": [
+          {
+            "question": "Kto je nazvaný prvotina vzkriesených podľa 1 Kor 15:12-26?",
+            "type": "text",
+            "acceptedAnswers": [
+              "kristus",
+              "jezis",
+              "jezis kristus"
+            ],
+            "placeholder": "Napíš odpoveď"
+          },
+          {
+            "question": "Koľko zo zomretých ľudí bude vzkriesených?",
+            "options": [
+              "50%",
+              "0%",
+              "100%"
+            ],
+            "correctIndex": 2
+          },
+          {
+            "question": "Aký je rozdiel medzi vzkriesením života a vzkriesením súdu podľa Ján 5:24-29?",
+            "type": "text",
+            "acceptedAnswers": [
+              "zivot a sud",
+              "vzkriesenie zivota a vzkriesenie sudu",
+              "jedni k zivotu ini k sudu",
+              "k zivotu k sudu"
+            ],
+            "placeholder": "Napíš rozdiel vlastnými slovami"
+          },
+          {
+            "question": "Vymenuj búrky, ktoré poznáš z Biblie.",
+            "type": "text",
+            "acceptedAnswers": [
+              "potopa",
+              "burka na mori",
+              "jonas",
+              "jezis utisil burku",
+              "pavol"
+            ],
+            "placeholder": "Napíš aspoň jednu"
+          }
+        ]
+      },
+      "videoThumbnail": "/images/course/lekcia-5.png",
+      "videoUrl": "https://www.youtube.com/watch?v=klGWy00I1vA",
+      "videoFile": "",
+      "tips": [
+        "Prečítaj si 1 Korinťanom 15 pomaly a označ si, čo Pavol spája so vzkriesením.",
+        "Skús jednou vetou vysvetliť, prečo smrť nemá posledné slovo.",
+        "Porovnaj Ján 5:24-29: čo znamená vzkriesenie života a čo vzkriesenie súdu."
+      ]
+    }
+  ],
+  "quiz": {
+    "title": "Kontrolný bod: Overenie základov",
+    "intro": "Krátky kvíz z prvých troch lekcií. Po jeho úspešnom zvládnutí sa ti odomknú lekcie 4 a 5.",
+    "afterLessonOrder": 3,
+    "passThreshold": 2,
+    "questions": [
+      {
+        "id": "q1",
+        "question": "Ako by sme najlepšie opísali vieru podľa prvej lekcie?",
+        "options": [
+          "Zbierka pravidiel, ktoré treba dodržiavať",
+          "Vzťah a dôvera, ktorá rastie",
+          "Niečo, čo musí byť hneď dokonalé"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": "q2",
+        "question": "Ktoré evanjelium sme odporučili čítať ako prvé?",
+        "options": [
+          "Podľa Jána",
+          "Podľa Marka",
+          "Podľa Matúša"
+        ],
+        "correctIndex": 1
+      },
+      {
+        "id": "q3",
+        "question": "Čo je pri modlitbe najdôležitejšie?",
+        "options": [
+          "Správne a naučené slová",
+          "Dĺžka modlitby",
+          "Úprimnosť srdca"
+        ],
+        "correctIndex": 2
+      }
+    ]
+  }
+}

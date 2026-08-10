@@ -1,0 +1,790 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { course, type Lesson } from '../../data/course';
+
+export function getStaticPaths() {
+  return course.lessons.map((lesson) => ({
+    params: { lessonId: lesson.id },
+    props: { lesson },
+  }));
+}
+
+interface Props {
+  lesson: Lesson;
+}
+
+const { lesson } = Astro.props;
+const videoUrl = lesson.videoFile || lesson.videoUrl || '';
+const hasVideo = Boolean(videoUrl);
+const videoIsExternal = /^https?:\/\//.test(videoUrl);
+
+function getYoutubeVideoId(url: string) {
+  try {
+    const parsedUrl = new URL(url);
+    const host = parsedUrl.hostname.replace(/^www\./, '');
+
+    if (host === 'youtu.be') {
+      return parsedUrl.pathname.split('/').filter(Boolean)[0] || '';
+    }
+
+    if (host === 'youtube.com' || host === 'm.youtube.com') {
+      const watchId = parsedUrl.searchParams.get('v');
+      if (watchId) return watchId;
+
+      const pathMatch = parsedUrl.pathname.match(/\/(?:embed|shorts)\/([^/?#]+)/);
+      return pathMatch?.[1] || '';
+    }
+  } catch {
+    return '';
+  }
+
+  return '';
+}
+
+const youtubeVideoId = getYoutubeVideoId(videoUrl);
+const videoThumbnail = youtubeVideoId
+  ? `https://img.youtube.com/vi/${youtubeVideoId}/hqdefault.jpg`
+  : lesson.videoThumbnail;
+const youtubeEmbedUrl = youtubeVideoId
+  ? `https://www.youtube.com/embed/${youtubeVideoId}?enablejsapi=1&rel=0&modestbranding=1&playsinline=1`
+  : '';
+const youtubePlayerId = youtubeEmbedUrl ? `youtube-player-${lesson.id}` : '';
+const hasManualVideoCompletion = videoIsExternal && !youtubeEmbedUrl;
+const lessonQuiz = lesson.quiz || (lesson.order === course.quiz.afterLessonOrder ? course.quiz : undefined);
+const hasQuiz = Boolean(lessonQuiz);
+const quizIntro = lessonQuiz?.intro
+  ?.replace(
+    'Po úspešnom zvládnutí a označení videa ako dopozeraného sa ti otvorí ďalší krok.',
+    hasVideo
+      ? 'Po úspešnom zvládnutí a dopozeraní videa sa ti otvorí ďalší krok.'
+      : 'Po úspešnom zvládnutí sa ti otvorí ďalší krok.'
+  );
+const nextLesson = course.lessons.find((item) => item.order === lesson.order + 1);
+const progressData = {
+  lessonId: lesson.id,
+  lessonOrder: lesson.order,
+  hasVideo,
+  hasQuiz,
+  passThreshold: lessonQuiz?.passThreshold || course.quiz.passThreshold,
+  lessons: course.lessons.map((item) => ({
+    id: item.id,
+    order: item.order,
+    title: item.title,
+    hasVideo: Boolean(item.videoFile || item.videoUrl),
+    hasQuiz: Boolean(item.quiz) || item.order === course.quiz.afterLessonOrder,
+  })),
+};
+---
+
+<BaseLayout
+  title={`${lesson.title} | Kurzy | New Level Church`}
+  description={lesson.preview}
+  currentPage="kurzy"
+>
+  <section class="course-surface bg-[var(--color-background)] py-8 md:py-12">
+    <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+      <a href="/kurzy" class="mb-6 inline-flex items-center gap-2 rounded-full bg-[var(--color-primary-light)] px-4 py-2 text-sm font-bold text-[var(--color-primary)] transition-colors hover:bg-[var(--color-primary)] hover:text-white">
+        <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+        Späť na mapu kurzu
+      </a>
+
+      <div class="mb-6 hidden rounded-3xl border border-[var(--color-primary)]/25 bg-[var(--color-primary-light)] p-5 text-[var(--color-text)]" data-course-lock-warning>
+        <p class="text-sm font-black uppercase tracking-widest text-[var(--color-primary)]">Lekcia je zatiaľ zamknutá</p>
+        <h2 class="mt-2 text-2xl font-black">Najprv dokonči predchádzajúci krok.</h2>
+        <p class="mt-2 text-sm font-semibold text-[var(--color-text-light)]">
+          Vráť sa na mapu kurzu a prejdi lekcie postupne. Po splnení potrebných krokov sa ďalšia časť odomkne automaticky.
+        </p>
+      </div>
+
+      <div class="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
+        <article class="overflow-hidden rounded-3xl border border-[var(--color-text-muted)]/20 bg-white shadow-sm">
+          <div class="p-5 md:p-7">
+            <p class="text-sm font-black uppercase tracking-widest text-[var(--color-primary)]">
+              Lekcia {String(lesson.order).padStart(2, '0')}
+            </p>
+            <h1 class="mt-3 text-4xl font-black leading-tight text-[var(--color-text)] md:text-5xl">
+              {lesson.title}
+            </h1>
+            <p class="mt-4 text-lg leading-relaxed text-[var(--color-text-light)]">
+              {lesson.preview}
+            </p>
+          </div>
+
+          {hasVideo && (
+            <div class="px-5 pb-5 md:px-7 md:pb-7">
+              <div class="relative overflow-hidden rounded-2xl border border-[var(--color-text-muted)]/20 bg-[var(--color-background-alt)]">
+                {youtubeEmbedUrl ? (
+                  <iframe
+                    id={youtubePlayerId}
+                    class="h-[18rem] w-full md:h-[24rem]"
+                    src={youtubeEmbedUrl}
+                    title={`Video: ${lesson.title}`}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowfullscreen
+                    data-course-youtube-player
+                  ></iframe>
+                ) : !videoIsExternal ? (
+                  <video
+                    class="h-[18rem] w-full object-cover md:h-[24rem]"
+                    controls
+                    poster={videoThumbnail}
+                    preload="metadata"
+                    data-course-video
+                  >
+                    <source src={videoUrl} />
+                  </video>
+                ) : (
+                  <img
+                    src={videoThumbnail}
+                    alt={`Náhľad videa: ${lesson.title}`}
+                    class="h-[18rem] w-full object-cover md:h-[24rem]"
+                    width="1200"
+                    height="675"
+                    loading="eager"
+                    decoding="async"
+                  />
+                )}
+                {hasManualVideoCompletion && (
+                  <a
+                    href={videoUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="absolute inset-0 flex items-center justify-center bg-black/10 transition-colors hover:bg-black/20"
+                    aria-label={`Prehrať video: ${lesson.title}`}
+                  >
+                    <span class="flex size-20 items-center justify-center rounded-full bg-white text-[var(--color-primary)] shadow-xl">
+                      <svg class="ml-1 size-9" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M8 5v14l11-7z"></path>
+                      </svg>
+                    </span>
+                  </a>
+                )}
+                {hasManualVideoCompletion && (
+                  <button
+                    type="button"
+                    class="absolute bottom-3 left-3 rounded-full bg-white/95 px-4 py-2 text-xs font-black text-[var(--color-primary)] shadow-lg transition-colors hover:bg-[var(--color-primary)] hover:text-white"
+                    data-mark-video-complete
+                  >
+                    Označiť video ako dopozerané
+                  </button>
+                )}
+                <span class="absolute bottom-3 right-3 rounded-lg bg-black/75 px-3 py-1 text-sm font-black text-white">
+                  {lesson.duration}
+                </span>
+              </div>
+            </div>
+          )}
+        </article>
+
+        <aside class="space-y-4">
+          <section class="rounded-3xl border border-[var(--color-text-muted)]/20 bg-white p-5 shadow-sm">
+            <p class="text-sm font-black uppercase tracking-widest text-[var(--color-primary)]">Stav lekcie</p>
+            <div class="mt-4 grid gap-2">
+              {hasVideo && (
+                <div class="course-status-row" data-video-status>
+                  <span>Video</span>
+                  <strong>Čaká sa</strong>
+                </div>
+              )}
+              {hasQuiz && (
+                <div class="course-status-row" data-quiz-status>
+                  <span>Test</span>
+                  <strong>Čaká sa</strong>
+                </div>
+              )}
+              <div class="course-status-row" data-lesson-status>
+                <span>Lekcia</span>
+                <strong>Rozpracovaná</strong>
+              </div>
+            </div>
+          </section>
+
+          {lesson.commonMistakes && lesson.commonMistakes.length > 0 && (
+            <section class="rounded-3xl border border-[var(--color-primary)]/20 bg-[var(--color-primary-light)] p-5 shadow-sm">
+              <h2 class="text-xl font-black text-[var(--color-text)]">Najčastejšie omyly</h2>
+              <ul class="mt-4 space-y-2">
+                {lesson.commonMistakes.map((item) => (
+                  <li class="flex gap-3 text-sm leading-relaxed text-[var(--color-text-light)]">
+                    <span class="mt-2 size-2 shrink-0 rounded-full bg-[var(--color-primary)]"></span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+        </aside>
+      </div>
+
+      <section class="mt-8 rounded-3xl border border-[var(--color-text-muted)]/20 bg-white p-5 shadow-sm md:p-7">
+        <div class="course-stepper" aria-label="Časti lekcie">
+          <button type="button" class="course-stepper-button is-active" data-course-panel-button="resources">
+            <span>01</span>
+            Podklady
+          </button>
+          {lessonQuiz && (
+            <button type="button" class="course-stepper-button" data-course-panel-button="quiz">
+              <span>02</span>
+              Test
+            </button>
+          )}
+        </div>
+
+        <section class="mt-6" data-course-panel="resources">
+          <p class="text-sm font-black uppercase tracking-widest text-[var(--color-primary)]">Podklady</p>
+          <h2 class="mt-2 text-2xl font-black text-[var(--color-text)]">Informácie k lekcii</h2>
+
+          <div class="mt-5 grid gap-4 lg:grid-cols-[0.95fr_1.05fr]">
+            <div class="rounded-2xl bg-[var(--color-background-alt)] p-5">
+              <h3 class="text-lg font-black text-[var(--color-text)]">Zhrnutie</h3>
+              <p class="mt-3 text-sm leading-relaxed text-[var(--color-text-light)]">{lesson.summary}</p>
+              <p class="mt-5 rounded-2xl bg-white px-4 py-3 text-sm font-bold italic text-[var(--color-primary)]">
+                {lesson.encouragement}
+              </p>
+            </div>
+
+            <div class="rounded-2xl bg-[var(--color-background-alt)] p-5">
+              <h3 class="text-lg font-black text-[var(--color-text)]">Praktické tipy</h3>
+              <ul class="mt-4 space-y-2">
+                {lesson.tips.map((tip) => (
+                  <li class="flex gap-3 text-sm leading-relaxed text-[var(--color-text-light)]">
+                    <span class="mt-2 size-2 shrink-0 rounded-full bg-[var(--color-accent)]"></span>
+                    <span>{tip}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          {lesson.scriptures && lesson.scriptures.length > 0 && (
+            <div class="mt-6">
+              <h3 class="text-xl font-black text-[var(--color-text)]">Verše</h3>
+              <div class="mt-4 grid gap-4">
+                {lesson.scriptures.map((scripture) => (
+                  <article class="rounded-2xl bg-[var(--color-background-alt)] p-4">
+                    <h4 class="text-sm font-black uppercase tracking-wide text-[var(--color-primary)]">{scripture.reference}</h4>
+                    <p class="mt-2 text-sm leading-relaxed text-[var(--color-text-light)]">{scripture.text}</p>
+                  </article>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {lessonQuiz && (
+            <button type="button" class="mt-6 rounded-full bg-[var(--color-primary)] px-5 py-3 text-sm font-black text-white shadow-sm transition-colors hover:bg-[var(--color-primary-dark)]" data-open-quiz>
+              Prejsť na test
+            </button>
+          )}
+        </section>
+
+        {lessonQuiz && (
+          <section class="mt-6 hidden" data-course-panel="quiz">
+            <p class="text-sm font-black uppercase tracking-widest text-[var(--color-accent-dark)]">Test</p>
+            <h2 class="mt-2 text-2xl font-black text-[var(--color-text)]">{lessonQuiz.title}</h2>
+            {quizIntro && <p class="mt-2 text-sm leading-relaxed text-[var(--color-text-light)]">{quizIntro}</p>}
+            <form class="course-quiz-form" data-course-quiz>
+              {lessonQuiz.questions.map((question, questionIndex) => {
+                const isMulti = question.type === 'multi' || Boolean(question.correctIndexes);
+                const isText = question.type === 'text';
+                return (
+                <fieldset
+                  class="course-quiz-question"
+                  aria-labelledby={`question-${lesson.id}-${questionIndex}`}
+                  data-question-type={isText ? 'text' : isMulti ? 'multi' : 'single'}
+                  data-correct={question.correctIndex}
+                  data-correct-indexes={JSON.stringify(question.correctIndexes || [])}
+                  data-accepted-answers={JSON.stringify(question.acceptedAnswers || [])}
+                >
+                  <h3 id={`question-${lesson.id}-${questionIndex}`} class="course-quiz-prompt">
+                    {questionIndex + 1}. {question.question}
+                  </h3>
+                  {isMulti && (
+                    <p class="course-quiz-note">
+                      Vyber všetky správne odpovede.
+                    </p>
+                  )}
+                  {isText ? (
+                    <input
+                      type="text"
+                      name={question.id}
+                      class="course-quiz-input"
+                      placeholder={question.placeholder || 'Napíš odpoveď'}
+                    />
+                  ) : (
+                    <div class="course-quiz-options">
+                      {(question.options || []).map((option, optionIndex) => (
+                        <label class="course-quiz-option">
+                          <input type={isMulti ? 'checkbox' : 'radio'} name={question.id} value={optionIndex} />
+                          <span>{option}</span>
+                        </label>
+                      ))}
+                    </div>
+                  )}
+                </fieldset>
+              )})}
+              <button type="button" class="rounded-full bg-[var(--color-primary)] px-5 py-2.5 text-sm font-black text-white" data-evaluate-quiz>
+                Vyhodnotiť test
+              </button>
+              <p class="hidden rounded-xl bg-white px-4 py-3 text-sm font-bold text-[var(--color-text)]" data-quiz-result></p>
+              {hasVideo && (
+                <div class="hidden rounded-2xl border border-[var(--color-primary)]/20 bg-[var(--color-primary-light)] p-4" data-video-required-after-quiz>
+                  <p class="text-sm font-bold leading-relaxed text-[var(--color-text)]">
+                    Test je splnený. Aby sa otvorila ďalšia lekcia, ešte dopozeraj video do konca.
+                  </p>
+                  {hasManualVideoCompletion && (
+                    <button type="button" class="mt-3 rounded-full bg-[var(--color-primary)] px-4 py-2 text-sm font-black text-white" data-mark-video-complete-inline>
+                      Označiť video ako dopozerané
+                    </button>
+                  )}
+                </div>
+              )}
+            </form>
+          </section>
+        )}
+      </section>
+
+      <nav class="mt-8 flex flex-wrap items-center justify-between gap-3 rounded-3xl bg-[var(--color-background-alt)] p-4">
+        <a href="/kurzy" class="rounded-full bg-white px-5 py-3 text-sm font-black text-[var(--color-text)] shadow-sm transition-colors hover:text-[var(--color-primary)]">
+          Späť na mapu
+        </a>
+        {nextLesson && (
+          <a href={`/kurzy/${nextLesson.id}`} class="rounded-full bg-[var(--color-primary)] px-5 py-3 text-sm font-black text-white shadow-sm transition-colors hover:bg-[var(--color-primary-dark)]" data-next-lesson>
+            Ďalšia lekcia: {String(nextLesson.order).padStart(2, '0')}
+          </a>
+        )}
+      </nav>
+    </div>
+  </section>
+
+  <script type="application/json" id="course-progress-data" set:html={JSON.stringify(progressData)}></script>
+
+  <script is:inline>
+    const COURSE_PROGRESS_KEY = 'newlevel-course-progress-v1';
+    const progressDataElement = document.getElementById('course-progress-data');
+    const progressData = progressDataElement ? JSON.parse(progressDataElement.textContent || '{}') : {};
+
+    function readCourseProgress() {
+      try {
+        const rawProgress = window.localStorage.getItem(COURSE_PROGRESS_KEY);
+        return rawProgress ? JSON.parse(rawProgress) : {};
+      } catch {
+        return {};
+      }
+    }
+
+    function writeCourseProgress(progress) {
+      window.localStorage.setItem(COURSE_PROGRESS_KEY, JSON.stringify(progress));
+      window.dispatchEvent(new CustomEvent('newlevel-course-progress'));
+    }
+
+    function isProgressLessonDone(lesson, progress) {
+      const videoDone = lesson.hasVideo ? Boolean(progress.videos?.[lesson.id]) : true;
+      const quizDone = lesson.hasQuiz ? Boolean(progress.quizzes?.[lesson.id]) : true;
+      return videoDone && quizDone;
+    }
+
+    function isProgressLessonUnlocked(order, progress) {
+      return (progressData.lessons || [])
+        .filter((lesson) => lesson.order < order)
+        .every((lesson) => isProgressLessonDone(lesson, progress));
+    }
+
+    function setStatus(row, done, doneText, waitingText) {
+      if (!row) return;
+
+      row.dataset.done = done ? 'true' : 'false';
+      const value = row.querySelector('strong');
+      if (value) value.textContent = done ? doneText : waitingText;
+    }
+
+    function refreshCourseLessonUi() {
+      const progress = readCourseProgress();
+      const lessonId = progressData.lessonId;
+      const videoDone = progressData.hasVideo ? Boolean(progress.videos?.[lessonId]) : true;
+      const quizDone = progressData.hasQuiz ? Boolean(progress.quizzes?.[lessonId]) : true;
+      const lessonDone = videoDone && quizDone;
+      const unlocked = isProgressLessonUnlocked(progressData.lessonOrder, progress);
+
+      setStatus(document.querySelector('[data-video-status]'), videoDone, 'Dopozerané', 'Čaká sa');
+      setStatus(document.querySelector('[data-quiz-status]'), quizDone, 'Splnený', 'Čaká sa');
+      setStatus(document.querySelector('[data-lesson-status]'), lessonDone, 'Dokončená', unlocked ? 'Rozpracovaná' : 'Zamknutá');
+
+      document.querySelector('[data-course-lock-warning]')?.classList.toggle('hidden', unlocked);
+      document.querySelector('[data-video-required-after-quiz]')?.classList.toggle('hidden', !progressData.hasVideo || !quizDone || videoDone || !unlocked);
+
+      const nextLesson = document.querySelector('[data-next-lesson]');
+      nextLesson?.classList.toggle('course-next-disabled', !lessonDone);
+      nextLesson?.setAttribute('aria-disabled', lessonDone ? 'false' : 'true');
+      nextLesson?.setAttribute(
+        'title',
+        lessonDone
+          ? 'Pokračovať na ďalšiu lekciu'
+          : progressData.hasVideo && quizDone
+            ? 'Ešte dopozeraj video do konca'
+            : progressData.hasVideo
+              ? 'Najprv dokonči video a test'
+              : 'Najprv splň test'
+      );
+
+      document.querySelectorAll('[data-course-quiz] input, [data-evaluate-quiz], [data-mark-video-complete], [data-mark-video-complete-inline], [data-course-video]').forEach((element) => {
+        element.disabled = !unlocked;
+      });
+    }
+
+    function markCourseVideoComplete() {
+      const progress = readCourseProgress();
+      const videos = { ...(progress.videos || {}), [progressData.lessonId]: true };
+      writeCourseProgress({ ...progress, videos });
+      refreshCourseLessonUi();
+    }
+
+    document.querySelector('[data-course-video]')?.addEventListener('ended', markCourseVideoComplete);
+    document.querySelectorAll('[data-mark-video-complete], [data-mark-video-complete-inline]').forEach((button) => {
+      button.addEventListener('click', markCourseVideoComplete);
+    });
+
+    function initializeYoutubeProgressTracking() {
+      const youtubeFrame = document.querySelector('[data-course-youtube-player]');
+      if (!youtubeFrame) return;
+
+      const setupPlayer = () => {
+        if (!window.YT?.Player || youtubeFrame.dataset.youtubeReady === 'true') return;
+
+        youtubeFrame.dataset.youtubeReady = 'true';
+        new window.YT.Player(youtubeFrame.id, {
+          events: {
+            onStateChange(event) {
+              if (event.data === window.YT.PlayerState.ENDED) {
+                markCourseVideoComplete();
+              }
+            },
+          },
+        });
+      };
+
+      if (window.YT?.Player) {
+        setupPlayer();
+        return;
+      }
+
+      const previousReadyCallback = window.onYouTubeIframeAPIReady;
+      window.onYouTubeIframeAPIReady = () => {
+        if (typeof previousReadyCallback === 'function') previousReadyCallback();
+        setupPlayer();
+      };
+
+      if (!document.querySelector('script[data-youtube-iframe-api]')) {
+        const script = document.createElement('script');
+        script.src = 'https://www.youtube.com/iframe_api';
+        script.async = true;
+        script.dataset.youtubeIframeApi = 'true';
+        document.head.appendChild(script);
+      }
+    }
+
+    initializeYoutubeProgressTracking();
+
+    function openCoursePanel(panelName) {
+      document.querySelectorAll('[data-course-panel]').forEach((panel) => {
+        panel.classList.toggle('hidden', panel.dataset.coursePanel !== panelName);
+      });
+
+      document.querySelectorAll('[data-course-panel-button]').forEach((button) => {
+        const active = button.dataset.coursePanelButton === panelName;
+        button.classList.toggle('is-active', active);
+        button.setAttribute('aria-current', active ? 'step' : 'false');
+      });
+    }
+
+    document.querySelectorAll('[data-course-panel-button]').forEach((button) => {
+      button.addEventListener('click', () => openCoursePanel(button.dataset.coursePanelButton));
+    });
+
+    document.querySelector('[data-open-quiz]')?.addEventListener('click', () => {
+      openCoursePanel('quiz');
+      document.querySelector('[data-course-panel="quiz"]')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
+    document.querySelector('[data-evaluate-quiz]')?.addEventListener('click', () => {
+      const form = document.querySelector('[data-course-quiz]');
+      const result = document.querySelector('[data-quiz-result]');
+
+      if (!form || !result) return;
+
+      const fieldsets = [...form.querySelectorAll('fieldset[data-question-type]')];
+      let correct = 0;
+      let answered = 0;
+
+      const normalizeAnswer = (value) =>
+        String(value || '')
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, ' ')
+          .trim();
+
+      fieldsets.forEach((fieldset) => {
+        const questionType = fieldset.dataset.questionType || 'single';
+        const checkedInputs = [...fieldset.querySelectorAll('input:checked')];
+
+        if (questionType === 'text') {
+          const input = fieldset.querySelector('input[type="text"]');
+          const answer = normalizeAnswer(input?.value);
+          if (!answer) return;
+
+          answered += 1;
+          const acceptedAnswers = JSON.parse(fieldset.dataset.acceptedAnswers || '[]').map(normalizeAnswer);
+          if (acceptedAnswers.some((acceptedAnswer) => acceptedAnswer && answer.includes(acceptedAnswer))) {
+            correct += 1;
+          }
+          return;
+        }
+
+        if (!checkedInputs.length) return;
+
+        answered += 1;
+
+        if (questionType === 'multi') {
+          const selected = checkedInputs.map((input) => Number(input.value)).sort((a, b) => a - b);
+          const correctAnswers = JSON.parse(fieldset.dataset.correctIndexes || '[]').sort((a, b) => a - b);
+          const isExactMatch =
+            selected.length === correctAnswers.length &&
+            selected.every((value, index) => value === correctAnswers[index]);
+
+          if (isExactMatch) correct += 1;
+          return;
+        }
+
+        if (String(checkedInputs[0].value) === fieldset.dataset.correct) {
+          correct += 1;
+        }
+      });
+
+      result.classList.remove('hidden');
+      const passed = answered === fieldsets.length && correct >= Number(progressData.passThreshold || fieldsets.length);
+
+      result.textContent =
+        answered < fieldsets.length
+          ? 'Odpovedz najprv na všetky otázky.'
+          : passed
+            ? `Výborne, test je splnený. Máš ${correct} z ${fieldsets.length} správne.`
+            : `Máš ${correct} z ${fieldsets.length} správne. Na pokračovanie potrebuješ aspoň ${progressData.passThreshold}.`;
+
+      if (passed) {
+        const progress = readCourseProgress();
+        const quizzes = { ...(progress.quizzes || {}), [progressData.lessonId]: true };
+        writeCourseProgress({ ...progress, quizzes });
+        refreshCourseLessonUi();
+      }
+    });
+
+    document.querySelector('[data-next-lesson]')?.addEventListener('click', (event) => {
+      if (event.currentTarget.classList.contains('course-next-disabled')) {
+        event.preventDefault();
+      }
+    });
+
+    refreshCourseLessonUi();
+  </script>
+
+  <style>
+    .course-surface {
+      --background: var(--color-background);
+      --foreground: var(--color-text);
+      --card: #ffffff;
+      --primary: var(--color-primary);
+      --primary-foreground: #ffffff;
+      --secondary: var(--color-background-alt);
+      --muted: var(--color-primary-light);
+      --muted-foreground: var(--color-text-muted);
+      --accent: var(--color-accent);
+      --accent-foreground: var(--color-text);
+      --destructive: #dc2626;
+      --border: color-mix(in srgb, var(--color-text-muted) 28%, transparent);
+      --input: color-mix(in srgb, var(--color-text-muted) 35%, transparent);
+      --ring: var(--color-primary);
+      --path: color-mix(in srgb, var(--color-primary) 25%, transparent);
+      --path-active: var(--color-primary);
+    }
+
+    .course-stepper {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+      gap: 0.75rem;
+      border-radius: 1.5rem;
+      background: var(--color-background-alt);
+      padding: 0.45rem;
+    }
+
+    .course-stepper-button {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      border: 0;
+      border-radius: 1.15rem;
+      background: transparent;
+      padding: 0.9rem 1rem;
+      color: var(--color-text-light);
+      cursor: pointer;
+      font: inherit;
+      font-size: 0.95rem;
+      font-weight: 900;
+      text-align: left;
+      transition:
+        background-color 160ms ease,
+        box-shadow 160ms ease,
+        color 160ms ease;
+    }
+
+    .course-stepper-button span {
+      display: inline-flex;
+      width: 2.2rem;
+      height: 2.2rem;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.9);
+      color: var(--color-primary);
+      font-size: 0.82rem;
+      font-weight: 900;
+    }
+
+    .course-stepper-button.is-active {
+      background: #ffffff;
+      color: var(--color-text);
+      box-shadow: 0 0.8rem 1.8rem rgba(0, 0, 0, 0.08);
+    }
+
+    .course-stepper-button.is-active span {
+      background: var(--color-primary);
+      color: #ffffff;
+    }
+
+    .course-quiz-form {
+      display: grid;
+      gap: 0.9rem;
+      margin-top: 1.25rem;
+    }
+
+    .course-quiz-question {
+      margin: 0;
+      border: 0;
+      border-radius: 1.25rem;
+      background: color-mix(in srgb, var(--color-background-alt) 72%, white);
+      padding: 1rem;
+    }
+
+    .course-quiz-prompt {
+      margin: 0;
+      color: var(--color-text);
+      font-size: clamp(1rem, 2.8vw, 1.12rem);
+      font-weight: 900;
+      line-height: 1.28;
+      letter-spacing: 0;
+    }
+
+    .course-quiz-note {
+      margin-top: 0.45rem;
+      color: var(--color-accent-dark);
+      font-size: 0.72rem;
+      font-weight: 900;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .course-quiz-options {
+      display: grid;
+      gap: 0.55rem;
+      margin-top: 0.85rem;
+    }
+
+    .course-quiz-option {
+      display: flex;
+      min-height: 2.75rem;
+      cursor: pointer;
+      align-items: center;
+      gap: 0.7rem;
+      border: 1px solid color-mix(in srgb, var(--color-text-muted) 20%, transparent);
+      border-radius: 0.85rem;
+      background: #ffffff;
+      padding: 0.72rem 0.85rem;
+      color: var(--color-text-light);
+      font-size: 0.96rem;
+      font-weight: 750;
+      line-height: 1.25;
+      transition:
+        border-color 160ms ease,
+        box-shadow 160ms ease,
+        color 160ms ease;
+    }
+
+    .course-quiz-option:hover {
+      border-color: color-mix(in srgb, var(--color-primary) 35%, transparent);
+      color: var(--color-text);
+      box-shadow: 0 0.55rem 1.2rem rgba(0, 0, 0, 0.06);
+    }
+
+    .course-quiz-option input {
+      width: 1rem;
+      height: 1rem;
+      flex: 0 0 auto;
+      accent-color: var(--color-primary);
+    }
+
+    .course-quiz-input {
+      width: 100%;
+      margin-top: 0.85rem;
+      border: 1px solid color-mix(in srgb, var(--color-text-muted) 22%, transparent);
+      border-radius: 0.85rem;
+      background: #ffffff;
+      padding: 0.85rem 0.95rem;
+      color: var(--color-text);
+      font-size: 0.95rem;
+      font-weight: 750;
+      outline: none;
+      transition:
+        border-color 160ms ease,
+        box-shadow 160ms ease;
+    }
+
+    .course-quiz-input:focus {
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--color-primary) 12%, transparent);
+    }
+
+    .course-status-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      border-radius: 1rem;
+      background: var(--color-background-alt);
+      padding: 0.8rem 0.9rem;
+      color: var(--color-text-light);
+      font-size: 0.9rem;
+      font-weight: 800;
+    }
+
+    .course-status-row strong {
+      color: var(--color-primary);
+      font-size: 0.82rem;
+      text-transform: uppercase;
+    }
+
+    .course-status-row[data-done="true"] {
+      background: color-mix(in srgb, var(--color-accent) 15%, white);
+      color: var(--color-text);
+    }
+
+    .course-status-row[data-done="true"] strong {
+      color: var(--color-accent-dark);
+    }
+
+    .course-next-disabled {
+      cursor: not-allowed;
+      opacity: 0.48;
+      filter: grayscale(1);
+    }
+  </style>
+</BaseLayout>
