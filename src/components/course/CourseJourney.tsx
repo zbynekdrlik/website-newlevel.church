@@ -1,7 +1,10 @@
 "use client"
 
+import type React from "react"
+import { useEffect, useMemo, useState } from "react"
 import {
   BookOpen,
+  Check,
   ClipboardCheck,
   FileText,
   Globe2,
@@ -46,7 +49,22 @@ const lessonLayouts = [
     accent: "dark",
     marker: "heart",
   },
+  {
+    cardClass: "course-board__card--six",
+    nodeClass: "course-board__node--six",
+    accent: "dark",
+    marker: "globe",
+  },
 ] as const
+
+const COURSE_PROGRESS_KEY = "newlevel-course-progress-v1"
+
+type CourseProgress = {
+  videos?: Record<string, boolean>
+  quizzes?: Record<string, boolean>
+}
+
+type LessonViewState = "done" | "current" | "locked"
 
 const defaultMapLabels = {
   intro: "Úvod do kurzu",
@@ -63,11 +81,40 @@ const defaultMapLabels = {
 const defaultMapIntro = {
   titleAccent: "pre mladých",
   subtitle: "Objavuj pravdu, buduj vzťah s Bohom a ži život, ktorý má zmysel.",
+  reference: "",
   hint: "Klikni na bod cesty a otvor lekciu",
 }
 
+function readCourseProgress(): CourseProgress {
+  if (typeof window === "undefined") return {}
+
+  try {
+    const rawProgress = window.localStorage.getItem(COURSE_PROGRESS_KEY)
+    return rawProgress ? JSON.parse(rawProgress) : {}
+  } catch {
+    return {}
+  }
+}
+
+function lessonNeedsQuiz(lesson: (typeof course.lessons)[number]) {
+  return Boolean(lesson.quiz) || lesson.order === course.quiz.afterLessonOrder
+}
+
+function lessonHasVideo(lesson: (typeof course.lessons)[number]) {
+  return Boolean(lesson.videoFile || lesson.videoUrl)
+}
+
+function isLessonDone(lesson: (typeof course.lessons)[number], progress: CourseProgress) {
+  const videoDone = lessonHasVideo(lesson) ? Boolean(progress.videos?.[lesson.id]) : true
+  const quizDone = lessonNeedsQuiz(lesson) ? Boolean(progress.quizzes?.[lesson.id]) : true
+
+  return videoDone && quizDone
+}
+
 export function CourseJourney() {
-  const { lessons, quiz } = course
+  const { lessons } = course
+  const [progress, setProgress] = useState<CourseProgress>({})
+  const [progressLoaded, setProgressLoaded] = useState(false)
   const intro = { ...defaultMapIntro, ...course.mapIntro }
   const labels = { ...defaultMapLabels, ...course.mapLabels }
   const mapLabels = [
@@ -81,15 +128,70 @@ export function CourseJourney() {
     { className: "course-board__label--mission", title: labels.mission, icon: Heart },
     { className: "course-board__label--world", title: labels.world, icon: Globe2 },
   ]
+  const lessonStates = useMemo(() => {
+    return lessons.map((lesson, index) => {
+      const previousLessons = lessons.slice(0, index)
+      const locked = previousLessons.some((previousLesson) => !isLessonDone(previousLesson, progress))
+      const done = !locked && isLessonDone(lesson, progress)
+      const state: LessonViewState = locked ? "locked" : done ? "done" : "current"
+
+      return {
+        done,
+        locked,
+        state,
+      }
+    })
+  }, [lessons, progress])
+  const completedLessons = lessonStates.filter((state) => state.done).length
+  const currentLessonIndex = lessonStates.findIndex((state) => state.state === "current")
+  const currentLesson = currentLessonIndex >= 0 ? lessons[currentLessonIndex] : lessons[lessons.length - 1]
+  const progressPercent = Math.round((completedLessons / lessons.length) * 100)
+
+  useEffect(() => {
+    const syncProgress = () => {
+      setProgress(readCourseProgress())
+      setProgressLoaded(true)
+    }
+
+    syncProgress()
+    window.addEventListener("storage", syncProgress)
+    window.addEventListener("pageshow", syncProgress)
+    window.addEventListener("newlevel-course-progress", syncProgress)
+
+    return () => {
+      window.removeEventListener("storage", syncProgress)
+      window.removeEventListener("pageshow", syncProgress)
+      window.removeEventListener("newlevel-course-progress", syncProgress)
+    }
+  }, [])
 
   return (
-    <div className="course-board">
+    <div
+      className={cn("course-board", `course-board--done-${completedLessons}`)}
+      data-progress-loaded={progressLoaded ? "true" : "false"}
+    >
       <div className="course-board__intro">
         <h1>
           {course.title}
           <span>{intro.titleAccent}</span>
         </h1>
-        <p>{intro.subtitle}</p>
+        <blockquote className="course-board__scripture">
+          <p>{intro.subtitle}</p>
+          {intro.reference && <cite>{intro.reference}</cite>}
+        </blockquote>
+      </div>
+
+      <div className="course-board__progress-panel" aria-live="polite">
+        <span>Progres kurzu</span>
+        <strong>{completedLessons}/{lessons.length}</strong>
+        <div className="course-board__progress-bar" aria-hidden="true">
+          <i style={{ width: `${progressPercent}%` }}></i>
+        </div>
+        <p>
+          {completedLessons === lessons.length
+            ? "Celá cesta je dokončená."
+            : `Ďalší krok: ${String(currentLesson.order).padStart(2, "0")} ${currentLesson.title}`}
+        </p>
       </div>
 
       <div className="course-board__track" aria-hidden="true">
@@ -160,26 +262,33 @@ export function CourseJourney() {
 
       {lessons.map((lesson, index) => {
         const layout = lessonLayouts[index] ?? lessonLayouts[lessonLayouts.length - 1]
-        const locked = lesson.order >= 2
+        const state = lessonStates[index]
+        const locked = state.locked
 
         return (
           <a
             key={`${lesson.id}-node`}
             href={`/kurzy/${lesson.id}`}
+            aria-disabled={locked}
+            onClick={(event) => {
+              if (locked) event.preventDefault()
+            }}
             className={cn(
               "course-board__node",
               layout.nodeClass,
-              layout.accent === "teal" && "course-board__node--done",
-              layout.accent === "red" && "course-board__node--current",
-              layout.accent === "dark" && "course-board__node--locked",
+              state.done && "course-board__node--done",
+              state.state === "current" && "course-board__node--current",
+              locked && "course-board__node--locked",
             )}
             aria-label={`Otvoriť lekciu ${lesson.order}: ${lesson.title}`}
           >
-            <strong>{String(lesson.order).padStart(2, "0")}</strong>
-            {locked && <Lock aria-hidden="true" />}
+            {state.done ? <Check aria-hidden="true" /> : <strong>{String(lesson.order).padStart(2, "0")}</strong>}
+            {locked ? <Lock aria-hidden="true" /> : state.state === "current" ? <Play aria-hidden="true" /> : null}
             <span className="course-board__tooltip">
               {String(lesson.order).padStart(2, "0")} {lesson.title}
-              <small>Otvoriť lekciu</small>
+              <small>
+                {state.done ? "Dokončené" : locked ? "Najprv dokonči predchádzajúcu lekciu" : "Pokračovať v lekcii"}
+              </small>
             </span>
           </a>
         )
@@ -192,13 +301,16 @@ export function CourseJourney() {
       <div className="course-board__mobile-list">
         {lessons.map((lesson, index) => {
           const layout = lessonLayouts[index] ?? lessonLayouts[lessonLayouts.length - 1]
+          const state = lessonStates[index]
 
           return (
             <LessonPopover
               key={lesson.id}
               lesson={lesson}
               layout={layout}
-              hasQuiz={lesson.order === quiz.afterLessonOrder}
+              hasQuiz={lessonNeedsQuiz(lesson)}
+              state={state.state}
+              locked={state.locked}
               mobile
             />
           )
@@ -218,50 +330,63 @@ function LessonPopover({
   lesson,
   layout,
   hasQuiz,
+  state,
+  locked,
   mobile = false,
 }: {
   lesson: (typeof course.lessons)[number]
   layout: (typeof lessonLayouts)[number]
   hasQuiz: boolean
+  state: LessonViewState
+  locked: boolean
   mobile?: boolean
 }) {
-  const locked = lesson.order >= 4
+  const tone = state === "done" ? "teal" : state === "current" ? "red" : "dark"
 
   return (
     <div
       className={cn(
         "course-board__card",
         !mobile && layout.cardClass,
-        layout.accent === "red" && "course-board__card--red",
-        layout.accent === "teal" && "course-board__card--teal",
-        layout.accent === "dark" && "course-board__card--dark",
+        state === "current" && "course-board__card--red",
+        state === "done" && "course-board__card--teal",
+        state === "locked" && "course-board__card--dark",
         mobile && "course-board__card--mobile",
       )}
+      data-lesson-order={String(lesson.order).padStart(2, "0")}
+      data-lesson-state={state}
     >
-      <span className={cn("course-board__mini", `course-board__mini--${layout.accent}`)}>
-        {locked ? <Lock /> : <Play />}
+      <span className={cn("course-board__mini", `course-board__mini--${tone}`)}>
+        {state === "done" ? <Check /> : locked ? <Lock /> : <Play />}
       </span>
+      <small className={cn("course-board__state", `course-board__state--${tone}`)}>
+        {state === "done" ? "Dokončené" : locked ? "Zamknuté" : "Aktuálne"}
+      </small>
       <h2>
         {String(lesson.order).padStart(2, "0")} {lesson.title}
       </h2>
       <p>{lesson.preview}</p>
       <div className="course-board__actions">
-        <Pill icon={<Play />} label="Video" tone={layout.accent} disabled={locked} />
+        <Pill icon={<Play />} label="Video" tone={tone} disabled={locked} />
         {hasQuiz && (
           <Pill
             icon={<ClipboardCheck />}
             label="Test"
-            tone={layout.accent}
+            tone={tone}
             disabled={locked}
           />
         )}
-        <Pill icon={<FileText />} label="Materiály" tone={layout.accent} disabled={locked} />
+        <Pill icon={<FileText />} label="Materiály" tone={tone} disabled={locked} />
       </div>
       <a
         href={`/kurzy/${lesson.id}`}
-        className={cn("course-board__detail", `course-board__detail--${layout.accent}`)}
+        aria-disabled={locked}
+        onClick={(event) => {
+          if (locked) event.preventDefault()
+        }}
+        className={cn("course-board__detail", `course-board__detail--${tone}`)}
       >
-        Detail
+        {locked ? "Zamknuté" : "Detail"}
       </a>
     </div>
   )

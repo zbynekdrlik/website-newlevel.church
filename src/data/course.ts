@@ -9,6 +9,11 @@ export interface LessonMaterial {
   file?: string;
 }
 
+export interface LessonScripture {
+  reference: string;
+  text: string;
+}
+
 export interface Lesson {
   id: string;
   order: number;
@@ -27,13 +32,20 @@ export interface Lesson {
   materials: LessonMaterial[];
   status: LessonStatus;
   requiresQuiz?: boolean;
+  scriptures?: LessonScripture[];
+  commonMistakes?: string[];
+  quiz?: LessonQuiz;
 }
 
 export interface QuizQuestion {
   id: string;
+  type?: 'single' | 'multi' | 'text';
   question: string;
-  options: string[];
-  correctIndex: number;
+  options?: string[];
+  correctIndex?: number;
+  correctIndexes?: number[];
+  acceptedAnswers?: string[];
+  placeholder?: string;
 }
 
 export interface Quiz {
@@ -43,6 +55,8 @@ export interface Quiz {
   passThreshold: number;
   questions: QuizQuestion[];
 }
+
+export type LessonQuiz = Omit<Quiz, 'afterLessonOrder'>;
 
 export interface CourseStat {
   label: string;

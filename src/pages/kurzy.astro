@@ -10,7 +10,7 @@ import { course } from '../data/course';
   currentPage="kurzy"
 >
   <section class="course-surface">
-    <CourseJourney />
+    <CourseJourney client:load />
   </section>
 
   <style is:global>
@@ -27,7 +27,7 @@ import { course } from '../data/course';
     .course-board {
       position: relative;
       min-height: calc(100svh - 5rem);
-      max-width: 100rem;
+      max-width: 104rem;
       margin: 0 auto;
       padding: clamp(2.2rem, 3vw, 4rem) clamp(1.25rem, 3vw, 4rem) 3.8rem;
       isolation: isolate;
@@ -56,15 +56,15 @@ import { course } from '../data/course';
 
     .course-board__intro {
       position: absolute;
-      left: clamp(1.25rem, 3vw, 4rem);
+      left: clamp(1.5rem, 3.4vw, 4.6rem);
       top: clamp(2rem, 4vw, 4.5rem);
       z-index: 5;
-      max-width: 24rem;
+      max-width: 25rem;
     }
 
     .course-board__intro h1 {
       font-family: "Barlow Condensed", "Inter", sans-serif;
-      font-size: clamp(3.5rem, 5.1vw, 6.1rem);
+      font-size: clamp(3.35rem, 4.75vw, 5.8rem);
       font-weight: 900;
       line-height: 0.93;
       letter-spacing: 0;
@@ -76,18 +76,112 @@ import { course } from '../data/course';
       color: var(--color-primary);
     }
 
-    .course-board__intro p {
-      margin-top: 1.35rem;
-      max-width: 29rem;
+    .course-board__scripture {
+      position: relative;
+      margin-top: 1.1rem;
+      max-width: 26rem;
+      border-left: 0.2rem solid color-mix(in srgb, var(--color-primary) 82%, white);
+      padding-left: 1rem;
+    }
+
+    .course-board__scripture p {
+      margin: 0;
       color: rgba(255, 255, 255, 0.78);
-      font-size: clamp(1rem, 1.4vw, 1.35rem);
+      font-family: "SFMono-Regular", "Roboto Mono", "Cascadia Mono", "Liberation Mono", Menlo, Consolas, monospace;
+      font-size: clamp(0.82rem, 0.9vw, 0.96rem);
       font-weight: 700;
-      line-height: 1.45;
+      line-height: 1.65;
+    }
+
+    .course-board__scripture p::before {
+      content: "“";
+      color: var(--color-primary);
+      font-size: 1.2em;
+      font-weight: 900;
+    }
+
+    .course-board__scripture p::after {
+      content: "”";
+      color: var(--color-primary);
+      font-size: 1.2em;
+      font-weight: 900;
+    }
+
+    .course-board__scripture cite {
+      display: block;
+      margin-top: 0.55rem;
+      color: rgba(255, 255, 255, 0.58);
+      font-family: "SFMono-Regular", "Roboto Mono", "Cascadia Mono", "Liberation Mono", Menlo, Consolas, monospace;
+      font-size: 0.82rem;
+      font-style: normal;
+      font-weight: 900;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .course-board__progress-panel {
+      position: absolute;
+      right: clamp(1.6rem, 3.4vw, 4.6rem);
+      top: clamp(1.75rem, 2.8vw, 3.2rem);
+      z-index: 24;
+      width: min(20.5rem, 28vw);
+      padding: 0.9rem 1rem;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 1rem;
+      background: rgba(7, 12, 17, 0.72);
+      box-shadow: 0 1.25rem 3rem rgba(0, 0, 0, 0.34);
+      backdrop-filter: blur(16px);
+    }
+
+    .course-board__progress-panel > span {
+      display: block;
+      color: rgba(255, 255, 255, 0.58);
+      font-size: 0.78rem;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .course-board__progress-panel strong {
+      display: block;
+      margin-top: 0.25rem;
+      color: #ffffff;
+      font-family: "Barlow Condensed", "Inter", sans-serif;
+      font-size: clamp(2rem, 2.7vw, 2.95rem);
+      font-weight: 900;
+      line-height: 0.9;
+    }
+
+    .course-board__progress-bar {
+      position: relative;
+      height: 0.55rem;
+      margin-top: 0.75rem;
+      overflow: hidden;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .course-board__progress-bar i {
+      display: block;
+      height: 100%;
+      min-width: 0.55rem;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+      box-shadow: 0 0 1rem rgba(62, 187, 192, 0.45);
+      transition: width 240ms ease;
+    }
+
+    .course-board__progress-panel p {
+      margin-top: 0.72rem;
+      color: rgba(255, 255, 255, 0.76);
+      font-size: 0.88rem;
+      font-weight: 800;
+      line-height: 1.25;
     }
 
     .course-board__track {
       position: absolute;
-      inset: 8.5rem -1rem 3.8rem -1rem;
+      inset: clamp(9rem, 12vh, 10.7rem) clamp(4.2rem, 5.6vw, 6.2rem) clamp(5rem, 6.2vh, 5.8rem) clamp(5.6rem, 8.6vw, 9.6rem);
       z-index: 1;
     }
 
@@ -111,46 +205,69 @@ import { course } from '../data/course';
 
     .course-board__road-shadow {
       stroke: rgba(0, 0, 0, 0.55);
-      stroke-width: 122;
+      stroke-width: 98;
       filter: url(#course-road-shadow);
     }
 
     .course-board__road-base {
       stroke: rgba(11, 14, 17, 0.94);
-      stroke-width: 112;
+      stroke-width: 88;
     }
 
     .course-board__road-border {
       stroke: rgba(255, 255, 255, 0.34);
-      stroke-width: 118;
+      stroke-width: 94;
     }
 
     .course-board__road-inner {
       stroke: rgba(12, 15, 18, 0.96);
-      stroke-width: 102;
+      stroke-width: 78;
     }
 
     .course-board__segment {
-      stroke-width: 94;
+      stroke-width: 70;
     }
 
     .course-board__segment--red {
-      stroke: url(#course-red);
+      stroke: url(#course-locked);
     }
 
     .course-board__segment--teal {
-      stroke: url(#course-teal);
+      stroke: url(#course-locked);
     }
 
     .course-board__segment--locked {
       stroke: url(#course-locked);
     }
 
+    .course-board--done-0 .course-board__segment--red,
+    .course-board--done-1 .course-board__segment--teal,
+    .course-board--done-2 .course-board__segment--teal,
+    .course-board--done-3 .course-board__segment--locked,
+    .course-board--done-4 .course-board__segment--locked,
+    .course-board--done-5 .course-board__segment--locked {
+      stroke: url(#course-red);
+    }
+
+    .course-board--done-1 .course-board__segment--red,
+    .course-board--done-2 .course-board__segment--red,
+    .course-board--done-3 .course-board__segment--red,
+    .course-board--done-3 .course-board__segment--teal,
+    .course-board--done-4 .course-board__segment--red,
+    .course-board--done-4 .course-board__segment--teal,
+    .course-board--done-5 .course-board__segment--red,
+    .course-board--done-5 .course-board__segment--teal,
+    .course-board--done-6 .course-board__segment--red,
+    .course-board--done-6 .course-board__segment--teal,
+    .course-board--done-6 .course-board__segment--locked {
+      stroke: url(#course-teal);
+    }
+
     .course-board__road-line {
       stroke: rgba(255, 255, 255, 0.72);
-      stroke-width: 2.2;
+      stroke-width: 1.85;
       stroke-dasharray: 240 18;
-      opacity: 0.7;
+      opacity: 0.62;
     }
 
     .course-board__label {
@@ -162,7 +279,7 @@ import { course } from '../data/course';
       gap: 0.3rem;
       color: rgba(255, 255, 255, 0.78);
       font-family: "Barlow Condensed", "Inter", sans-serif;
-      font-size: clamp(1rem, 1.35vw, 1.55rem);
+      font-size: clamp(0.92rem, 1.15vw, 1.34rem);
       font-weight: 900;
       letter-spacing: 0.04em;
       line-height: 0.95;
@@ -173,64 +290,64 @@ import { course } from '../data/course';
     }
 
     .course-board__label svg {
-      width: 1.5rem;
-      height: 1.5rem;
+      width: 1.28rem;
+      height: 1.28rem;
       opacity: 0.55;
       stroke-width: 1.7;
     }
 
     .course-board__label--intro {
-      left: 27%;
-      top: 32%;
+      left: 30%;
+      top: 36%;
       transform: rotate(-6deg);
     }
 
     .course-board__label--god {
-      left: 12%;
-      top: 47%;
+      left: 15.2%;
+      top: 50.2%;
       transform: rotate(-12deg);
       color: rgba(255, 255, 255, 0.54);
     }
 
     .course-board__label--bible {
-      left: 50%;
-      top: 25%;
+      left: 52%;
+      top: 30%;
       transform: rotate(-16deg);
     }
 
     .course-board__label--inspire {
-      left: 63%;
-      top: 12%;
+      left: 65.2%;
+      top: 17.2%;
       transform: rotate(-3deg);
     }
 
     .course-board__label--prayer {
-      left: 75%;
-      top: 15%;
+      left: 77.5%;
+      top: 19%;
       transform: rotate(12deg);
     }
 
     .course-board__label--community {
-      left: 73%;
-      top: 60%;
+      left: 75%;
+      top: 62.5%;
       transform: rotate(-18deg);
     }
 
     .course-board__label--life {
-      left: 63%;
-      top: 67%;
+      left: 64%;
+      top: 68%;
       transform: rotate(0deg);
     }
 
     .course-board__label--mission {
-      left: 38%;
-      top: 74%;
+      left: 40.5%;
+      top: 74.5%;
       transform: rotate(-10deg);
     }
 
     .course-board__label--world {
-      left: 4%;
-      top: 78%;
+      left: 7.2%;
+      top: 79%;
       transform: rotate(-4deg);
     }
 
@@ -332,6 +449,21 @@ import { course } from '../data/course';
       border-top: 1px solid rgba(255, 255, 255, 0.85);
     }
 
+    .course-board__card--six {
+      left: 2.5%;
+      top: 68%;
+      width: min(17rem, 20vw);
+    }
+
+    .course-board__card--six::after {
+      left: 30%;
+      top: -0.85rem;
+      border: 0;
+      border-left: 1px solid rgba(255, 255, 255, 0.85);
+      border-top: 1px solid rgba(255, 255, 255, 0.85);
+    }
+
+
     .course-board__mini {
       display: inline-flex;
       width: 2.55rem;
@@ -361,6 +493,34 @@ import { course } from '../data/course';
 
     .course-board__mini--dark {
       background: #8a8a8a;
+    }
+
+    .course-board__state {
+      display: inline-flex;
+      width: max-content;
+      margin-bottom: 0.55rem;
+      padding: 0.24rem 0.55rem;
+      border-radius: 999px;
+      font-size: 0.68rem;
+      font-weight: 900;
+      letter-spacing: 0.05em;
+      line-height: 1;
+      text-transform: uppercase;
+    }
+
+    .course-board__state--red {
+      background: rgba(221, 14, 24, 0.1);
+      color: var(--color-primary);
+    }
+
+    .course-board__state--teal {
+      background: rgba(62, 187, 192, 0.13);
+      color: #168b94;
+    }
+
+    .course-board__state--dark {
+      background: rgba(0, 0, 0, 0.08);
+      color: #626262;
     }
 
     .course-board__card h2 {
@@ -455,16 +615,21 @@ import { course } from '../data/course';
       background: #333;
     }
 
+    .course-board__detail[aria-disabled="true"] {
+      pointer-events: none;
+      opacity: 0.52;
+    }
+
     .course-board__node {
       position: absolute;
       z-index: 8;
       display: flex;
-      width: clamp(5.6rem, 6.6vw, 7.2rem);
-      height: clamp(5.6rem, 6.6vw, 7.2rem);
+      width: clamp(4.85rem, 5.45vw, 6.1rem);
+      height: clamp(4.85rem, 5.45vw, 6.1rem);
       align-items: center;
       justify-content: center;
       flex-direction: column;
-      border: 0.34rem solid rgba(255, 255, 255, 0.9);
+      border: 0.28rem solid rgba(255, 255, 255, 0.9);
       border-radius: 999px;
       color: #ffffff;
       cursor: pointer;
@@ -561,55 +726,90 @@ import { course } from '../data/course';
 
     .course-board__node strong {
       font-family: "Barlow Condensed", "Inter", sans-serif;
-      font-size: clamp(2.2rem, 3vw, 3.5rem);
+      font-size: clamp(2rem, 2.65vw, 3rem);
       font-weight: 900;
       line-height: 0.85;
       letter-spacing: 0;
     }
 
     .course-board__node svg {
-      width: 1.25rem;
-      height: 1.25rem;
-      margin-top: 0.35rem;
+      width: 1.05rem;
+      height: 1.05rem;
+      margin-top: 0.28rem;
       stroke-width: 2.7;
     }
 
     .course-board__node--done {
       background: #188f98;
+      border-color: rgba(255, 255, 255, 0.96);
+      box-shadow:
+        0 1rem 1.8rem rgba(0, 0, 0, 0.38),
+        0 0 0 0.42rem rgba(62, 187, 192, 0.2),
+        inset 0 0 0 0.18rem rgba(255, 255, 255, 0.16);
     }
 
     .course-board__node--current {
       background: var(--color-primary);
+      animation: course-current-pulse 1.8s ease-in-out infinite;
     }
 
     .course-board__node--locked {
       background: #2c2f32;
       color: rgba(255, 255, 255, 0.92);
+      cursor: not-allowed;
+      filter: saturate(0.7);
+    }
+
+    .course-board__node--locked:hover,
+    .course-board__node--locked:focus-visible {
+      transform: none;
+    }
+
+    @keyframes course-current-pulse {
+      0%,
+      100% {
+        box-shadow:
+          0 1rem 1.8rem rgba(0, 0, 0, 0.38),
+          0 0 0 0 rgba(221, 14, 24, 0.34),
+          inset 0 0 0 0.18rem rgba(255, 255, 255, 0.16);
+      }
+
+      50% {
+        box-shadow:
+          0 1rem 1.8rem rgba(0, 0, 0, 0.38),
+          0 0 0 0.6rem rgba(221, 14, 24, 0),
+          inset 0 0 0 0.18rem rgba(255, 255, 255, 0.16);
+      }
     }
 
     .course-board__node--one {
-      left: 2.9%;
-      top: 46.5%;
+      left: 15.2%;
+      top: 50.5%;
     }
 
     .course-board__node--two {
-      left: 42.4%;
-      top: 41%;
+      left: 44.3%;
+      top: 43.4%;
     }
 
     .course-board__node--three {
-      right: 15.4%;
-      top: 48.2%;
+      right: 12.9%;
+      top: 50%;
     }
 
     .course-board__node--four {
-      right: 27.2%;
-      bottom: 17.4%;
+      right: 25.4%;
+      bottom: 18.6%;
     }
 
     .course-board__node--five {
-      left: 29.5%;
-      bottom: 17%;
+      left: 32%;
+      bottom: 19.3%;
+    }
+
+    .course-board__node--six {
+      left: 11.3%;
+      bottom: 12.4%;
     }
 
     .course-board__legend {
@@ -687,6 +887,12 @@ import { course } from '../data/course';
         margin-bottom: 1.5rem;
       }
 
+      .course-board__progress-panel {
+        position: static;
+        width: 100%;
+        margin-bottom: 1.2rem;
+      }
+
       .course-board__intro h1 {
         font-size: clamp(3.1rem, 15vw, 4.8rem);
       }
@@ -702,7 +908,42 @@ import { course } from '../data/course';
 
       .course-board__mobile-list {
         display: grid;
-        gap: 1rem;
+        position: relative;
+        gap: 0.55rem;
+        padding: 0.1rem 0 0.1rem 3.35rem;
+      }
+
+      .course-board__mobile-list::before {
+        content: "";
+        position: absolute;
+        left: 1.12rem;
+        top: 0.7rem;
+        bottom: 0.7rem;
+        width: 0.72rem;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        border-radius: 999px;
+        background:
+          linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0)),
+          linear-gradient(180deg, rgba(221, 14, 24, 0.74) 0 17%, rgba(38, 153, 160, 0.68) 17% 48%, rgba(41, 47, 50, 0.9) 48% 100%);
+        box-shadow:
+          0 0 0 0.24rem rgba(255, 255, 255, 0.025),
+          inset 0 0 0.8rem rgba(0, 0, 0, 0.46);
+      }
+
+      .course-board__mobile-list::after {
+        content: "";
+        position: absolute;
+        left: 1.47rem;
+        top: 2.5rem;
+        bottom: 2.5rem;
+        width: 2px;
+        border-radius: 999px;
+        background: repeating-linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.42) 0 0.72rem,
+          transparent 0.72rem 1.45rem
+        );
+        opacity: 0.28;
       }
 
       .course-board__card {
@@ -710,7 +951,7 @@ import { course } from '../data/course';
         inset: auto;
         width: 100%;
         min-width: 0;
-        margin-bottom: 1rem;
+        margin-bottom: 0;
       }
 
       .course-board__card:hover,
@@ -720,6 +961,124 @@ import { course } from '../data/course';
 
       .course-board__card::after {
         display: none;
+      }
+
+      .course-board__card--mobile {
+        min-height: 0;
+        padding: 0.82rem 0.9rem;
+        border-color: rgba(255, 255, 255, 0.14);
+        border-radius: 0.85rem;
+        background:
+          linear-gradient(135deg, rgba(15, 19, 22, 0.92), rgba(12, 14, 17, 0.84));
+        color: rgba(255, 255, 255, 0.92);
+        box-shadow:
+          0 0.75rem 1.25rem rgba(0, 0, 0, 0.22),
+          inset 0 0 0 1px rgba(255, 255, 255, 0.035);
+        backdrop-filter: blur(14px);
+      }
+
+      .course-board__card--mobile::before {
+        content: attr(data-lesson-order);
+        position: absolute;
+        left: -2.95rem;
+        top: 0.78rem;
+        z-index: 3;
+        display: flex;
+        width: 2.35rem;
+        height: 2.35rem;
+        align-items: center;
+        justify-content: center;
+        border: 0.15rem solid rgba(255, 255, 255, 0.72);
+        border-radius: 999px;
+        color: #ffffff;
+        font-family: "Barlow Condensed", "Inter", sans-serif;
+        font-size: 1.16rem;
+        font-weight: 900;
+        line-height: 1;
+        box-shadow:
+          0 0.55rem 0.85rem rgba(0, 0, 0, 0.28),
+          inset 0 0 0 0.1rem rgba(255, 255, 255, 0.08);
+      }
+
+      .course-board__card--mobile::after {
+        content: "";
+        position: absolute;
+        left: -0.35rem;
+        top: 1.48rem;
+        display: block;
+        width: 0.74rem;
+        height: 0.74rem;
+        border: 0;
+        border-left: 1px solid rgba(255, 255, 255, 0.14);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+        background: rgba(14, 17, 20, 0.9);
+        transform: rotate(45deg);
+      }
+
+      .course-board__card--mobile[data-lesson-state="done"]::before {
+        content: "✓";
+        background: #167f86;
+      }
+
+      .course-board__card--mobile[data-lesson-state="current"]::before {
+        background: #cf121b;
+      }
+
+      .course-board__card--mobile[data-lesson-state="locked"]::before {
+        background: #2d3134;
+      }
+
+      .course-board__card--mobile .course-board__mini {
+        display: none;
+      }
+
+      .course-board__card--mobile .course-board__state {
+        margin-bottom: 0.38rem;
+        padding: 0;
+        background: transparent;
+        font-size: 0.56rem;
+        letter-spacing: 0.12em;
+        opacity: 0.72;
+      }
+
+      .course-board__card--mobile h2 {
+        color: #ffffff;
+        font-size: 1.06rem;
+        line-height: 1.08;
+      }
+
+      .course-board__card--mobile p {
+        display: none;
+      }
+
+      .course-board__card--mobile .course-board__actions {
+        display: none;
+      }
+
+      .course-board__card--mobile .course-board__pill {
+        min-height: 1.72rem;
+        padding: 0.26rem 0.5rem;
+        font-size: 0.72rem;
+      }
+
+      .course-board__card--mobile .course-board__detail {
+        min-width: 0;
+        min-height: 0;
+        margin-top: 0.55rem;
+        border-radius: 999px;
+        background: transparent;
+        color: rgba(255, 255, 255, 0.72);
+        font-size: 0.72rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      .course-board__card--mobile .course-board__detail:not([aria-disabled="true"])::after {
+        content: " →";
+      }
+
+      .course-board__card--mobile .course-board__detail[aria-disabled="true"] {
+        color: rgba(255, 255, 255, 0.36);
       }
 
       .course-board__legend {
