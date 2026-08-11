@@ -365,7 +365,6 @@ function LessonPopover({
       <h2>
         {String(lesson.order).padStart(2, "0")} {lesson.title}
       </h2>
-      <p>{lesson.preview}</p>
       <div className="course-board__actions">
         <Pill icon={<Play />} label="Video" tone={tone} disabled={locked} />
         {hasQuiz && (
