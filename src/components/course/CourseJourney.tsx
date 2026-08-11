@@ -173,7 +173,7 @@ export function CourseJourney() {
       <div className="course-board__intro">
         <h1>
           {course.title}
-          <span>{intro.titleAccent}</span>
+          {intro.titleAccent && <span>{intro.titleAccent}</span>}
         </h1>
         <blockquote className="course-board__scripture">
           <p>{intro.subtitle}</p>

@@ -1,6 +1,6 @@
 {
   "eyebrow": "Vzdelávacia cesta spoločenstva",
-  "title": "Cesta viery",
+  "title": "Základy viery",
   "description": "Päť lekcií, ktoré ťa krok za krokom prevedú základmi viery. Pozeraj videá vlastným tempom, stiahni si materiály a over si, čo si sa naučil.",
   "stats": [
     {
@@ -31,7 +31,7 @@
     }
   ],
   "mapIntro": {
-    "titleAccent": "pre mladých",
+    "titleAccent": "",
     "subtitle": "Rozmýšľam o Tvojich rozkazoch a hľadím na Tvoje chodníky. V Tvojich ustanoveniach sa kochám, na Tvoje slovo nezabúdam.",
     "reference": "Žalmy 119:15-16",
     "hint": "Klikni na bod cesty a otvor lekciu"
