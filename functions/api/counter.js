@@ -57,6 +57,47 @@ function getBaseCount(env) {
   return Number.isFinite(count) && count > 0 ? Math.floor(count) : 0;
 }
 
+function getSupabaseServiceKey(env) {
+  return env.SUPABASE_SECRET_KEY || env.SUPABASE_SERVICE_ROLE_KEY || "";
+}
+
+function hasSupabaseConfig(env) {
+  return Boolean(env.SUPABASE_URL && getSupabaseServiceKey(env));
+}
+
+async function callSupabaseRpc(env, name, body) {
+  const supabaseUrl = String(env.SUPABASE_URL || "").replace(/\/$/, "");
+  const serviceKey = getSupabaseServiceKey(env);
+
+  if (!supabaseUrl || !serviceKey) {
+    throw new Error("Supabase is not configured");
+  }
+
+  const response = await fetch(`${supabaseUrl}/rest/v1/rpc/${name}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "apikey": serviceKey,
+      "Authorization": `Bearer ${serviceKey}`,
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Supabase RPC failed: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+async function countSupabaseFoodRegistrations(env, eventDate) {
+  const count = await callSupabaseRpc(env, "get_party_food_registration_count", {
+    p_event_date: eventDate,
+  });
+
+  return Number.isFinite(Number(count)) ? Number(count) : 0;
+}
+
 async function countRegistrations(env, eventDate) {
   let cursor;
   let count = 0;
@@ -106,13 +147,31 @@ export async function onRequest(context) {
     return new Response(null, { status: 204, headers });
   }
 
-  if (!env.PARTY_COUNTER) {
+  if (!hasSupabaseConfig(env) && !env.PARTY_COUNTER) {
     return json({ error: "Counter storage unavailable" }, { status: 503 }, headers);
   }
 
   if (request.method === "GET") {
     const url = new URL(request.url);
     const eventDate = url.searchParams.get("eventDate") || getCurrentEventDate();
+    if (hasSupabaseConfig(env)) {
+      try {
+        const registrationsCount = await countSupabaseFoodRegistrations(env, eventDate);
+
+        return json({
+          count: registrationsCount,
+          baseCount: 0,
+          registrationsCount,
+          eventDate,
+          source: "SUPABASE_PARTY_REGISTRATIONS",
+        }, {}, headers);
+      } catch (error) {
+        if (!env.PARTY_COUNTER) {
+          return json({ error: "Supabase counter unavailable" }, { status: 503 }, headers);
+        }
+      }
+    }
+
     const registrationsCount = await countRegistrations(env, eventDate);
     const baseCount = getBaseCount(env);
 
