@@ -25,8 +25,8 @@ function getCurrentEventDate(date = new Date()) {
   const day = weekdayMap[parts.weekday] ?? 0;
   let daysUntilFriday = (5 - day + 7) % 7;
 
-  if (day === 5 || day === 6) {
-    daysUntilFriday = day === 5 ? 7 : 6;
+  if (day === 6) {
+    daysUntilFriday = 6;
   }
 
   const target = new Date(Date.UTC(
