@@ -25,8 +25,8 @@ function getCurrentEventDate(date = new Date()) {
   const day = weekdayMap[parts.weekday] ?? 0;
   let daysUntilFriday = (5 - day + 7) % 7;
 
-  if (day === 5 || day === 6) {
-    daysUntilFriday = day === 5 ? 7 : 6;
+  if (day === 6) {
+    daysUntilFriday = 6;
   }
 
   const target = new Date(Date.UTC(
@@ -63,6 +63,59 @@ function registrationPrefix(eventDate) {
 function getBaseCount(env) {
   const count = Number(env.FOOD_REGISTRATION_BASE_COUNT || 0);
   return Number.isFinite(count) && count > 0 ? Math.floor(count) : 0;
+}
+
+function getSupabaseServiceKey(env) {
+  return env.SUPABASE_SECRET_KEY || env.SUPABASE_SERVICE_ROLE_KEY || "";
+}
+
+function hasSupabaseConfig(env) {
+  return Boolean(env.SUPABASE_URL && getSupabaseServiceKey(env));
+}
+
+async function callSupabaseRpc(env, name, body) {
+  const supabaseUrl = String(env.SUPABASE_URL || "").replace(/\/$/, "");
+  const serviceKey = getSupabaseServiceKey(env);
+
+  if (!supabaseUrl || !serviceKey) {
+    throw new Error("Supabase is not configured");
+  }
+
+  const response = await fetch(`${supabaseUrl}/rest/v1/rpc/${name}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "apikey": serviceKey,
+      "Authorization": `Bearer ${serviceKey}`,
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Supabase RPC failed: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+async function upsertSupabaseRegistration(env, payload) {
+  return callSupabaseRpc(env, "upsert_party_registration", {
+    p_event_date: payload.event_date,
+    p_name: payload.name,
+    p_email: payload.email,
+    p_phone: payload.phone || null,
+    p_wants_food: wantsFood(payload.food_registration),
+    p_message: payload.message || null,
+    p_source: "website-party-form",
+  });
+}
+
+async function countSupabaseFoodRegistrations(env, eventDate) {
+  const count = await callSupabaseRpc(env, "get_party_food_registration_count", {
+    p_event_date: eventDate,
+  });
+
+  return Number.isFinite(Number(count)) ? Number(count) : 0;
 }
 
 async function countRegistrations(env, eventDate) {
@@ -117,17 +170,60 @@ export async function onRequest(context) {
       event_date: eventDate,
     };
 
-    const res = await fetch(env.N8N_WEBHOOK_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
+    const usesSupabase = hasSupabaseConfig(env);
+    let supabaseSaved = false;
 
-    const data = await res.json();
+    if (usesSupabase) {
+      await upsertSupabaseRegistration(env, payload);
+      supabaseSaved = true;
+    }
+
+    let data = { success: true };
+    let responseStatus = 200;
+
+    if (env.N8N_WEBHOOK_URL) {
+      try {
+        const res = await fetch(env.N8N_WEBHOOK_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        responseStatus = res.status;
+        data = await res.json();
+
+        if (!res.ok || !data.success) {
+          if (!supabaseSaved) {
+            return json(data, { status: responseStatus }, headers);
+          }
+
+          data = {
+            ...data,
+            success: true,
+            webhookWarning: "Discord webhook failed, but registration was saved.",
+          };
+          responseStatus = 200;
+        }
+      } catch (error) {
+        if (!supabaseSaved) {
+          return json({ success: false, error: "Registration failed" }, { status: 500 }, headers);
+        }
+
+        data = {
+          success: true,
+          webhookWarning: "Discord webhook failed, but registration was saved.",
+        };
+        responseStatus = 200;
+      }
+    } else if (!supabaseSaved) {
+      return json({ success: false, error: "Server is not configured" }, { status: 500 }, headers);
+    }
 
     let foodRegistrationCount;
 
-    if (res.ok && data.success && wantsFood(body.food_registration) && env.PARTY_COUNTER) {
+    if (data.success && wantsFood(body.food_registration) && usesSupabase) {
+      foodRegistrationCount = await countSupabaseFoodRegistrations(env, eventDate);
+    } else if (data.success && wantsFood(body.food_registration) && env.PARTY_COUNTER) {
       const emailHash = await hashEmail(email);
       const key = registrationKey(eventDate, emailHash);
       const existing = await env.PARTY_COUNTER.get(key);
@@ -145,7 +241,7 @@ export async function onRequest(context) {
     return json({
       ...data,
       ...(typeof foodRegistrationCount === "number" ? { count: foodRegistrationCount } : {}),
-    }, { status: res.status }, headers);
+    }, { status: responseStatus }, headers);
   } catch (err) {
     return json({ success: false, error: "Server error" }, { status: 500 }, headers);
   }
