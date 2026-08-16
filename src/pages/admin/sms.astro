@@ -1,0 +1,369 @@
+---
+---
+
+<!doctype html>
+<html lang="sk">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>SMS Admin | New Level Church</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+      :root { color-scheme: dark; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #0b0c0f; color: #f7f7f2; }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: #0b0c0f; }
+      .app { width: min(1360px, calc(100vw - 32px)); margin: 0 auto; padding: 28px 0 56px; }
+      .topbar, .section-head, .actions, .status { display: flex; align-items: center; gap: 12px; }
+      .topbar, .section-head { justify-content: space-between; }
+      .eyebrow, .hint { color: #a9abb3; }
+      h1, h2, p { margin: 0; }
+      h1 { font-size: 32px; }
+      h2 { font-size: 18px; }
+      .panel { margin-top: 18px; padding: 18px; border: 1px solid #2b2f38; border-radius: 8px; background: #14161b; }
+      .grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 14px; }
+      label { display: grid; gap: 6px; color: #d7d9df; font-size: 13px; }
+      input, select, textarea, button { border: 1px solid #363b46; border-radius: 6px; background: #0d0f14; color: #f7f7f2; font: inherit; }
+      input, select, textarea { width: 100%; padding: 10px 11px; }
+      textarea { resize: vertical; margin-top: 12px; }
+      button { padding: 10px 12px; cursor: pointer; }
+      button:hover { border-color: #7dd3fc; }
+      .actions { margin-top: 14px; flex-wrap: wrap; }
+      .badge { min-width: 96px; padding: 8px 10px; border-radius: 999px; background: #3f2d06; color: #facc15; text-align: center; font-size: 12px; font-weight: 700; }
+      .badge.is-live { background: #063b2f; color: #34d399; }
+      .table-wrap { max-height: 460px; overflow: auto; margin-top: 14px; border: 1px solid #252a33; border-radius: 6px; }
+      table { width: 100%; border-collapse: collapse; font-size: 13px; }
+      th, td { padding: 10px; border-bottom: 1px solid #252a33; text-align: left; white-space: nowrap; }
+      th { position: sticky; top: 0; background: #171a20; z-index: 1; }
+      tr.is-muted { color: #747985; }
+      .preview { min-height: 58px; margin-top: 12px; padding: 12px; border-radius: 6px; background: #0d0f14; color: #d7d9df; white-space: pre-wrap; }
+      @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } .topbar, .section-head { align-items: flex-start; flex-direction: column; } }
+    </style>
+  </head>
+  <body>
+    <main class="app">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">New Level Admin</p>
+          <h1>SMS kampane</h1>
+        </div>
+        <div class="status">
+          <span class="badge" data-test-mode>TEST MODE?</span>
+          <button type="button" data-refresh>Obnoviť</button>
+        </div>
+      </header>
+
+      <section class="panel">
+        <h2>Pripojenie</h2>
+        <div class="grid">
+          <label>Supabase URL<input data-supabase-url placeholder="https://kbpuhcuiljbwgxgiauku.supabase.co" /></label>
+          <label>Supabase anon key<input data-supabase-key placeholder="ey..." /></label>
+          <label>Email<input data-email type="email" /></label>
+          <label>Heslo<input data-password type="password" /></label>
+        </div>
+        <div class="actions">
+          <button type="button" data-login>Prihlásiť admina</button>
+          <button type="button" data-logout>Odhlásiť</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="section-head">
+          <h2>Publikum</h2>
+          <span data-counts>0 vybraných</span>
+        </div>
+        <div class="grid">
+          <label>Event / party<select data-events></select></label>
+          <label>Event date<input data-event-date type="date" /></label>
+          <label>Filter publika
+            <select data-audience>
+              <option value="all_with_phone">All with phone number</option>
+              <option value="registered_for_event">Registered for selected event</option>
+              <option value="not_registered_for_event">Not registered for selected event</option>
+              <option value="previously_registered_not_registered">Previously registered, not selected event</option>
+              <option value="custom_selection">Custom selection</option>
+            </select>
+          </label>
+        </div>
+        <div class="actions">
+          <button type="button" data-load-audience>Načítať ľudí</button>
+          <button type="button" data-select-filtered>Select all filtered</button>
+          <button type="button" data-deselect>Deselect all</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th></th><th>Meno</th><th>Phone</th><th>Email</th><th>Ever</th><th>Selected event</th><th>SMS enabled</th></tr>
+            </thead>
+            <tbody data-contacts></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="section-head">
+          <h2>SMS editor</h2>
+          <span data-segments>0 znakov</span>
+        </div>
+        <label>Názov kampane<input data-campaign-name value="New Level Party SMS" /></label>
+        <label>Text SMS<textarea data-message rows="7" placeholder="Ahoj &#123;&#123;first_name&#125;&#125;, vidíme sa na &#123;&#123;event_name&#125;&#125;?"></textarea></label>
+        <p class="hint">Premenné: &#123;&#123;first_name&#125;&#125;, &#123;&#123;name&#125;&#125;, &#123;&#123;event_name&#125;&#125;, &#123;&#123;event_date&#125;&#125;, &#123;&#123;registration_url&#125;&#125;</p>
+        <div class="preview" data-preview></div>
+      </section>
+
+      <section class="panel">
+        <div class="section-head">
+          <h2>Odoslanie</h2>
+          <span data-result></span>
+        </div>
+        <div class="grid">
+          <label>Dátum<input data-date type="date" /></label>
+          <label>Čas<input data-time type="time" /></label>
+          <label>Test phone<input data-test-phone placeholder="+421..." /></label>
+        </div>
+        <p class="hint" data-scheduled-preview></p>
+        <div class="actions">
+          <button type="button" data-send-test>Poslať test SMS</button>
+          <button type="button" data-send-now>Send now</button>
+          <button type="button" data-schedule>Schedule</button>
+          <button type="button" data-process-due>Process due</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="section-head">
+          <h2>História</h2>
+          <button type="button" data-load-history>Načítať históriu</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Subject</th><th>Status</th><th>Scheduled</th><th>Sent</th><th>Recipient</th><th>Provider</th><th>Error</th></tr>
+            </thead>
+            <tbody data-history></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const state = { client: null, session: null, contacts: [], selected: new Set(), events: [] };
+      const $ = (selector) => document.querySelector(selector);
+      const endpoint = () => `${$("[data-supabase-url]").value.trim().replace(/\/+$/, "")}/functions/v1/admin-sms`;
+
+      function saveConfig() {
+        localStorage.setItem("smsAdminUrl", $("[data-supabase-url]").value.trim());
+        localStorage.setItem("smsAdminKey", $("[data-supabase-key]").value.trim());
+      }
+
+      function loadConfig() {
+        $("[data-supabase-url]").value = localStorage.getItem("smsAdminUrl") || "https://kbpuhcuiljbwgxgiauku.supabase.co";
+        $("[data-supabase-key]").value = localStorage.getItem("smsAdminKey") || "";
+      }
+
+      async function api(body) {
+        if (!state.session) throw new Error("Najprv sa prihlás.");
+        const response = await fetch(endpoint(), {
+          method: "POST",
+          headers: { "Authorization": `Bearer ${state.session.access_token}`, "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        const data = await response.json();
+        if (!response.ok || !data.success) throw new Error(data.error || "Request failed");
+        return data;
+      }
+
+      function selectedEventId() {
+        return $("[data-events]").value || null;
+      }
+
+      function localScheduledIso() {
+        const date = $("[data-date]").value;
+        const time = $("[data-time]").value;
+        if (!date || !time) return null;
+        return new Date(`${date}T${time}:00`).toISOString();
+      }
+
+      function updateCounts() {
+        const visible = state.contacts.filter((contact) => contact.matches);
+        $("[data-counts]").textContent = `${state.selected.size} vybraných / ${visible.length} vo filtri`;
+      }
+
+      function renderEvents() {
+        const select = $("[data-events]");
+        select.innerHTML = `<option value="">Podľa dátumu</option>`;
+        for (const event of state.events) {
+          const option = document.createElement("option");
+          option.value = event.id;
+          option.textContent = `${event.title || "New Level Party"} - ${event.event_date || ""}`;
+          select.append(option);
+        }
+      }
+
+      function renderContacts() {
+        const tbody = $("[data-contacts]");
+        tbody.innerHTML = "";
+        for (const contact of state.contacts.filter((item) => item.matches)) {
+          const row = document.createElement("tr");
+          if (!contact.eligible) row.classList.add("is-muted");
+          row.innerHTML = `
+            <td><input type="checkbox" data-contact-id="${contact.id}"></td>
+            <td>${contact.name || ""}</td>
+            <td>${contact.normalizedPhone || contact.phone || ""}</td>
+            <td>${contact.email || ""}</td>
+            <td>${contact.everRegistered ? "áno" : "nie"}</td>
+            <td>${contact.registeredForSelected ? "áno" : "nie"}</td>
+            <td>${contact.sms_enabled ? "áno" : "nie"}</td>
+          `;
+          const checkbox = row.querySelector("input");
+          checkbox.checked = state.selected.has(contact.id);
+          checkbox.disabled = !contact.eligible;
+          checkbox.addEventListener("change", () => {
+            if (checkbox.checked) state.selected.add(contact.id);
+            else state.selected.delete(contact.id);
+            updateCounts();
+          });
+          tbody.append(row);
+        }
+        updateCounts();
+        updateSegmentPreview();
+      }
+
+      async function refreshConfig() {
+        const config = await api({ action: "config" });
+        const badge = $("[data-test-mode]");
+        badge.textContent = config.testMode ? `TEST MODE (${config.allowedCount})` : "LIVE SMS";
+        badge.classList.toggle("is-live", !config.testMode);
+      }
+
+      async function login() {
+        saveConfig();
+        state.client = supabase.createClient($("[data-supabase-url]").value.trim(), $("[data-supabase-key]").value.trim());
+        const { data, error } = await state.client.auth.signInWithPassword({
+          email: $("[data-email]").value.trim(),
+          password: $("[data-password]").value,
+        });
+        if (error) throw error;
+        state.session = data.session;
+        await refreshAll();
+      }
+
+      async function refreshAll() {
+        await refreshConfig();
+        const events = await api({ action: "list_events" });
+        state.events = events.events || [];
+        renderEvents();
+        await loadAudience();
+        await loadHistory();
+      }
+
+      async function loadAudience() {
+        const result = await api({
+          action: "list_audience",
+          audienceType: $("[data-audience]").value,
+          eventId: selectedEventId(),
+          eventDate: $("[data-event-date]").value,
+        });
+        state.contacts = result.contacts || [];
+        state.selected.clear();
+        renderContacts();
+      }
+
+      function updateSegmentPreview() {
+        const text = $("[data-message]").value;
+        const chars = [...text].length;
+        const hasUnicode = /[^\x00-\x7F]/.test(text);
+        const single = hasUnicode ? 70 : 160;
+        const multi = hasUnicode ? 67 : 153;
+        const segments = chars <= single ? 1 : Math.ceil(chars / multi);
+        $("[data-segments]").textContent = `${chars} znakov, približne ${segments} SMS segment${segments === 1 ? "" : "y"}`;
+        const first = state.contacts.find((contact) => state.selected.has(contact.id)) || state.contacts[0];
+        const event = state.events.find((item) => item.id === selectedEventId());
+        const preview = text
+          .replaceAll("{{first_name}}", first?.name?.split(/\s+/)[0] || "Ahoj")
+          .replaceAll("{{name}}", first?.name || "")
+          .replaceAll("{{email}}", first?.email || "")
+          .replaceAll("{{phone}}", first?.normalizedPhone || first?.phone || "")
+          .replaceAll("{{event_name}}", event?.title || "New Level Party")
+          .replaceAll("{{event_date}}", event?.starts_at ? new Date(event.starts_at).toLocaleString("sk-SK") : ($("[data-event-date]").value || ""))
+          .replaceAll("{{registration_url}}", "https://newlevel.church/youth/");
+        $("[data-preview]").textContent = preview || "Preview sa zobrazí po napísaní SMS.";
+      }
+
+      async function sendTest() {
+        const result = await api({ action: "send_test", phone: $("[data-test-phone]").value, message: $("[data-message]").value });
+        $("[data-result]").textContent = `Test: ${result.status} ${result.providerMessageId || ""}`;
+      }
+
+      async function createCampaign(sendNow) {
+        const selected = [...state.selected];
+        const scheduledFor = sendNow ? new Date().toISOString() : localScheduledIso();
+        if (!sendNow && !scheduledFor) throw new Error("Vyber dátum a čas.");
+        const ok = confirm(`Potvrdiť SMS?\n\nPríjemcov: ${selected.length || "všetci vo filtri"}\nRežim: ${sendNow ? "Send now" : "Schedule"}\n\n${$("[data-message]").value}`);
+        if (!ok) return;
+        const result = await api({
+          action: "create_campaign",
+          name: $("[data-campaign-name]").value,
+          message: $("[data-message]").value,
+          audienceType: selected.length ? "custom_selection" : $("[data-audience]").value,
+          eventId: selectedEventId(),
+          eventDate: $("[data-event-date]").value,
+          selectedContactIds: selected,
+          sendNow,
+          scheduledFor,
+        });
+        $("[data-result]").textContent = `Queue: ${result.queued}, batch: ${result.batchId}`;
+        await loadHistory();
+      }
+
+      async function loadHistory() {
+        const result = await api({ action: "history", limit: 100 });
+        const tbody = $("[data-history]");
+        tbody.innerHTML = "";
+        for (const message of result.messages || []) {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${message.subject || ""}</td>
+            <td>${message.status || ""}</td>
+            <td>${message.scheduled_for ? new Date(message.scheduled_for).toLocaleString("sk-SK") : ""}</td>
+            <td>${message.sent_at ? new Date(message.sent_at).toLocaleString("sk-SK") : ""}</td>
+            <td>${message.recipient || ""}</td>
+            <td>${message.provider || ""}</td>
+            <td>${message.last_error || ""}</td>
+          `;
+          tbody.append(row);
+        }
+      }
+
+      function bind() {
+        $("[data-login]").addEventListener("click", () => login().catch(alert));
+        $("[data-logout]").addEventListener("click", async () => { await state.client?.auth.signOut(); state.session = null; });
+        $("[data-refresh]").addEventListener("click", () => refreshAll().catch(alert));
+        $("[data-load-audience]").addEventListener("click", () => loadAudience().catch(alert));
+        $("[data-audience]").addEventListener("change", () => loadAudience().catch(alert));
+        $("[data-events]").addEventListener("change", () => loadAudience().catch(alert));
+        $("[data-select-filtered]").addEventListener("click", () => {
+          for (const contact of state.contacts) if (contact.matches && contact.eligible) state.selected.add(contact.id);
+          renderContacts();
+        });
+        $("[data-deselect]").addEventListener("click", () => { state.selected.clear(); renderContacts(); });
+        $("[data-message]").addEventListener("input", updateSegmentPreview);
+        $("[data-send-test]").addEventListener("click", () => sendTest().catch(alert));
+        $("[data-send-now]").addEventListener("click", () => createCampaign(true).catch(alert));
+        $("[data-schedule]").addEventListener("click", () => createCampaign(false).catch(alert));
+        $("[data-load-history]").addEventListener("click", () => loadHistory().catch(alert));
+        $("[data-process-due]").addEventListener("click", () => api({ action: "process_due", limit: 20 }).then(loadHistory).catch(alert));
+        document.querySelectorAll("[data-date], [data-time]").forEach((input) => {
+          input.addEventListener("input", () => {
+            const iso = localScheduledIso();
+            $("[data-scheduled-preview]").textContent = iso ? `Výsledný čas uložený ako UTC: ${iso}` : "";
+          });
+        });
+      }
+
+      loadConfig();
+      bind();
+      updateSegmentPreview();
+    </script>
+  </body>
+</html>

@@ -1,5 +1,5 @@
 import { renderPartyEmailHtml, sendEmail } from "./email.ts";
-import { sendTextBeeSms } from "./textbee.ts";
+import { sendInfobipSms } from "./infobip.ts";
 
 type SendResult =
   | { ok: true; providerMessageId: string | null }
@@ -82,7 +82,7 @@ export async function dispatchDueMessages(admin: any, limit: number) {
       .eq("status", "queued");
 
     const result: SendResult = message.channel === "sms"
-      ? await sendTextBeeSms(message.recipient, message.body)
+      ? await sendInfobipSms(message.recipient, message.body)
       : message.channel === "whatsapp"
       ? await sendWhatsApp(message.recipient, message.body)
       : await sendEmail(
@@ -96,7 +96,7 @@ export async function dispatchDueMessages(admin: any, limit: number) {
       );
 
     const provider = message.channel === "sms"
-      ? "textbee"
+      ? "infobip"
       : message.channel === "whatsapp"
       ? "meta-whatsapp"
       : "resend";
