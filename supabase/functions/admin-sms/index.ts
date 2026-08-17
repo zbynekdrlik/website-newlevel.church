@@ -114,6 +114,15 @@ function timingSafeEqual(a: string, b: string) {
   return diff === 0;
 }
 
+function registrationCount(
+  contacts: AudienceContact[],
+  kind: "ever" | "selected",
+) {
+  return contacts.filter((contact) =>
+    kind === "selected" ? contact.registeredForSelected : contact.everRegistered
+  ).length;
+}
+
 function renderMessage(
   template: string,
   contact: Record<string, unknown>,
@@ -304,6 +313,8 @@ Deno.serve(async (req) => {
         event,
         contacts,
         total: contacts.length,
+        totalRegistrations: registrationCount(contacts, "ever"),
+        selectedEventRegistrations: registrationCount(contacts, "selected"),
         matching: contacts.filter((contact: AudienceContact) =>
           contact.matches
         ).length,
