@@ -50,7 +50,6 @@ type ContactRow = {
 type RegistrationRow = {
   contact_id: string;
   event_id: string;
-  created_at: string;
 };
 
 type AudienceContact = ContactRow & {
@@ -197,11 +196,15 @@ async function loadAudience(
   const { data: registrations, error: registrationsError } = await admin
     .schema("invitation")
     .from("party_registrations")
-    .select("contact_id,event_id,created_at")
+    .select("contact_id,event_id")
     .limit(10000);
 
   if (registrationsError || !registrations) {
-    throw new Error("Registrations load failed");
+    throw new Error(
+      registrationsError?.message
+        ? `Registrations load failed: ${registrationsError.message}`
+        : "Registrations load failed",
+    );
   }
 
   const registrationRows = registrations as RegistrationRow[];
