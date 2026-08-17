@@ -11,6 +11,7 @@ supabase secrets set SUPABASE_URL="https://kbpuhcuiljbwgxgiauku.supabase.co"
 supabase secrets set SUPABASE_SERVICE_ROLE_KEY="..."
 supabase secrets set SUPABASE_PUBLISHABLE_KEY="..."
 supabase secrets set ADMIN_EMAILS="admin@example.com"
+supabase secrets set ADMIN_SMS_KEY="long-random-admin-sms-key"
 supabase secrets set ALLOWED_ORIGINS="https://newlevel.church,http://localhost:4321"
 supabase secrets set DEFAULT_PHONE_COUNTRY_CODE="+421"
 supabase secrets set CRON_SECRET="long-random-secret"
@@ -57,9 +58,12 @@ https://newlevel.church/admin/sms
 Use:
 
 ```text
-Supabase URL: https://kbpuhcuiljbwgxgiauku.supabase.co
-Supabase anon/publishable key: from Supabase Dashboard > Project Settings > API
+Admin API key: value from ADMIN_SMS_KEY
 ```
+
+The admin page stores the key only in this browser's local storage. The key is
+sent to the `admin-sms` Edge Function as `x-admin-sms-key`; the Infobip API key
+and Supabase service role key stay only in Supabase secrets.
 
 ## Test Mode
 
