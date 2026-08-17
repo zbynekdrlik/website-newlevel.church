@@ -46,6 +46,7 @@
       tr.is-muted { color: #747985; }
       .preview { min-height: 58px; margin-top: 12px; padding: 12px; border-radius: 6px; background: #0d0f14; color: #d7d9df; white-space: pre-wrap; }
       .result { color: #7dd3fc; font-weight: 800; }
+      .result.is-error { color: #f87171; }
 
       @media (max-width: 820px) {
         .grid, .login-grid { grid-template-columns: 1fr; }
@@ -149,6 +150,18 @@
       const $ = (selector) => document.querySelector(selector);
       const endpoint = () => `${$("[data-supabase-url]").value.trim().replace(/\/+$/, "")}/functions/v1/admin-sms`;
 
+      function setResult(message, isError = false) {
+        const result = $("[data-result]");
+        result.textContent = message;
+        result.classList.toggle("is-error", isError);
+      }
+
+      function showError(error) {
+        const message = error instanceof Error ? error.message : String(error);
+        setResult(message, true);
+        alert(message);
+      }
+
       function saveConfig() {
         localStorage.setItem("smsAdminUrl", $("[data-supabase-url]").value.trim());
         localStorage.setItem("smsAdminKey", $("[data-admin-key]").value.trim());
@@ -168,8 +181,11 @@
           headers: { "x-admin-sms-key": state.adminKey, "Content-Type": "application/json" },
           body: JSON.stringify(body),
         });
-        const data = await response.json();
-        if (!response.ok || !data.success) throw new Error(data.error || "Request failed");
+        const data = await response.json().catch(() => ({ error: "Server vrátil nečitateľnú odpoveď" }));
+        if (!response.ok || !data.success) {
+          const detail = data.errorMessage || data.errorCode || data.error || `Request failed (${response.status})`;
+          throw new Error(detail);
+        }
         return data;
       }
 
@@ -224,6 +240,7 @@
         const badge = $("[data-test-mode]");
         badge.textContent = config.testMode ? `TEST MODE (${config.allowedCount})` : "LIVE SMS";
         badge.classList.toggle("is-live", !config.testMode);
+        setResult(config.testMode ? `Test režim: povolených čísel ${config.allowedCount}` : "Live SMS režim");
       }
 
       async function saveKey() {
@@ -235,7 +252,7 @@
         localStorage.removeItem("smsAdminKey");
         state.adminKey = "";
         $("[data-admin-key]").value = "";
-        $("[data-result]").textContent = "Kľúč vymazaný";
+        setResult("Kľúč vymazaný");
       }
 
       async function loadAudience() {
@@ -247,6 +264,7 @@
         state.contacts = result.contacts || [];
         state.selected.clear();
         renderContacts();
+        setResult(`Načítané: ${result.matching || 0} vo filtri, ${result.eligible || 0} použiteľných`);
       }
 
       function updateSegmentPreview() {
@@ -271,7 +289,7 @@
 
       async function sendTest() {
         const result = await api({ action: "send_test", phone: $("[data-test-phone]").value, message: $("[data-message]").value });
-        $("[data-result]").textContent = `Test: ${result.status}`;
+        setResult(`Test: ${result.status}`);
       }
 
       async function createCampaign(sendNow) {
@@ -290,24 +308,24 @@
           sendNow,
           scheduledFor,
         });
-        $("[data-result]").textContent = `Pripravené: ${result.queued} SMS`;
+        setResult(`Pripravené: ${result.queued} SMS`);
       }
 
       function bind() {
-        $("[data-save-key]").addEventListener("click", () => saveKey().catch(alert));
+        $("[data-save-key]").addEventListener("click", () => saveKey().catch(showError));
         $("[data-clear-key]").addEventListener("click", clearKey);
-        $("[data-refresh]").addEventListener("click", () => refreshConfig().catch(alert));
-        $("[data-load-audience]").addEventListener("click", () => loadAudience().catch(alert));
-        $("[data-audience]").addEventListener("change", () => loadAudience().catch(alert));
+        $("[data-refresh]").addEventListener("click", () => refreshConfig().catch(showError));
+        $("[data-load-audience]").addEventListener("click", () => loadAudience().catch(showError));
+        $("[data-audience]").addEventListener("change", () => loadAudience().catch(showError));
         $("[data-select-filtered]").addEventListener("click", () => {
           for (const contact of state.contacts) if (contact.matches && contact.eligible) state.selected.add(contact.id);
           renderContacts();
         });
         $("[data-deselect]").addEventListener("click", () => { state.selected.clear(); renderContacts(); });
         $("[data-message]").addEventListener("input", updateSegmentPreview);
-        $("[data-send-test]").addEventListener("click", () => sendTest().catch(alert));
-        $("[data-send-now]").addEventListener("click", () => createCampaign(true).catch(alert));
-        $("[data-schedule]").addEventListener("click", () => createCampaign(false).catch(alert));
+        $("[data-send-test]").addEventListener("click", () => sendTest().catch(showError));
+        $("[data-send-now]").addEventListener("click", () => createCampaign(true).catch(showError));
+        $("[data-schedule]").addEventListener("click", () => createCampaign(false).catch(showError));
         document.querySelectorAll("[data-date], [data-time]").forEach((input) => {
           input.addEventListener("input", () => {
             const iso = localScheduledIso();
