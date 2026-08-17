@@ -1,5 +1,11 @@
-import { requireAdmin } from "../_shared/admin.ts";
-import { json, readJsonBody } from "../_shared/contact.ts";
+import {
+  corsHeaders,
+  createAdminClient,
+  json,
+  readJsonBody,
+  readServiceKey,
+  validateRequestBasics,
+} from "../_shared/contact.ts";
 import {
   normalizeE164,
   sendInfobipSms,
@@ -79,6 +85,34 @@ function cleanUuidList(value: unknown) {
   return value
     .map((item) => typeof item === "string" ? item : "")
     .filter((item) => /^[0-9a-f-]{36}$/i.test(item));
+}
+
+function readAdminSmsKey() {
+  return Deno.env.get("ADMIN_SMS_KEY")?.trim() ?? "";
+}
+
+function requestAdminSmsKey(req: Request) {
+  const header = req.headers.get("x-admin-sms-key")?.trim() ?? "";
+  const authorization = req.headers.get("authorization") ?? "";
+  const bearer = authorization.toLowerCase().startsWith("bearer ")
+    ? authorization.slice(7).trim()
+    : "";
+
+  return header || bearer;
+}
+
+function timingSafeEqual(a: string, b: string) {
+  const encoder = new TextEncoder();
+  const left = encoder.encode(a);
+  const right = encoder.encode(b);
+  if (left.length !== right.length) return false;
+
+  let diff = 0;
+  for (let index = 0; index < left.length; index += 1) {
+    diff |= left[index] ^ right[index];
+  }
+
+  return diff === 0;
 }
 
 function renderMessage(
@@ -216,8 +250,23 @@ async function loadAudience(
 }
 
 Deno.serve(async (req) => {
-  const auth = await requireAdmin(req);
-  if (auth.ok === false) return auth.response;
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders(req) });
+  }
+
+  const basics = validateRequestBasics(req);
+  if (basics.ok === false) return basics.response;
+
+  const expectedKey = readAdminSmsKey();
+  const providedKey = requestAdminSmsKey(req);
+  if (!expectedKey || !timingSafeEqual(providedKey, expectedKey)) {
+    return json(req, { success: false, error: "Forbidden" }, 403);
+  }
+
+  const admin = createAdminClient(readServiceKey());
+  if (!admin) {
+    return json(req, { success: false, error: "Server not configured" }, 500);
+  }
 
   const parsed = await readJsonBody(req);
   if (!parsed.ok) {
@@ -233,7 +282,7 @@ Deno.serve(async (req) => {
     }
 
     if (action === "list_events") {
-      const { data, error } = await auth.admin
+      const { data, error } = await admin
         .schema("invitation")
         .from("party_events")
         .select("id,event_date,title,starts_at,status")
@@ -244,9 +293,9 @@ Deno.serve(async (req) => {
     }
 
     if (action === "list_audience") {
-      const event = await getOrCreateEvent(auth.admin, body);
+      const event = await getOrCreateEvent(admin, body);
       const audienceType = body.audienceType ?? "all_with_phone";
-      const contacts = await loadAudience(auth.admin, event.id, audienceType);
+      const contacts = await loadAudience(admin, event.id, audienceType);
       return json(req, {
         success: true,
         event,
@@ -291,7 +340,7 @@ Deno.serve(async (req) => {
     }
 
     if (action === "create_campaign") {
-      const event = await getOrCreateEvent(auth.admin, body);
+      const event = await getOrCreateEvent(admin, body);
       const audienceType = body.audienceType ?? "all_with_phone";
       const selectedIds = new Set(cleanUuidList(body.selectedContactIds));
       const message = cleanText(body.message, 1000);
@@ -310,7 +359,7 @@ Deno.serve(async (req) => {
         }, 400);
       }
 
-      const contacts = await loadAudience(auth.admin, event.id, audienceType);
+      const contacts = await loadAudience(admin, event.id, audienceType);
       const recipients = contacts
         .filter((contact: AudienceContact) =>
           contact.matches && contact.eligible
@@ -329,14 +378,14 @@ Deno.serve(async (req) => {
 
       const automationId =
         `admin-sms-${event.event_date}-${audienceType}-${crypto.randomUUID()}`;
-      const { data: batch, error: batchError } = await auth.admin
+      const { data: batch, error: batchError } = await admin
         .schema("invitation")
         .from("message_batches")
         .insert({
           event_id: event.id,
           kind: "custom",
           channel_strategy: "sms_only",
-          created_by: auth.user.id,
+          created_by: null,
         })
         .select("id")
         .single();
@@ -355,7 +404,7 @@ Deno.serve(async (req) => {
         subject: name,
       }));
 
-      const { error: queueError } = await auth.admin
+      const { error: queueError } = await admin
         .schema("invitation")
         .from("message_queue")
         .upsert(rows, {
@@ -368,7 +417,7 @@ Deno.serve(async (req) => {
       let processed = null;
       if (body.sendNow) {
         processed = await dispatchDueMessages(
-          auth.admin,
+          admin,
           Math.min(rows.length, 50),
         );
       }
@@ -383,7 +432,7 @@ Deno.serve(async (req) => {
     }
 
     if (action === "history") {
-      const { data, error } = await auth.admin
+      const { data, error } = await admin
         .schema("invitation")
         .from("message_queue")
         .select(
@@ -399,7 +448,7 @@ Deno.serve(async (req) => {
 
     if (action === "process_due") {
       const limit = Math.max(1, Math.min(Number(body.limit ?? 20), 50));
-      const result = await dispatchDueMessages(auth.admin, limit);
+      const result = await dispatchDueMessages(admin, limit);
       return json(req, { success: result.ok, result }, result.ok ? 200 : 500);
     }
 
