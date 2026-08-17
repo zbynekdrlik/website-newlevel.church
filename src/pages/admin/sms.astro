@@ -264,7 +264,7 @@
         state.contacts = result.contacts || [];
         state.selected.clear();
         renderContacts();
-        setResult(`Načítané: ${result.matching || 0} vo filtri, ${result.eligible || 0} použiteľných`);
+        setResult(`Načítané: ${result.matching || 0} vo filtri, ${result.eligible || 0} použiteľných. Registrácie na ${result.event?.event_date || "tento dátum"}: ${result.selectedEventRegistrations || 0}. Registrovaní niekedy: ${result.totalRegistrations || 0}.`);
       }
 
       function updateSegmentPreview() {

@@ -171,12 +171,18 @@ export async function onRequest(context) {
     };
 
     const usesSupabase = hasSupabaseConfig(env);
+
+    if (!usesSupabase) {
+      return json({
+        success: false,
+        error: "Supabase registration storage is not configured",
+      }, { status: 500 }, headers);
+    }
+
     let supabaseSaved = false;
 
-    if (usesSupabase) {
-      await upsertSupabaseRegistration(env, payload);
-      supabaseSaved = true;
-    }
+    await upsertSupabaseRegistration(env, payload);
+    supabaseSaved = true;
 
     let data = { success: true };
     let responseStatus = 200;
@@ -240,6 +246,8 @@ export async function onRequest(context) {
 
     return json({
       ...data,
+      eventDate,
+      supabaseSaved,
       ...(typeof foodRegistrationCount === "number" ? { count: foodRegistrationCount } : {}),
     }, { status: responseStatus }, headers);
   } catch (err) {
