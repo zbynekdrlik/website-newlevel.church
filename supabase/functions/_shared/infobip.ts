@@ -57,7 +57,23 @@ function providerMessage(data: unknown, fallback: string) {
 
 export function normalizeE164(value: string | null | undefined) {
   if (!value) return null;
-  const phone = value.replace(/[^\d+]/g, "");
+  const countryCode = Deno.env.get("DEFAULT_PHONE_COUNTRY_CODE")?.trim();
+  let phone = value.replace(/[^\d+]/g, "");
+
+  if (phone.includes("+") && !phone.startsWith("+")) {
+    return null;
+  }
+
+  phone = phone.replace(/(?!^)\+/g, "");
+
+  if (phone.startsWith("00")) {
+    phone = `+${phone.slice(2)}`;
+  }
+
+  if (countryCode && /^0\d+$/.test(phone)) {
+    phone = `${countryCode}${phone.replace(/^0+/, "")}`;
+  }
+
   return /^\+[1-9]\d{7,14}$/.test(phone) ? phone : null;
 }
 

@@ -30,7 +30,7 @@ Cloudflare Pages only needs public/static site config. Do not put `RESEND_API_KE
 ## Deploy Functions
 
 ```bash
-supabase functions deploy admin-sms --project-ref kbpuhcuiljbwgxgiauku --use-api
+supabase functions deploy admin-sms --project-ref kbpuhcuiljbwgxgiauku --use-api --no-verify-jwt
 supabase functions deploy dispatch-message-cron --project-ref kbpuhcuiljbwgxgiauku --use-api --no-verify-jwt
 supabase functions deploy dispatch-message-queue --project-ref kbpuhcuiljbwgxgiauku --use-api
 supabase functions deploy dispatch-messages --project-ref kbpuhcuiljbwgxgiauku --use-api
