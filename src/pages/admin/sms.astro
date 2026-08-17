@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex" />
     <title>SMS Admin | New Level Church</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
     <style>
       :root {
         color-scheme: dark;
@@ -228,7 +228,14 @@
 
       async function login() {
         saveConfig();
-        state.client = supabase.createClient($("[data-supabase-url]").value.trim(), $("[data-supabase-key]").value.trim());
+        if (!window.supabase?.createClient) {
+          throw new Error("Supabase knižnica sa nenačítala. Obnov stránku alebo skontroluj pripojenie.");
+        }
+
+        state.client = window.supabase.createClient(
+          $("[data-supabase-url]").value.trim(),
+          $("[data-supabase-key]").value.trim(),
+        );
         const { data, error } = await state.client.auth.signInWithPassword({
           email: $("[data-email]").value.trim(),
           password: $("[data-password]").value,
