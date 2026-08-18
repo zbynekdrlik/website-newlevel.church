@@ -45,6 +45,7 @@
       th, td { padding: 10px; border-bottom: 1px solid #252a33; text-align: left; white-space: nowrap; }
       th { position: sticky; top: 0; background: #171a20; z-index: 1; }
       tr.is-muted { color: #747985; }
+      .message-cell { max-width: 320px; overflow: hidden; text-overflow: ellipsis; }
       .preview { min-height: 58px; margin-top: 12px; padding: 12px; border-radius: 6px; background: #0d0f14; color: #d7d9df; white-space: pre-wrap; }
       .result { color: #7dd3fc; font-weight: 800; }
       .result.is-error { color: #f87171; }
@@ -85,6 +86,21 @@
           <input data-supabase-url type="hidden" />
         </div>
       </details>
+
+      <section class="panel">
+        <div class="section-head">
+          <h2>Aktívne kampane</h2>
+          <button type="button" data-load-campaigns>Obnoviť kampane</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Odoslanie</th><th>Publikum</th><th>Sender</th><th>Správa</th><th>Stav</th><th></th></tr>
+            </thead>
+            <tbody data-campaigns></tbody>
+          </table>
+        </div>
+      </section>
 
       <section class="panel">
         <div class="section-head">
@@ -149,7 +165,14 @@
 
     <script>
       const DEFAULT_SUPABASE_URL = "https://kbpuhcuiljbwgxgiauku.supabase.co";
-      const state = { adminKey: "", contacts: [], selected: new Set(), event: null };
+      const state = {
+        adminKey: "",
+        contacts: [],
+        selected: new Set(),
+        event: null,
+        campaigns: [],
+        editingCampaignId: null,
+      };
       const $ = (selector) => document.querySelector(selector);
       const endpoint = () => `${$("[data-supabase-url]").value.trim().replace(/\/+$/, "")}/functions/v1/admin-sms`;
 
@@ -199,6 +222,33 @@
         const time = $("[data-time]").value;
         if (!date || !time) return null;
         return new Date(`${date}T${time}:00`).toISOString();
+      }
+
+      function setLocalDateTime(iso) {
+        const date = new Date(iso);
+        const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+        $("[data-date]").value = local.toISOString().slice(0, 10);
+        $("[data-time]").value = local.toISOString().slice(11, 16);
+      }
+
+      function localDateTimeLabel(iso) {
+        return new Intl.DateTimeFormat("sk-SK", {
+          dateStyle: "medium",
+          timeStyle: "short",
+        }).format(new Date(iso));
+      }
+
+      function audienceLabel(value) {
+        return {
+          registered_for_event: "Prihlásení",
+          previously_registered_not_registered: "Boli, teraz nie",
+          not_registered_for_event: "Neprihlásení",
+          all_with_phone: "Všetci s telefónom",
+        }[value] || value;
+      }
+
+      function eventFromCampaign(campaign) {
+        return Array.isArray(campaign.event) ? campaign.event[0] : campaign.event;
       }
 
       function updateCounts() {
@@ -252,6 +302,7 @@
       async function saveKey() {
         saveConfig();
         await refreshConfig();
+        await loadCampaigns();
         await loadAudience();
         $("[data-access]").open = false;
       }
@@ -278,6 +329,87 @@
         const visible = state.contacts.filter((contact) => contact.matches);
         const usable = visible.filter((contact) => contact.eligible);
         setResult(`Načítané: ${visible.length} v zozname, ${usable.length} použiteľných`);
+      }
+
+      async function loadCampaigns() {
+        const result = await api({ action: "list_campaigns" });
+        state.campaigns = result.campaigns || [];
+        renderCampaigns();
+      }
+
+      function renderCampaigns() {
+        const tbody = $("[data-campaigns]");
+        tbody.innerHTML = "";
+        if (!state.campaigns.length) {
+          const row = document.createElement("tr");
+          row.innerHTML = `<td colspan="6" class="hint">Žiadne aktívne kampane</td>`;
+          tbody.append(row);
+          return;
+        }
+
+        for (const campaign of state.campaigns) {
+          const event = eventFromCampaign(campaign);
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${localDateTimeLabel(campaign.scheduled_for)}</td>
+            <td>${audienceLabel(campaign.audience_type)}<br><span class="hint">${event?.event_date || ""}</span></td>
+            <td>${campaign.sender || ""}</td>
+            <td class="message-cell">${campaign.message || ""}</td>
+            <td>${campaign.status} ${campaign.queued_count ? `(${campaign.sent_count}/${campaign.queued_count})` : ""}</td>
+            <td>
+              <button type="button" data-edit-campaign="${campaign.id}">Upraviť</button>
+              <button type="button" data-cancel-campaign="${campaign.id}">Zrušiť</button>
+            </td>
+          `;
+          tbody.append(row);
+        }
+      }
+
+      async function editCampaign(id) {
+        const campaign = state.campaigns.find((item) => item.id === id);
+        if (!campaign) return;
+        const event = eventFromCampaign(campaign);
+        state.editingCampaignId = campaign.id;
+        $("[data-event-date]").value = event?.event_date || "";
+        $("[data-audience]").value = campaign.audience_type;
+        $("[data-sender]").value = campaign.sender || "NewLevel";
+        $("[data-message]").value = campaign.message || "";
+        $("[data-schedule-toggle]").checked = true;
+        setLocalDateTime(campaign.scheduled_for);
+        updateSchedule();
+        updateSegmentPreview();
+        await loadAudience();
+        setResult("Upravuješ aktívnu kampaň");
+      }
+
+      async function cancelCampaign(id) {
+        if (!confirm("Zrušiť túto kampaň?")) return;
+        await api({ action: "cancel_campaign", campaignId: id });
+        if (state.editingCampaignId === id) state.editingCampaignId = null;
+        await loadCampaigns();
+        setResult("Kampaň zrušená");
+      }
+
+      async function updateCampaign() {
+        const sender = $("[data-sender]").value.trim();
+        const scheduledFor = localScheduledIso();
+        if (!state.editingCampaignId) return;
+        if (!/^[A-Za-z0-9]{1,11}$/.test(sender)) throw new Error("Meno odosielateľa musí mať 1-11 písmen alebo čísiel bez medzier.");
+        if (!$("[data-message]").value.trim()) throw new Error("Napíš text SMS.");
+        if (!scheduledFor) throw new Error("Vyber dátum a čas odoslania.");
+        await api({
+          action: "update_campaign",
+          campaignId: state.editingCampaignId,
+          sender,
+          message: $("[data-message]").value,
+          eventDate: $("[data-event-date]").value,
+          audienceType: $("[data-audience]").value,
+          scheduledFor,
+        });
+        state.editingCampaignId = null;
+        await loadCampaigns();
+        updateSchedule();
+        setResult("Kampaň upravená");
       }
 
       function updateSegmentPreview() {
@@ -307,13 +439,21 @@
       async function createCampaign(sendNow) {
         const selected = [...state.selected];
         const sender = $("[data-sender]").value.trim();
-        if (!selected.length) throw new Error("Vyber aspoň jedno telefónne číslo.");
+        if (state.editingCampaignId) {
+          await updateCampaign();
+          return;
+        }
+        if (sendNow && !selected.length) throw new Error("Vyber aspoň jedno telefónne číslo.");
         if (!/^[A-Za-z0-9]{1,11}$/.test(sender)) throw new Error("Meno odosielateľa musí mať 1-11 písmen alebo čísiel bez medzier.");
         if (!$("[data-message]").value.trim()) throw new Error("Napíš text SMS.");
         const scheduledFor = sendNow ? new Date().toISOString() : localScheduledIso();
         if (!sendNow && !scheduledFor) throw new Error("Vyber dátum a čas odoslania.");
         localStorage.setItem("smsSender", sender);
-        const ok = confirm(`Potvrdiť SMS?\n\nOdosielateľ: ${sender}\nPríjemcov: ${selected.length}\nRežim: ${sendNow ? "poslať teraz" : "naplánovať"}\n\n${$("[data-message]").value}`);
+        const audience = $("[data-audience]").value;
+        const recipientLine = sendNow
+          ? `Príjemcov: ${selected.length}`
+          : `Publikum: ${audienceLabel(audience)} sa skontroluje až v čase odoslania`;
+        const ok = confirm(`Potvrdiť SMS?\n\nOdosielateľ: ${sender}\n${recipientLine}\nRežim: ${sendNow ? "poslať teraz" : "naplánovať"}\n\n${$("[data-message]").value}`);
         if (!ok) return;
         const result = await api({
           action: "create_campaign",
@@ -321,13 +461,14 @@
           sender,
           message: $("[data-message]").value,
           eventDate: $("[data-event-date]").value,
-          audienceType: "custom_selection",
-          selectedContactIds: selected,
+          audienceType: sendNow ? "custom_selection" : audience,
+          selectedContactIds: sendNow ? selected : [],
           sendNow,
           scheduledFor,
         });
         if (!sendNow) {
-          setResult(`Naplánované: ${result.queued} SMS`);
+          await loadCampaigns();
+          setResult("Kampaň naplánovaná");
           return;
         }
 
@@ -353,6 +494,7 @@
         const scheduled = $("[data-schedule-toggle]").checked;
         $("[data-schedule-fields]").hidden = !scheduled;
         $("[data-submit]").textContent = scheduled ? "Naplánovať SMS" : "Poslať teraz";
+        if (state.editingCampaignId) $("[data-submit]").textContent = "Uložiť zmeny";
       }
 
       function setDefaultSchedule() {
@@ -378,6 +520,13 @@
         $("[data-clear-key]").addEventListener("click", clearKey);
         $("[data-refresh]").addEventListener("click", () => saveKey().catch(showError));
         $("[data-load-audience]").addEventListener("click", () => loadAudience().catch(showError));
+        $("[data-load-campaigns]").addEventListener("click", () => loadCampaigns().catch(showError));
+        $("[data-campaigns]").addEventListener("click", (event) => {
+          const editButton = event.target.closest("[data-edit-campaign]");
+          const cancelButton = event.target.closest("[data-cancel-campaign]");
+          if (editButton) editCampaign(editButton.dataset.editCampaign).catch(showError);
+          if (cancelButton) cancelCampaign(cancelButton.dataset.cancelCampaign).catch(showError);
+        });
         $("[data-select-filtered]").addEventListener("click", () => {
           for (const contact of state.contacts) {
             if (contact.matches && contact.eligible) state.selected.add(contact.id);

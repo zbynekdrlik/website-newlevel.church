@@ -5,6 +5,10 @@ import {
   readServiceKey,
 } from "../_shared/contact.ts";
 import { dispatchDueMessages } from "../_shared/message_queue.ts";
+import {
+  materializeDueSmsCampaigns,
+  updateSmsCampaignStatuses,
+} from "../_shared/sms_campaigns.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -36,7 +40,9 @@ Deno.serve(async (req) => {
   }
 
   const limit = Math.max(1, Math.min(Number(parsed.data.limit ?? 20), 50));
+  const campaigns = await materializeDueSmsCampaigns(admin, 10);
   const result = await dispatchDueMessages(admin, limit);
+  await updateSmsCampaignStatuses(admin);
   if (!result.ok) {
     return json(
       req,
@@ -47,6 +53,7 @@ Deno.serve(async (req) => {
 
   return json(req, {
     success: true,
+    campaigns,
     processed: result.processed,
     results: result.results,
   });

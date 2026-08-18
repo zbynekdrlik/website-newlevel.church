@@ -15,6 +15,10 @@ import {
   smsTestModeConfig,
 } from "../_shared/infobip.ts";
 import { dispatchDueMessages } from "../_shared/message_queue.ts";
+import {
+  materializeDueSmsCampaigns,
+  updateSmsCampaignStatuses,
+} from "../_shared/sms_campaigns.ts";
 import { buildRegistrationUrl } from "../_shared/registration_url.ts";
 
 type AudienceType =
@@ -30,6 +34,7 @@ type AdminSmsBody = {
   eventDate?: string;
   audienceType?: AudienceType;
   selectedContactIds?: string[];
+  campaignId?: string;
   name?: string;
   message?: string;
   subject?: string;
@@ -89,6 +94,12 @@ function cleanUuidList(value: unknown) {
   return value
     .map((item) => typeof item === "string" ? item : "")
     .filter((item) => /^[0-9a-f-]{36}$/i.test(item));
+}
+
+function cleanUuid(value: unknown) {
+  return typeof value === "string" && /^[0-9a-f-]{36}$/i.test(value)
+    ? value
+    : null;
 }
 
 function readAdminSmsKey() {
@@ -336,6 +347,22 @@ Deno.serve(async (req) => {
       });
     }
 
+    if (action === "list_campaigns") {
+      await updateSmsCampaignStatuses(admin);
+      const { data, error } = await admin
+        .schema("invitation")
+        .from("sms_campaigns")
+        .select(
+          "id,automation_id,audience_type,sender,message,scheduled_for,status,queued_count,sent_count,failed_count,last_error,created_at,event:party_events(id,event_date,title,starts_at,status)",
+        )
+        .in("status", ["queued", "dispatching", "partial", "failed"])
+        .order("scheduled_for", { ascending: true })
+        .limit(100);
+
+      if (error) throw new Error("Campaigns load failed");
+      return json(req, { success: true, campaigns: data ?? [] });
+    }
+
     if (action === "segment_info") {
       return json(req, {
         success: true,
@@ -400,6 +427,46 @@ Deno.serve(async (req) => {
         }, 400);
       }
 
+      const automationId =
+        `admin-sms-${event.event_date}-${audienceType}-${crypto.randomUUID()}`;
+
+      if (!body.sendNow) {
+        if (audienceType === "custom_selection") {
+          return json(req, {
+            success: false,
+            error: "Scheduled campaigns need a dynamic audience type",
+          }, 400);
+        }
+
+        const { data: campaign, error: campaignError } = await admin
+          .schema("invitation")
+          .from("sms_campaigns")
+          .insert({
+            event_id: event.id,
+            automation_id: automationId,
+            audience_type: audienceType,
+            sender,
+            message,
+            scheduled_for: new Date(scheduledFor).toISOString(),
+            status: "queued",
+          })
+          .select(
+            "id,automation_id,audience_type,sender,message,scheduled_for,status,queued_count,sent_count,failed_count,last_error,created_at,event:party_events(id,event_date,title,starts_at,status)",
+          )
+          .single();
+
+        if (campaignError || !campaign) {
+          throw new Error("Campaign create failed");
+        }
+
+        return json(req, {
+          success: true,
+          campaign,
+          queued: 0,
+          dynamic: true,
+        });
+      }
+
       const contacts = await loadAudience(admin, event.id, audienceType);
       const recipients = contacts
         .filter((contact: AudienceContact) =>
@@ -417,8 +484,6 @@ Deno.serve(async (req) => {
         );
       }
 
-      const automationId =
-        `admin-sms-${event.event_date}-${audienceType}-${crypto.randomUUID()}`;
       const { data: batch, error: batchError } = await admin
         .schema("invitation")
         .from("message_batches")
@@ -492,9 +557,101 @@ Deno.serve(async (req) => {
       return json(req, { success: true, messages: data ?? [] });
     }
 
+    if (action === "update_campaign") {
+      const campaignId = cleanUuid(body.campaignId);
+      const event = await getOrCreateEvent(admin, body);
+      const audienceType = body.audienceType ?? "all_with_phone";
+      const message = cleanText(body.message, 1000);
+      const sender = normalizeSmsSender(body.sender);
+      const scheduledFor = cleanText(body.scheduledFor, 40);
+
+      if (!campaignId) {
+        return json(req, { success: false, error: "Campaign id is required" }, 400);
+      }
+      if (audienceType === "custom_selection") {
+        return json(req, {
+          success: false,
+          error: "Campaign needs a dynamic audience type",
+        }, 400);
+      }
+      if (!message) {
+        return json(req, { success: false, error: "Message is required" }, 400);
+      }
+      if (!sender) {
+        return json(req, {
+          success: false,
+          error: "SMS sender must be 1-11 letters/numbers",
+        }, 400);
+      }
+      if (!scheduledFor || Number.isNaN(new Date(scheduledFor).getTime())) {
+        return json(req, {
+          success: false,
+          error: "Scheduled time is required",
+        }, 400);
+      }
+
+      const { data: campaign, error } = await admin
+        .schema("invitation")
+        .from("sms_campaigns")
+        .update({
+          event_id: event.id,
+          audience_type: audienceType,
+          sender,
+          message,
+          scheduled_for: new Date(scheduledFor).toISOString(),
+          last_error: null,
+        })
+        .eq("id", campaignId)
+        .eq("status", "queued")
+        .select(
+          "id,automation_id,audience_type,sender,message,scheduled_for,status,queued_count,sent_count,failed_count,last_error,created_at,event:party_events(id,event_date,title,starts_at,status)",
+        )
+        .maybeSingle();
+
+      if (error) throw new Error("Campaign update failed");
+      if (!campaign) {
+        return json(req, {
+          success: false,
+          error: "Campaign can no longer be edited",
+        }, 400);
+      }
+
+      return json(req, { success: true, campaign });
+    }
+
+    if (action === "cancel_campaign") {
+      const campaignId = cleanUuid(body.campaignId);
+      if (!campaignId) {
+        return json(req, { success: false, error: "Campaign id is required" }, 400);
+      }
+
+      const { data: campaign, error } = await admin
+        .schema("invitation")
+        .from("sms_campaigns")
+        .update({ status: "cancelled" })
+        .eq("id", campaignId)
+        .in("status", ["queued", "dispatching"])
+        .select("automation_id")
+        .maybeSingle();
+
+      if (error) throw new Error("Campaign cancel failed");
+      if (campaign?.automation_id) {
+        await admin
+          .schema("invitation")
+          .from("message_queue")
+          .update({ status: "cancelled" })
+          .eq("automation_id", campaign.automation_id)
+          .in("status", ["queued", "processing"]);
+      }
+
+      return json(req, { success: true });
+    }
+
     if (action === "process_due") {
       const limit = Math.max(1, Math.min(Number(body.limit ?? 20), 50));
+      await materializeDueSmsCampaigns(admin, 10);
       const result = await dispatchDueMessages(admin, limit);
+      await updateSmsCampaignStatuses(admin);
       return json(req, { success: result.ok, result }, result.ok ? 200 : 500);
     }
 
