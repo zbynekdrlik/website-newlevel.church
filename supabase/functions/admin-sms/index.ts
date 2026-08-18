@@ -14,6 +14,7 @@ import {
   smsSegmentInfo,
   smsTestModeConfig,
 } from "../_shared/infobip.ts";
+import { expandSmsEmojiShortcodes } from "../_shared/emoji.ts";
 import { dispatchDueMessages } from "../_shared/message_queue.ts";
 import {
   materializeDueSmsCampaigns,
@@ -85,7 +86,9 @@ function nextFridayDate() {
 
 function cleanText(value: unknown, maxLength: number) {
   if (typeof value !== "string") return null;
-  const cleaned = value.replace(/\p{C}/gu, "").replace(/\s+/g, " ").trim();
+  const cleaned = expandSmsEmojiShortcodes(
+    value.replace(/\p{C}/gu, "").replace(/\s+/g, " ").trim(),
+  );
   return cleaned ? cleaned.slice(0, maxLength) : null;
 }
 

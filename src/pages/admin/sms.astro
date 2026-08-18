@@ -251,6 +251,36 @@
         return Array.isArray(campaign.event) ? campaign.event[0] : campaign.event;
       }
 
+      function expandEmojiShortcodes(value) {
+        const emoji = {
+          smiling_face_with_tear: "🥲",
+          round_pushpin: "📍",
+          raised_hands: "🙌",
+          pray: "🙏",
+          folded_hands: "🙏",
+          tada: "🎉",
+          fire: "🔥",
+          heart: "❤️",
+          blue_heart: "💙",
+          white_heart: "🤍",
+          sparkles: "✨",
+          musical_note: "🎵",
+          notes: "🎶",
+          pizza: "🍕",
+          hamburger: "🍔",
+          game_die: "🎲",
+          soccer: "⚽",
+          star: "⭐",
+          warning: "⚠️",
+          point_right: "👉",
+          point_down: "👇",
+          wave: "👋",
+          smile: "😄",
+          slightly_smiling_face: "🙂",
+        };
+        return value.replace(/:([a-z0-9_+-]+):/gi, (match, key) => emoji[key.toLowerCase()] || match);
+      }
+
       function updateCounts() {
         const visible = state.contacts.filter((contact) => contact.matches);
         $("[data-counts]").textContent = `${state.selected.size} vybraných / ${visible.length} v zozname`;
@@ -392,16 +422,17 @@
 
       async function updateCampaign() {
         const sender = $("[data-sender]").value.trim();
+        const message = expandEmojiShortcodes($("[data-message]").value);
         const scheduledFor = localScheduledIso();
         if (!state.editingCampaignId) return;
         if (!/^[A-Za-z0-9]{1,11}$/.test(sender)) throw new Error("Meno odosielateľa musí mať 1-11 písmen alebo čísiel bez medzier.");
-        if (!$("[data-message]").value.trim()) throw new Error("Napíš text SMS.");
+        if (!message.trim()) throw new Error("Napíš text SMS.");
         if (!scheduledFor) throw new Error("Vyber dátum a čas odoslania.");
         await api({
           action: "update_campaign",
           campaignId: state.editingCampaignId,
           sender,
-          message: $("[data-message]").value,
+          message,
           eventDate: $("[data-event-date]").value,
           audienceType: $("[data-audience]").value,
           scheduledFor,
@@ -413,7 +444,7 @@
       }
 
       function updateSegmentPreview() {
-        const text = $("[data-message]").value;
+        const text = expandEmojiShortcodes($("[data-message]").value);
         const chars = [...text].length;
         const hasUnicode = /[^\x00-\x7F]/.test(text);
         const single = hasUnicode ? 70 : 160;
@@ -439,13 +470,14 @@
       async function createCampaign(sendNow) {
         const selected = [...state.selected];
         const sender = $("[data-sender]").value.trim();
+        const message = expandEmojiShortcodes($("[data-message]").value);
         if (state.editingCampaignId) {
           await updateCampaign();
           return;
         }
         if (sendNow && !selected.length) throw new Error("Vyber aspoň jedno telefónne číslo.");
         if (!/^[A-Za-z0-9]{1,11}$/.test(sender)) throw new Error("Meno odosielateľa musí mať 1-11 písmen alebo čísiel bez medzier.");
-        if (!$("[data-message]").value.trim()) throw new Error("Napíš text SMS.");
+        if (!message.trim()) throw new Error("Napíš text SMS.");
         const scheduledFor = sendNow ? new Date().toISOString() : localScheduledIso();
         if (!sendNow && !scheduledFor) throw new Error("Vyber dátum a čas odoslania.");
         localStorage.setItem("smsSender", sender);
@@ -453,13 +485,13 @@
         const recipientLine = sendNow
           ? `Príjemcov: ${selected.length}`
           : `Publikum: ${audienceLabel(audience)} sa skontroluje až v čase odoslania`;
-        const ok = confirm(`Potvrdiť SMS?\n\nOdosielateľ: ${sender}\n${recipientLine}\nRežim: ${sendNow ? "poslať teraz" : "naplánovať"}\n\n${$("[data-message]").value}`);
+        const ok = confirm(`Potvrdiť SMS?\n\nOdosielateľ: ${sender}\n${recipientLine}\nRežim: ${sendNow ? "poslať teraz" : "naplánovať"}\n\n${message}`);
         if (!ok) return;
         const result = await api({
           action: "create_campaign",
           name: "New Level SMS",
           sender,
-          message: $("[data-message]").value,
+          message,
           eventDate: $("[data-event-date]").value,
           audienceType: sendNow ? "custom_selection" : audience,
           selectedContactIds: sendNow ? selected : [],
