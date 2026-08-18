@@ -2744,16 +2744,34 @@ function getSavedRegistration(){
 
 function prefillRegistration(){
   if(!form)return;
+  const hashPrefix="#registracia";
+  const hash=window.location.hash;
+  const hashParams=hash.startsWith(`${hashPrefix}?`)
+    ?new URLSearchParams(hash.slice(hashPrefix.length+1))
+    :null;
+  const queryParams=new URLSearchParams(window.location.search);
   const saved=getSavedRegistration();
-  if(!saved)return;
   const name=form.querySelector('[name="name"]');
   const email=form.querySelector('[name="email"]');
   const phone=form.querySelector('[name="phone"]');
   const food=form.querySelector('[name="food_registration"]');
-  if(name&&!name.value)name.value=saved.name||"";
-  if(email&&!email.value)email.value=saved.email||"";
-  if(phone&&!phone.value)phone.value=saved.phone||"";
-  if(food)food.checked=Boolean(saved.food_registration);
+  const linkValue=(key)=>hashParams?.get(key)||queryParams.get(key)||"";
+  if(name&&!name.value)name.value=linkValue("name")||saved?.name||"";
+  if(email&&!email.value)email.value=linkValue("email")||saved?.email||"";
+  if(phone&&!phone.value)phone.value=linkValue("phone")||saved?.phone||"";
+  if(food&&saved)food.checked=Boolean(saved.food_registration);
+
+  const openedFromInvitation=Boolean(hashParams)||queryParams.has("prefill");
+  if(openedFromInvitation){
+    window.history.replaceState(null,"",`${window.location.pathname}${hashPrefix}`);
+    window.requestAnimationFrame(()=>{
+      document.getElementById("registracia")?.scrollIntoView({
+        behavior:window.matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",
+        block:"start"
+      });
+      name?.focus({preventScroll:true});
+    });
+  }
 }
 
 function saveRegistration(fd){

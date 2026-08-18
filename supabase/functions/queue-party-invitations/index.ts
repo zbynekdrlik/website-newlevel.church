@@ -1,5 +1,6 @@
 import { json, readJsonBody } from "../_shared/contact.ts";
 import { requireAdmin } from "../_shared/admin.ts";
+import { buildRegistrationUrl } from "../_shared/registration_url.ts";
 
 type QueueBody = {
   eventDate?: string;
@@ -17,6 +18,19 @@ type QueueBody = {
   targetNames?: string[];
   body?: string;
   subject?: string;
+};
+
+type QueueContact = {
+  id: string;
+  name: string | null;
+  email: string | null;
+  phone: string | null;
+  sms_enabled: boolean;
+  email_enabled: boolean;
+};
+
+type RegistrationRow = {
+  contact_id: string;
 };
 
 function nextFridayDate() {
@@ -139,11 +153,13 @@ Deno.serve(async (req) => {
     );
   }
 
-  const registered = new Set(registrations.map((row) => row.contact_id));
+  const registered = new Set(
+    (registrations as RegistrationRow[]).map((row) => row.contact_id),
+  );
   const targetIds = new Set(targetContactIds);
   const targetEmailSet = new Set(targetEmails);
   const targetNameSet = new Set(targetNames);
-  const rows = contacts
+  const rows = (contacts as QueueContact[])
     .filter((contact) => !registered.has(contact.id))
     .filter((contact) => {
       if (!hasTargets) return true;
@@ -153,10 +169,10 @@ Deno.serve(async (req) => {
         targetNameSet.has(name);
     })
     .flatMap((contact) => {
-      const bodyText = messageBody.replaceAll(
-        "{{name}}",
-        contact.name ?? "kamarád",
-      );
+      const registrationUrl = buildRegistrationUrl(contact);
+      const bodyText = messageBody
+        .replaceAll("{{name}}", contact.name ?? "kamarát")
+        .replaceAll("{{registration_url}}", registrationUrl);
       if (
         (strategy === "sms_then_email" || strategy === "sms_only") &&
         contact.phone &&
