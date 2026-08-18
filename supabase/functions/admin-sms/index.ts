@@ -360,6 +360,7 @@ Deno.serve(async (req) => {
         providerMessageId: didSend ? result.providerMessageId : null,
         errorCode: didSend ? null : result.errorCode,
         errorMessage: didSend ? null : result.errorMessage,
+        debugDetails: didSend ? null : result.debugDetails ?? null,
       }, didSend ? 200 : 502);
     }
 

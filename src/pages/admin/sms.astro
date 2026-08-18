@@ -305,7 +305,13 @@
         const sent = deliveries.filter((delivery) => delivery.ok).length;
         const failed = deliveries.find((delivery) => !delivery.ok);
         if (failed) {
-          throw new Error(`SMS sa neodoslala: ${failed.errorMessage || failed.errorCode || "neznáma chyba"}`);
+          const parts = [
+            "SMS sa neodoslala",
+            failed.errorCode,
+            failed.errorMessage,
+            failed.debugDetails ? `Debug: ${failed.debugDetails}` : "",
+          ].filter(Boolean);
+          throw new Error(parts.join("\n"));
         }
         if (sent !== result.queued) {
           throw new Error("SMS zostala čakať v rade. Skús odoslanie znovu.");

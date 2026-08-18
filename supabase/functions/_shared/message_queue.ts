@@ -4,7 +4,12 @@ import { buildRegistrationUrl } from "./registration_url.ts";
 
 type SendResult =
   | { ok: true; providerMessageId: string | null }
-  | { ok: false; errorCode: string; errorMessage: string };
+  | {
+    ok: false;
+    errorCode: string;
+    errorMessage: string;
+    debugDetails?: string;
+  };
 
 type QueueMessage = {
   id: string;
@@ -162,6 +167,7 @@ export async function dispatchDueMessages(
     const sentAt = result.ok === true ? new Date().toISOString() : null;
     const errorCode = result.ok === true ? null : result.errorCode;
     const errorMessage = result.ok === true ? null : result.errorMessage;
+    const debugDetails = result.ok === true ? null : result.debugDetails ?? null;
     const providerMessageId = result.ok === true
       ? result.providerMessageId
       : null;
@@ -191,7 +197,7 @@ export async function dispatchDueMessages(
         error_code: errorCode,
         error_message: errorMessage,
         sent_at: sentAt,
-        metadata: { queue_id: message.id, attempts },
+        metadata: { queue_id: message.id, attempts, debug_details: debugDetails },
       });
 
     results.push({
@@ -200,6 +206,7 @@ export async function dispatchDueMessages(
       ok: result.ok,
       errorCode: result.ok ? null : result.errorCode,
       errorMessage: result.ok ? null : result.errorMessage,
+      debugDetails,
     });
   }
 
