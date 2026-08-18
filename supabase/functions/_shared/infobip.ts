@@ -15,13 +15,16 @@ const GSM_7 =
   "@£$¥èéùìòÇ\nØø\rÅåΔ_ΦΓΛΩΠΨΣΘΞ ÆæßÉ !\"#¤%&'()*+,-./0123456789:;<=>?¡ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÑÜ§¿abcdefghijklmnopqrstuvwxyzäöñüà";
 const GSM_7_EXT = "^{}\\[~]|€";
 
+function normalizeBaseUrl(value: string) {
+  const trimmed = value.trim().replace(/\/+$/, "");
+  if (!trimmed) return "";
+  return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+}
+
 function readInfobipConfig() {
   return {
     apiKey: Deno.env.get("INFOBIP_API_KEY")?.trim() ?? "",
-    baseUrl: (Deno.env.get("INFOBIP_BASE_URL")?.trim() ?? "").replace(
-      /\/+$/,
-      "",
-    ),
+    baseUrl: normalizeBaseUrl(Deno.env.get("INFOBIP_BASE_URL") ?? ""),
     sender: Deno.env.get("INFOBIP_SMS_SENDER")?.trim() || "NewLevel",
     testMode:
       (Deno.env.get("SMS_TEST_MODE") ?? "false").toLowerCase() === "true",
