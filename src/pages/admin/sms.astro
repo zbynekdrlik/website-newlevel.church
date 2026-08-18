@@ -166,7 +166,7 @@
         </div>
         <label class="schedule-toggle">
           <input type="checkbox" data-schedule-toggle />
-          Naplánovať odoslanie
+          Naplánovať manuálne odoslanie
         </label>
         <div class="grid schedule-fields" data-schedule-fields hidden>
           <label>Dátum odoslania<input data-date type="date" /></label>
@@ -522,7 +522,7 @@
         $("[data-preview]").textContent = preview || "Preview sa zobrazí po napísaní SMS.";
       }
 
-      async function createCampaign(sendNow) {
+      async function manualSend(sendNow) {
         const selected = [...state.selected];
         const sender = $("[data-sender]").value.trim();
         const message = expandEmojiShortcodes($("[data-message]").value);
@@ -530,32 +530,31 @@
           await updateCampaign();
           return;
         }
-        if (sendNow && !selected.length) throw new Error("Vyber aspoň jedno telefónne číslo.");
+        if (!selected.length) throw new Error("Vyber aspoň jedno telefónne číslo.");
         if (!/^[A-Za-z0-9]{1,11}$/.test(sender)) throw new Error("Meno odosielateľa musí mať 1-11 písmen alebo čísiel bez medzier.");
         if (!message.trim()) throw new Error("Napíš text SMS.");
         const scheduledFor = sendNow ? new Date().toISOString() : localScheduledIso();
         if (!sendNow && !scheduledFor) throw new Error("Vyber dátum a čas odoslania.");
         localStorage.setItem("smsSender", sender);
         const audience = $("[data-audience]").value;
-        const recipientLine = sendNow
-          ? `Príjemcov: ${selected.length}`
-          : `Publikum: ${audienceLabel(audience)} sa skontroluje až v čase odoslania`;
-        const ok = confirm(`Potvrdiť SMS?\n\nOdosielateľ: ${sender}\n${recipientLine}\nRežim: ${sendNow ? "poslať teraz" : "naplánovať"}\n\n${message}`);
+        const recipientLine = `Príjemcov: ${selected.length}`;
+        const scheduleLine = sendNow ? "" : `\nČas: ${localDateTimeLabel(scheduledFor)}`;
+        const ok = confirm(`Potvrdiť manuálne SMS?\n\nOdosielateľ: ${sender}\n${recipientLine}${scheduleLine}\nRežim: ${sendNow ? "poslať teraz" : "naplánovať manuálne"}\n\n${message}`);
         if (!ok) return;
         const result = await api({
-          action: "create_campaign",
-          name: "New Level SMS",
+          action: "manual_send",
+          name: "Manual SMS",
           sender,
           message,
           eventDate: $("[data-event-date]").value,
-          audienceType: sendNow ? "custom_selection" : audience,
-          selectedContactIds: sendNow ? selected : [],
+          audienceType: audience,
+          selectedContactIds: selected,
           sendNow,
           scheduledFor,
         });
         if (!sendNow) {
-          await loadCampaigns();
-          setResult("Kampaň naplánovaná");
+          await loadHistory();
+          setResult(`Manuálne SMS naplánované: ${result.queued} príjemcov`);
           return;
         }
 
@@ -572,14 +571,14 @@
           throw new Error(parts.join("\n"));
         }
         if (sent !== result.queued) {
-          throw new Error("SMS zostala čakať v rade. Skús odoslanie znovu.");
+          throw new Error("Nie všetky SMS boli prijaté Infobipom. Pozri históriu nižšie.");
         }
         const accepted = deliveries.find((delivery) => delivery.ok);
         const providerLine = accepted?.providerMessageId
           ? ` Infobip ID: ${accepted.providerMessageId}${accepted.providerStatus ? `, status: ${accepted.providerStatus}` : ""}`
           : "";
         await loadHistory();
-        setResult(`Infobip prijal: ${sent} SMS.${providerLine}`);
+        setResult(`Infobip prijal manuálne SMS: ${sent}.${providerLine}`);
       }
 
       async function sendTestSms() {
@@ -608,7 +607,7 @@
       function updateSchedule() {
         const scheduled = $("[data-schedule-toggle]").checked;
         $("[data-schedule-fields]").hidden = !scheduled;
-        $("[data-submit]").textContent = scheduled ? "Naplánovať SMS" : "Poslať teraz";
+        $("[data-submit]").textContent = scheduled ? "Naplánovať manuálne" : "Poslať teraz";
         if (state.editingCampaignId) $("[data-submit]").textContent = "Uložiť zmeny";
       }
 
@@ -654,7 +653,7 @@
         $("[data-event-date]").addEventListener("change", () => loadAudience().catch(showError));
         $("[data-message]").addEventListener("input", updateSegmentPreview);
         $("[data-schedule-toggle]").addEventListener("change", updateSchedule);
-        $("[data-submit]").addEventListener("click", () => createCampaign(!$("[data-schedule-toggle]").checked).catch(showError));
+        $("[data-submit]").addEventListener("click", () => manualSend(!$("[data-schedule-toggle]").checked).catch(showError));
         $("[data-send-test]").addEventListener("click", () => sendTestSms().catch(showError));
       }
 
