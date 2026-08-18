@@ -2799,9 +2799,11 @@ form?.addEventListener("submit",async(e)=>{
       form.reset();
       window.dispatchEvent(new CustomEvent("party-counter-refresh"));
     }else{
+      console.error("Party registration failed",data);
       errorMsg?.classList.remove("hidden");
     }
   }catch(err){
+    console.error("Party registration request failed",err);
     errorMsg?.classList.remove("hidden");
   }finally{
     submitBtn.disabled=false;

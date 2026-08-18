@@ -1,4 +1,5 @@
 const TIME_ZONE = "Europe/Bratislava";
+const DEFAULT_SUPABASE_URL = "https://kbpuhcuiljbwgxgiauku.supabase.co";
 
 function json(body, init = {}, headers) {
   return new Response(JSON.stringify(body), {
@@ -69,12 +70,16 @@ function getSupabaseServiceKey(env) {
   return env.SUPABASE_SECRET_KEY || env.SUPABASE_SERVICE_ROLE_KEY || "";
 }
 
-function hasSupabaseConfig(env) {
-  return Boolean(env.SUPABASE_URL && getSupabaseServiceKey(env));
+function getSupabaseUrl(env) {
+  return String(env.SUPABASE_URL || DEFAULT_SUPABASE_URL).replace(/\/$/, "");
+}
+
+function hasSupabaseRpcConfig(env) {
+  return Boolean(getSupabaseUrl(env) && getSupabaseServiceKey(env));
 }
 
 async function callSupabaseRpc(env, name, body) {
-  const supabaseUrl = String(env.SUPABASE_URL || "").replace(/\/$/, "");
+  const supabaseUrl = getSupabaseUrl(env);
   const serviceKey = getSupabaseServiceKey(env);
 
   if (!supabaseUrl || !serviceKey) {
@@ -98,7 +103,41 @@ async function callSupabaseRpc(env, name, body) {
   return response.json();
 }
 
+async function callSupabaseFunction(env, name, body) {
+  const supabaseUrl = getSupabaseUrl(env);
+
+  if (!supabaseUrl) {
+    throw new Error("Supabase URL is not configured");
+  }
+
+  const response = await fetch(`${supabaseUrl}/functions/v1/${name}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok || data.success === false) {
+    throw new Error(data.error || `Supabase function failed: ${response.status}`);
+  }
+
+  return data;
+}
+
 async function upsertSupabaseRegistration(env, payload) {
+  if (!getSupabaseServiceKey(env)) {
+    return callSupabaseFunction(env, "register-party", {
+      eventDate: payload.event_date,
+      name: payload.name,
+      email: payload.email,
+      phone: payload.phone || null,
+      food_registration: payload.food_registration,
+      message: payload.message || null,
+    });
+  }
+
   return callSupabaseRpc(env, "upsert_party_registration", {
     p_event_date: payload.event_date,
     p_name: payload.name,
@@ -111,6 +150,8 @@ async function upsertSupabaseRegistration(env, payload) {
 }
 
 async function countSupabaseFoodRegistrations(env, eventDate) {
+  if (!hasSupabaseRpcConfig(env)) return null;
+
   const count = await callSupabaseRpc(env, "get_party_food_registration_count", {
     p_event_date: eventDate,
   });
@@ -170,15 +211,6 @@ export async function onRequest(context) {
       event_date: eventDate,
     };
 
-    const usesSupabase = hasSupabaseConfig(env);
-
-    if (!usesSupabase) {
-      return json({
-        success: false,
-        error: "Supabase registration storage is not configured",
-      }, { status: 500 }, headers);
-    }
-
     let supabaseSaved = false;
 
     await upsertSupabaseRegistration(env, payload);
@@ -227,9 +259,11 @@ export async function onRequest(context) {
 
     let foodRegistrationCount;
 
-    if (data.success && wantsFood(body.food_registration) && usesSupabase) {
+    if (data.success && wantsFood(body.food_registration)) {
       foodRegistrationCount = await countSupabaseFoodRegistrations(env, eventDate);
-    } else if (data.success && wantsFood(body.food_registration) && env.PARTY_COUNTER) {
+    }
+
+    if (data.success && wantsFood(body.food_registration) && typeof foodRegistrationCount !== "number" && env.PARTY_COUNTER) {
       const emailHash = await hashEmail(email);
       const key = registrationKey(eventDate, emailHash);
       const existing = await env.PARTY_COUNTER.get(key);
@@ -251,6 +285,7 @@ export async function onRequest(context) {
       ...(typeof foodRegistrationCount === "number" ? { count: foodRegistrationCount } : {}),
     }, { status: responseStatus }, headers);
   } catch (err) {
-    return json({ success: false, error: "Server error" }, { status: 500 }, headers);
+    const message = err instanceof Error ? err.message : "Server error";
+    return json({ success: false, error: message }, { status: 500 }, headers);
   }
 }
