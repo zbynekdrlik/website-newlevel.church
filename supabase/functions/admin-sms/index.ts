@@ -72,6 +72,13 @@ type AudienceContact = ContactRow & {
   testModeBlocked: boolean;
 };
 
+type ManualDeliveryRow = {
+  id: string;
+  contact_id: string;
+  recipient: string;
+  body: string;
+};
+
 function nextFridayDate() {
   const now = new Date();
   const bratislava = new Date(
@@ -174,6 +181,82 @@ function renderMessage(
   return template.replace(/\{\{\s*([a-z_]+)\s*\}\}/g, (_match, key: string) => {
     return values[key] ?? "";
   });
+}
+
+async function sendManualSmsRows(
+  admin: any,
+  rows: ManualDeliveryRow[],
+  sender: string,
+  automationId: string,
+) {
+  const results = [];
+
+  for (const row of rows) {
+    const result = await sendInfobipSms(row.recipient, row.body, { sender });
+    const status = result.ok === true ? "sent" : "failed";
+    const sentAt = result.ok === true ? new Date().toISOString() : null;
+    const providerMessageId = result.ok === true
+      ? result.providerMessageId
+      : null;
+    const providerStatus = result.ok === true
+      ? result.providerStatus ?? null
+      : null;
+    const errorCode = result.ok === true ? null : result.errorCode;
+    const errorMessage = result.ok === true ? null : result.errorMessage;
+    const debugDetails = result.ok === true
+      ? null
+      : result.debugDetails ?? null;
+
+    await admin
+      .schema("invitation")
+      .from("message_queue")
+      .update({
+        status,
+        provider: "infobip",
+        provider_message_id: providerMessageId,
+        attempts: 1,
+        last_error: errorMessage,
+        sent_at: sentAt,
+      })
+      .eq("id", row.id);
+
+    await admin
+      .schema("invitation")
+      .from("message_logs")
+      .insert({
+        contact_id: row.contact_id,
+        automation_id: automationId,
+        channel: "sms",
+        provider: "infobip",
+        status,
+        provider_message_id: providerMessageId,
+        error_code: errorCode,
+        error_message: errorMessage,
+        sent_at: sentAt,
+        metadata: {
+          queue_id: row.id,
+          mode: "manual_send",
+          debug_details: debugDetails,
+          provider_status: providerStatus,
+        },
+      });
+
+    results.push({
+      id: row.id,
+      ok: result.ok,
+      providerMessageId,
+      providerStatus,
+      errorCode,
+      errorMessage,
+      debugDetails,
+    });
+  }
+
+  return {
+    ok: results.every((item) => item.ok),
+    processed: results.length,
+    results,
+  };
 }
 
 async function getOrCreateEvent(admin: any, body: AdminSmsBody) {
@@ -402,6 +485,122 @@ Deno.serve(async (req) => {
         errorMessage: didSend ? null : result.errorMessage,
         debugDetails: didSend ? null : result.debugDetails ?? null,
       }, didSend ? 200 : 502);
+    }
+
+    if (action === "manual_send") {
+      const event = await getOrCreateEvent(admin, body);
+      const audienceType = body.audienceType ?? "all_with_phone";
+      const selectedIds = new Set(cleanUuidList(body.selectedContactIds));
+      const message = cleanText(body.message, 1000);
+      const name = cleanText(body.name, 120) ?? "Manual SMS";
+      const sender = normalizeSmsSender(body.sender);
+      const scheduledFor = body.sendNow
+        ? new Date().toISOString()
+        : cleanText(body.scheduledFor, 40);
+
+      if (!selectedIds.size) {
+        return json(req, {
+          success: false,
+          error: "Select at least one recipient",
+        }, 400);
+      }
+      if (!message) {
+        return json(req, { success: false, error: "Message is required" }, 400);
+      }
+      if (!sender) {
+        return json(req, {
+          success: false,
+          error: "SMS sender must be 1-11 letters/numbers",
+        }, 400);
+      }
+      if (!scheduledFor || Number.isNaN(new Date(scheduledFor).getTime())) {
+        return json(req, {
+          success: false,
+          error: "Scheduled time is required",
+        }, 400);
+      }
+
+      const contacts = await loadAudience(admin, event.id, audienceType);
+      const recipients = contacts
+        .filter((contact: AudienceContact) => selectedIds.has(contact.id))
+        .filter((contact: AudienceContact) => contact.eligible);
+
+      if (!recipients.length) {
+        return json(
+          req,
+          { success: false, error: "No eligible recipients" },
+          400,
+        );
+      }
+
+      const automationId = `manual-sms-${crypto.randomUUID()}`;
+      const { data: batch, error: batchError } = await admin
+        .schema("invitation")
+        .from("message_batches")
+        .insert({
+          event_id: event.id,
+          kind: "custom",
+          channel_strategy: "sms_only",
+          created_by: null,
+        })
+        .select("id")
+        .single();
+
+      if (batchError || !batch) throw new Error("Batch create failed");
+
+      const queuedAt = new Date(scheduledFor).toISOString();
+      const rows = recipients.map((contact: AudienceContact) => ({
+        batch_id: batch.id,
+        event_id: null,
+        contact_id: contact.id,
+        automation_id: automationId,
+        channel: "sms",
+        recipient: contact.normalizedPhone,
+        body: renderMessage(message, contact, event),
+        template_name: sender,
+        status: body.sendNow ? "processing" : "queued",
+        scheduled_for: queuedAt,
+        subject: name,
+      }));
+
+      const { data: insertedRows, error: queueError } = await admin
+        .schema("invitation")
+        .from("message_queue")
+        .insert(rows)
+        .select("id,contact_id,recipient,body");
+
+      if (queueError || !insertedRows) {
+        throw new Error(
+          queueError?.message
+            ? `Queue insert failed: ${queueError.message}`
+            : "Queue insert failed",
+        );
+      }
+
+      if (!body.sendNow) {
+        return json(req, {
+          success: true,
+          mode: "manual_scheduled",
+          automationId,
+          queued: insertedRows.length,
+          scheduledFor: queuedAt,
+        });
+      }
+
+      const processed = await sendManualSmsRows(
+        admin,
+        insertedRows as ManualDeliveryRow[],
+        sender,
+        automationId,
+      );
+
+      return json(req, {
+        success: true,
+        mode: "manual_now",
+        automationId,
+        queued: insertedRows.length,
+        processed,
+      });
     }
 
     if (action === "create_campaign") {
