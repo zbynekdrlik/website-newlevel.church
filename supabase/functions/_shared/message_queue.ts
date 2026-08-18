@@ -19,6 +19,7 @@ type QueueMessage = {
   recipient: string;
   subject: string | null;
   body: string;
+  template_name: string | null;
   attempts: number | null;
 };
 
@@ -83,7 +84,7 @@ export async function dispatchDueMessages(
     .schema("invitation")
     .from("message_queue")
     .select(
-      "id,automation_id,contact_id,channel,recipient,subject,body,attempts",
+      "id,automation_id,contact_id,channel,recipient,subject,body,template_name,attempts",
     )
     .eq("status", "queued")
     .lte("scheduled_for", new Date().toISOString())
@@ -144,7 +145,9 @@ export async function dispatchDueMessages(
       .eq("status", "queued");
 
     const result: SendResult = message.channel === "sms"
-      ? await sendInfobipSms(message.recipient, renderedBody)
+      ? await sendInfobipSms(message.recipient, renderedBody, {
+        sender: message.template_name,
+      })
       : message.channel === "whatsapp"
       ? await sendWhatsApp(message.recipient, renderedBody)
       : await sendEmail(
