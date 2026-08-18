@@ -13,6 +13,7 @@ import {
   smsTestModeConfig,
 } from "../_shared/infobip.ts";
 import { dispatchDueMessages } from "../_shared/message_queue.ts";
+import { buildRegistrationUrl } from "../_shared/registration_url.ts";
 
 type AudienceType =
   | "all_with_phone"
@@ -145,7 +146,11 @@ function renderMessage(
     phone: typeof contact.phone === "string" ? contact.phone : "",
     event_name: String(event?.title ?? "New Level Party"),
     event_date: eventDate,
-    registration_url: "https://newlevel.church/youth/",
+    registration_url: buildRegistrationUrl({
+      name,
+      email: typeof contact.email === "string" ? contact.email : null,
+      phone: typeof contact.phone === "string" ? contact.phone : null,
+    }),
   };
 
   return template.replace(/\{\{\s*([a-z_]+)\s*\}\}/g, (_match, key: string) => {

@@ -1,9 +1,28 @@
 import { renderPartyEmailHtml, sendEmail } from "./email.ts";
 import { sendInfobipSms } from "./infobip.ts";
+import { buildRegistrationUrl } from "./registration_url.ts";
 
 type SendResult =
   | { ok: true; providerMessageId: string | null }
   | { ok: false; errorCode: string; errorMessage: string };
+
+type QueueMessage = {
+  id: string;
+  automation_id: string;
+  contact_id: string;
+  channel: "sms" | "whatsapp" | "email";
+  recipient: string;
+  subject: string | null;
+  body: string;
+  attempts: number | null;
+};
+
+type RegistrationContact = {
+  id: string;
+  name: string | null;
+  email: string | null;
+  phone: string | null;
+};
 
 async function sendWhatsApp(to: string, body: string): Promise<SendResult> {
   const token = Deno.env.get("WHATSAPP_ACCESS_TOKEN");
@@ -71,8 +90,33 @@ export async function dispatchDueMessages(admin: any, limit: number) {
     };
   }
 
+  const queueMessages = messages as QueueMessage[];
+  const contactIds = [...new Set(queueMessages.map((message) => message.contact_id))];
+  const { data: contacts } = contactIds.length
+    ? await admin
+      .schema("invitation")
+      .from("contacts")
+      .select("id,name,email,phone")
+      .in("id", contactIds)
+    : { data: [] };
+  const contactsById = new Map<string, RegistrationContact>(
+    ((contacts ?? []) as RegistrationContact[]).map((contact) => [
+      contact.id,
+      contact,
+    ]),
+  );
+
   const results = [];
-  for (const message of messages) {
+  for (const message of queueMessages) {
+    const contact = contactsById.get(message.contact_id) ?? {
+      email: message.channel === "email" ? message.recipient : null,
+      phone: message.channel === "sms" ? message.recipient : null,
+    };
+    const registrationUrl = buildRegistrationUrl(contact);
+    const renderedBody = message.body.replaceAll(
+      "{{registration_url}}",
+      registrationUrl,
+    );
     const attempts = Number(message.attempts ?? 0) + 1;
     await admin
       .schema("invitation")
@@ -82,16 +126,17 @@ export async function dispatchDueMessages(admin: any, limit: number) {
       .eq("status", "queued");
 
     const result: SendResult = message.channel === "sms"
-      ? await sendInfobipSms(message.recipient, message.body)
+      ? await sendInfobipSms(message.recipient, renderedBody)
       : message.channel === "whatsapp"
-      ? await sendWhatsApp(message.recipient, message.body)
+      ? await sendWhatsApp(message.recipient, renderedBody)
       : await sendEmail(
         message.recipient,
         message.subject ?? "New Level Youth",
-        message.body,
+        renderedBody,
         renderPartyEmailHtml(
           message.subject ?? "New Level Youth",
-          message.body,
+          renderedBody,
+          { ctaUrl: registrationUrl },
         ),
       );
 
