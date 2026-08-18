@@ -7,6 +7,7 @@ import {
   validateRequestBasics,
 } from "../_shared/contact.ts";
 import {
+  normalizeSmsSender,
   normalizeE164,
   sendInfobipSms,
   smsRecipientEligibility,
@@ -32,6 +33,7 @@ type AdminSmsBody = {
   name?: string;
   message?: string;
   subject?: string;
+  sender?: string;
   scheduledFor?: string;
   sendNow?: boolean;
   phone?: string;
@@ -344,14 +346,21 @@ Deno.serve(async (req) => {
     if (action === "send_test") {
       const phone = cleanText(body.phone, 40);
       const message = cleanText(body.message, 1000);
+      const sender = normalizeSmsSender(body.sender);
       if (!phone || !message) {
         return json(req, {
           success: false,
           error: "Phone and message are required",
         }, 400);
       }
+      if (!sender) {
+        return json(req, {
+          success: false,
+          error: "SMS sender must be 1-11 letters/numbers",
+        }, 400);
+      }
 
-      const result = await sendInfobipSms(phone, message);
+      const result = await sendInfobipSms(phone, message, { sender });
       const didSend = result.ok === true;
       return json(req, {
         success: didSend,
@@ -370,12 +379,19 @@ Deno.serve(async (req) => {
       const selectedIds = new Set(cleanUuidList(body.selectedContactIds));
       const message = cleanText(body.message, 1000);
       const name = cleanText(body.name, 120) ?? "New Level SMS";
+      const sender = normalizeSmsSender(body.sender);
       const scheduledFor = body.sendNow
         ? new Date().toISOString()
         : cleanText(body.scheduledFor, 40);
 
       if (!message) {
         return json(req, { success: false, error: "Message is required" }, 400);
+      }
+      if (!sender) {
+        return json(req, {
+          success: false,
+          error: "SMS sender must be 1-11 letters/numbers",
+        }, 400);
       }
       if (!scheduledFor || Number.isNaN(new Date(scheduledFor).getTime())) {
         return json(req, {
@@ -425,6 +441,7 @@ Deno.serve(async (req) => {
         channel: "sms",
         recipient: contact.normalizedPhone,
         body: renderMessage(message, contact, event),
+        template_name: sender,
         scheduled_for: new Date(scheduledFor).toISOString(),
         subject: name,
       }));

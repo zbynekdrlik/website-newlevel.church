@@ -21,11 +21,22 @@ function normalizeBaseUrl(value: string) {
   return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
 }
 
+export function normalizeSmsSender(
+  value: unknown,
+  fallback = "NewLevel",
+) {
+  const sender = (typeof value === "string" && value.trim())
+    ? value.trim()
+    : fallback.trim();
+  return /^[A-Za-z0-9]{1,11}$/.test(sender) ? sender : null;
+}
+
 function readInfobipConfig() {
   return {
     apiKey: Deno.env.get("INFOBIP_API_KEY")?.trim() ?? "",
     baseUrl: normalizeBaseUrl(Deno.env.get("INFOBIP_BASE_URL") ?? ""),
-    sender: Deno.env.get("INFOBIP_SMS_SENDER")?.trim() || "NewLevel",
+    sender: normalizeSmsSender(Deno.env.get("INFOBIP_SMS_SENDER")) ??
+      "NewLevel",
     testMode:
       (Deno.env.get("SMS_TEST_MODE") ?? "false").toLowerCase() === "true",
     allowedNumbers: new Set(
@@ -143,6 +154,7 @@ export function smsTestModeConfig() {
   return {
     testMode: config.testMode,
     allowedCount: config.allowedNumbers.size,
+    sender: config.sender,
   };
 }
 
@@ -158,10 +170,11 @@ export function smsRecipientEligibility(value: string | null | undefined) {
 export async function sendInfobipSms(
   recipient: string,
   message: string,
-  timeoutMs = 15000,
+  options: { timeoutMs?: number; sender?: string | null } = {},
 ): Promise<InfobipSmsResult> {
   const config = readInfobipConfig();
   const to = normalizeE164(recipient);
+  const sender = normalizeSmsSender(options.sender, config.sender);
 
   if (!config.apiKey || !config.baseUrl) {
     return {
@@ -176,6 +189,15 @@ export async function sendInfobipSms(
       ok: false,
       errorCode: "INVALID_RECIPIENT",
       errorMessage: "Recipient must be in E.164 format",
+    };
+  }
+
+  if (!sender) {
+    return {
+      ok: false,
+      errorCode: "INVALID_SENDER",
+      errorMessage:
+        "SMS sender must be 1-11 letters/numbers, for example NewLevel",
     };
   }
 
@@ -197,7 +219,7 @@ export async function sendInfobipSms(
   }
 
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  const timer = setTimeout(() => controller.abort(), options.timeoutMs ?? 15000);
 
   try {
     const response = await fetch(`${config.baseUrl}/sms/3/messages`, {
@@ -210,7 +232,7 @@ export async function sendInfobipSms(
       },
       body: JSON.stringify({
         messages: [{
-          sender: config.sender,
+          sender,
           destinations: [{ to }],
           content: { text },
         }],

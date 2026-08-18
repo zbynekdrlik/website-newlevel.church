@@ -121,6 +121,8 @@
           <h2>2. Napíš SMS</h2>
           <span data-segments>0 znakov</span>
         </div>
+        <label>Meno odosielateľa<input data-sender maxlength="11" placeholder="NewLevel" /></label>
+        <p class="hint">Max 11 písmen alebo čísiel, bez medzier. Infobip musí tento sender povoliť.</p>
         <label>Text SMS<textarea data-message rows="7" placeholder="Ahoj &#123;&#123;first_name&#125;&#125;, vidíme sa na New Level Youth?"></textarea></label>
         <p class="hint">Môžeš použiť: &#123;&#123;first_name&#125;&#125;, &#123;&#123;name&#125;&#125;, &#123;&#123;event_date&#125;&#125;, &#123;&#123;registration_url&#125;&#125;</p>
         <div class="preview" data-preview>Preview sa zobrazí po napísaní SMS.</div>
@@ -166,6 +168,7 @@
       function saveConfig() {
         localStorage.setItem("smsAdminUrl", $("[data-supabase-url]").value.trim());
         localStorage.setItem("smsAdminKey", $("[data-admin-key]").value.trim());
+        localStorage.setItem("smsSender", $("[data-sender]").value.trim());
         state.adminKey = $("[data-admin-key]").value.trim();
       }
 
@@ -173,6 +176,7 @@
         $("[data-supabase-url]").value = localStorage.getItem("smsAdminUrl") || DEFAULT_SUPABASE_URL;
         state.adminKey = localStorage.getItem("smsAdminKey") || "";
         $("[data-admin-key]").value = state.adminKey;
+        $("[data-sender]").value = localStorage.getItem("smsSender") || "NewLevel";
       }
 
       async function api(body) {
@@ -241,6 +245,7 @@
         const badge = $("[data-test-mode]");
         badge.textContent = config.testMode ? `TEST MODE (${config.allowedCount})` : "LIVE SMS";
         badge.classList.toggle("is-live", !config.testMode);
+        if (!localStorage.getItem("smsSender") && config.sender) $("[data-sender]").value = config.sender;
         $("[data-access-status]").textContent = "pripojené";
       }
 
@@ -301,15 +306,19 @@
 
       async function createCampaign(sendNow) {
         const selected = [...state.selected];
+        const sender = $("[data-sender]").value.trim();
         if (!selected.length) throw new Error("Vyber aspoň jedno telefónne číslo.");
+        if (!/^[A-Za-z0-9]{1,11}$/.test(sender)) throw new Error("Meno odosielateľa musí mať 1-11 písmen alebo čísiel bez medzier.");
         if (!$("[data-message]").value.trim()) throw new Error("Napíš text SMS.");
         const scheduledFor = sendNow ? new Date().toISOString() : localScheduledIso();
         if (!sendNow && !scheduledFor) throw new Error("Vyber dátum a čas odoslania.");
-        const ok = confirm(`Potvrdiť SMS?\n\nPríjemcov: ${selected.length}\nRežim: ${sendNow ? "poslať teraz" : "naplánovať"}\n\n${$("[data-message]").value}`);
+        localStorage.setItem("smsSender", sender);
+        const ok = confirm(`Potvrdiť SMS?\n\nOdosielateľ: ${sender}\nPríjemcov: ${selected.length}\nRežim: ${sendNow ? "poslať teraz" : "naplánovať"}\n\n${$("[data-message]").value}`);
         if (!ok) return;
         const result = await api({
           action: "create_campaign",
           name: "New Level SMS",
+          sender,
           message: $("[data-message]").value,
           eventDate: $("[data-event-date]").value,
           audienceType: "custom_selection",
