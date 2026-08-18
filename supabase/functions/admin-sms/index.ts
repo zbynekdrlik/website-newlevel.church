@@ -446,6 +446,7 @@ Deno.serve(async (req) => {
         processed = await dispatchDueMessages(
           admin,
           Math.min(rows.length, 50),
+          { automationId },
         );
       }
 
