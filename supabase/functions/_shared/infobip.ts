@@ -4,7 +4,12 @@ export type InfobipSmsResult =
     providerMessageId: string | null;
     providerStatus: string | null;
   }
-  | { ok: false; errorCode: string; errorMessage: string };
+  | {
+    ok: false;
+    errorCode: string;
+    errorMessage: string;
+    debugDetails?: string;
+  };
 
 const GSM_7 =
   "@£$¥èéùìòÇ\nØø\rÅåΔ_ΦΓΛΩΠΨΣΘΞ ÆæßÉ !\"#¤%&'()*+,-./0123456789:;<=>?¡ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÑÜ§¿abcdefghijklmnopqrstuvwxyzäöñüà";
@@ -53,6 +58,26 @@ function providerMessage(data: unknown, fallback: string) {
   }
 
   return fallback;
+}
+
+function safeDebugSnippet(value: unknown) {
+  if (value === null || value === undefined) return "";
+  const text = typeof value === "string" ? value : JSON.stringify(value);
+  return text
+    .replace(/App\s+[A-Za-z0-9._-]+/g, "App [redacted]")
+    .replace(/Bearer\s+[A-Za-z0-9._-]+/g, "Bearer [redacted]")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 500);
+}
+
+function parseJsonMaybe(text: string) {
+  if (!text.trim()) return null;
+  try {
+    return JSON.parse(text);
+  } catch {
+    return null;
+  }
 }
 
 export function normalizeE164(value: string | null | undefined) {
@@ -189,12 +214,16 @@ export async function sendInfobipSms(
       }),
     });
 
-    const data = await response.json().catch(() => null);
+    const responseText = await response.text().catch(() => "");
+    const data = parseJsonMaybe(responseText);
     if (!response.ok) {
+      const details = safeDebugSnippet(data ?? responseText);
+      const message = providerMessage(data, details || "Infobip request failed");
       return {
         ok: false,
         errorCode: `INFOBIP_HTTP_${response.status}`,
-        errorMessage: providerMessage(data, "Infobip request failed"),
+        errorMessage: `Infobip HTTP ${response.status}: ${message}`,
+        debugDetails: details || undefined,
       };
     }
 
@@ -216,7 +245,9 @@ export async function sendInfobipSms(
       errorCode: isAbort ? "INFOBIP_TIMEOUT" : "INFOBIP_NETWORK_ERROR",
       errorMessage: isAbort
         ? "Infobip request timed out"
-        : "Infobip request failed",
+        : `Infobip request failed: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
     };
   } finally {
     clearTimeout(timer);
