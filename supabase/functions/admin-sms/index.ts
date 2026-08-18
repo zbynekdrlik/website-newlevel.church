@@ -397,6 +397,7 @@ Deno.serve(async (req) => {
         status: didSend ? "sent" : "failed",
         provider: "infobip",
         providerMessageId: didSend ? result.providerMessageId : null,
+        providerStatus: didSend ? result.providerStatus ?? null : null,
         errorCode: didSend ? null : result.errorCode,
         errorMessage: didSend ? null : result.errorMessage,
         debugDetails: didSend ? null : result.debugDetails ?? null,

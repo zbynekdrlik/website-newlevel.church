@@ -172,7 +172,11 @@
           <label>Dátum odoslania<input data-date type="date" /></label>
           <label>Čas odoslania<input data-time type="time" /></label>
         </div>
+        <div class="grid">
+          <label>Test číslo<input data-test-phone placeholder="+421..." /></label>
+        </div>
         <div class="actions">
+          <button type="button" data-send-test>Poslať test SMS teraz</button>
           <button class="primary" type="button" data-submit>Poslať teraz</button>
         </div>
       </section>
@@ -300,6 +304,10 @@
       function updateCounts() {
         const visible = state.contacts.filter((contact) => contact.matches);
         $("[data-counts]").textContent = `${state.selected.size} vybraných / ${visible.length} v zozname`;
+        const selectedContact = state.contacts.find((contact) => state.selected.has(contact.id));
+        if (selectedContact?.normalizedPhone && !$("[data-test-phone]").value.trim()) {
+          $("[data-test-phone]").value = selectedContact.normalizedPhone;
+        }
       }
 
       function contactStatus(contact) {
@@ -574,6 +582,29 @@
         setResult(`Infobip prijal: ${sent} SMS.${providerLine}`);
       }
 
+      async function sendTestSms() {
+        const sender = $("[data-sender]").value.trim();
+        const selectedContact = state.contacts.find((contact) => state.selected.has(contact.id));
+        const phone = $("[data-test-phone]").value.trim() || selectedContact?.normalizedPhone || "";
+        const message = expandEmojiShortcodes($("[data-message]").value);
+        if (!phone) throw new Error("Zadaj test číslo alebo vyber jeden kontakt.");
+        if (!/^[A-Za-z0-9]{1,11}$/.test(sender)) throw new Error("Meno odosielateľa musí mať 1-11 písmen alebo čísiel bez medzier.");
+        if (!message.trim()) throw new Error("Napíš text SMS.");
+        const ok = confirm(`Poslať test SMS hneď?\n\nOdosielateľ: ${sender}\nČíslo: ${phone}\n\n${message}`);
+        if (!ok) return;
+        const result = await api({
+          action: "send_test",
+          sender,
+          phone,
+          message,
+        });
+        const providerLine = result.providerMessageId
+          ? ` Infobip ID: ${result.providerMessageId}${result.providerStatus ? `, status: ${result.providerStatus}` : ""}`
+          : "";
+        setResult(`Test SMS odoslaná.${providerLine}`);
+        await loadHistory();
+      }
+
       function updateSchedule() {
         const scheduled = $("[data-schedule-toggle]").checked;
         $("[data-schedule-fields]").hidden = !scheduled;
@@ -624,6 +655,7 @@
         $("[data-message]").addEventListener("input", updateSegmentPreview);
         $("[data-schedule-toggle]").addEventListener("change", updateSchedule);
         $("[data-submit]").addEventListener("click", () => createCampaign(!$("[data-schedule-toggle]").checked).catch(showError));
+        $("[data-send-test]").addEventListener("click", () => sendTestSms().catch(showError));
       }
 
       loadConfig();
