@@ -408,7 +408,7 @@ Deno.serve(async (req) => {
 
       const rows = recipients.map((contact: AudienceContact) => ({
         batch_id: batch.id,
-        event_id: event.id,
+        event_id: null,
         contact_id: contact.id,
         automation_id: automationId,
         channel: "sms",
@@ -421,12 +421,15 @@ Deno.serve(async (req) => {
       const { error: queueError } = await admin
         .schema("invitation")
         .from("message_queue")
-        .upsert(rows, {
-          onConflict: "automation_id,contact_id,channel",
-          ignoreDuplicates: true,
-        });
+        .insert(rows);
 
-      if (queueError) throw new Error("Queue insert failed");
+      if (queueError) {
+        throw new Error(
+          queueError.message
+            ? `Queue insert failed: ${queueError.message}`
+            : "Queue insert failed",
+        );
+      }
 
       let processed = null;
       if (body.sendNow) {
