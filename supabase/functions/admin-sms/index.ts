@@ -9,6 +9,7 @@ import {
 import {
   normalizeE164,
   sendInfobipSms,
+  smsRecipientEligibility,
   smsSegmentInfo,
   smsTestModeConfig,
 } from "../_shared/infobip.ts";
@@ -60,6 +61,7 @@ type AudienceContact = ContactRow & {
   previouslyRegisteredNotSelected: boolean;
   matches: boolean;
   eligible: boolean;
+  testModeBlocked: boolean;
 };
 
 function nextFridayDate() {
@@ -234,6 +236,7 @@ async function loadAudience(
   return (contacts as ContactRow[]).map(
     (contact: ContactRow): AudienceContact => {
       const normalizedPhone = normalizeE164(contact.phone);
+      const smsEligibility = smsRecipientEligibility(normalizedPhone);
       const registeredForSelected = selectedEvent.has(contact.id);
       const everRegistered = ever.has(contact.id);
       const previouslyRegisteredNotSelected = everRegistered &&
@@ -259,8 +262,10 @@ async function loadAudience(
         previouslyRegisteredNotSelected,
         matches,
         eligible: Boolean(
-          normalizedPhone && contact.active && contact.sms_enabled,
+          normalizedPhone && contact.active && contact.sms_enabled &&
+            smsEligibility.allowed,
         ),
+        testModeBlocked: smsEligibility.testMode && !smsEligibility.allowed,
       };
     },
   );
