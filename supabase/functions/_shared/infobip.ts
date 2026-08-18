@@ -118,6 +118,15 @@ export function smsTestModeConfig() {
   };
 }
 
+export function smsRecipientEligibility(value: string | null | undefined) {
+  const config = readInfobipConfig();
+  const phone = normalizeE164(value);
+  return {
+    testMode: config.testMode,
+    allowed: !config.testMode || Boolean(phone && config.allowedNumbers.has(phone)),
+  };
+}
+
 export async function sendInfobipSms(
   recipient: string,
   message: string,
