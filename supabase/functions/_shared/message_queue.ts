@@ -64,9 +64,17 @@ async function sendWhatsApp(to: string, body: string): Promise<SendResult> {
   };
 }
 
-export async function dispatchDueMessages(admin: any, limit: number) {
+type DispatchOptions = {
+  automationId?: string;
+};
+
+export async function dispatchDueMessages(
+  admin: any,
+  limit: number,
+  options: DispatchOptions = {},
+) {
   const safeLimit = Math.max(1, Math.min(Number(limit ?? 20), 50));
-  const { data: messages, error } = await admin
+  let query = admin
     .schema("invitation")
     .from("message_queue")
     .select(
@@ -74,8 +82,13 @@ export async function dispatchDueMessages(admin: any, limit: number) {
     )
     .eq("status", "queued")
     .lte("scheduled_for", new Date().toISOString())
-    .order("created_at", { ascending: true })
-    .limit(safeLimit);
+    .order("created_at", { ascending: true });
+
+  if (options.automationId) {
+    query = query.eq("automation_id", options.automationId);
+  }
+
+  const { data: messages, error } = await query.limit(safeLimit);
 
   if (error || !messages) {
     return {
@@ -181,7 +194,13 @@ export async function dispatchDueMessages(admin: any, limit: number) {
         metadata: { queue_id: message.id, attempts },
       });
 
-    results.push({ id: message.id, channel: message.channel, ok: result.ok });
+    results.push({
+      id: message.id,
+      channel: message.channel,
+      ok: result.ok,
+      errorCode: result.ok ? null : result.errorCode,
+      errorMessage: result.ok ? null : result.errorMessage,
+    });
   }
 
   return {
