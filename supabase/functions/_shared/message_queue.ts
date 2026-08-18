@@ -3,7 +3,11 @@ import { sendInfobipSms } from "./infobip.ts";
 import { buildRegistrationUrl } from "./registration_url.ts";
 
 type SendResult =
-  | { ok: true; providerMessageId: string | null }
+  | {
+    ok: true;
+    providerMessageId: string | null;
+    providerStatus?: string | null;
+  }
   | {
     ok: false;
     errorCode: string;
@@ -174,6 +178,9 @@ export async function dispatchDueMessages(
     const providerMessageId = result.ok === true
       ? result.providerMessageId
       : null;
+    const providerStatus = result.ok === true
+      ? result.providerStatus ?? null
+      : null;
 
     await admin
       .schema("invitation")
@@ -200,13 +207,20 @@ export async function dispatchDueMessages(
         error_code: errorCode,
         error_message: errorMessage,
         sent_at: sentAt,
-        metadata: { queue_id: message.id, attempts, debug_details: debugDetails },
+        metadata: {
+          queue_id: message.id,
+          attempts,
+          debug_details: debugDetails,
+          provider_status: providerStatus,
+        },
       });
 
     results.push({
       id: message.id,
       channel: message.channel,
       ok: result.ok,
+      providerMessageId,
+      providerStatus,
       errorCode: result.ok ? null : result.errorCode,
       errorMessage: result.ok ? null : result.errorMessage,
       debugDetails,

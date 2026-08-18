@@ -104,6 +104,21 @@
 
       <section class="panel">
         <div class="section-head">
+          <h2>Posledné SMS</h2>
+          <button type="button" data-load-history>Obnoviť históriu</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Čas</th><th>Telefón</th><th>Stav</th><th>Infobip ID</th><th>Chyba</th></tr>
+            </thead>
+            <tbody data-history></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="section-head">
           <h2>1. Vyber čísla</h2>
           <span data-counts>0 vybraných</span>
         </div>
@@ -171,6 +186,7 @@
         selected: new Set(),
         event: null,
         campaigns: [],
+        history: [],
         editingCampaignId: null,
       };
       const $ = (selector) => document.querySelector(selector);
@@ -333,6 +349,7 @@
         saveConfig();
         await refreshConfig();
         await loadCampaigns();
+        await loadHistory();
         await loadAudience();
         $("[data-access]").open = false;
       }
@@ -390,6 +407,36 @@
               <button type="button" data-edit-campaign="${campaign.id}">Upraviť</button>
               <button type="button" data-cancel-campaign="${campaign.id}">Zrušiť</button>
             </td>
+          `;
+          tbody.append(row);
+        }
+      }
+
+      async function loadHistory() {
+        const result = await api({ action: "history", limit: 50 });
+        state.history = result.messages || [];
+        renderHistory();
+      }
+
+      function renderHistory() {
+        const tbody = $("[data-history]");
+        tbody.innerHTML = "";
+        if (!state.history.length) {
+          const row = document.createElement("tr");
+          row.innerHTML = `<td colspan="5" class="hint">Zatiaľ žiadna história</td>`;
+          tbody.append(row);
+          return;
+        }
+
+        for (const item of state.history) {
+          const row = document.createElement("tr");
+          const time = item.sent_at || item.created_at;
+          row.innerHTML = `
+            <td>${time ? localDateTimeLabel(time) : ""}</td>
+            <td>${item.recipient || ""}</td>
+            <td>${item.status || ""}</td>
+            <td>${item.provider_message_id || ""}</td>
+            <td class="message-cell">${item.last_error || ""}</td>
           `;
           tbody.append(row);
         }
@@ -519,7 +566,12 @@
         if (sent !== result.queued) {
           throw new Error("SMS zostala čakať v rade. Skús odoslanie znovu.");
         }
-        setResult(`Odoslané: ${sent} SMS`);
+        const accepted = deliveries.find((delivery) => delivery.ok);
+        const providerLine = accepted?.providerMessageId
+          ? ` Infobip ID: ${accepted.providerMessageId}${accepted.providerStatus ? `, status: ${accepted.providerStatus}` : ""}`
+          : "";
+        await loadHistory();
+        setResult(`Infobip prijal: ${sent} SMS.${providerLine}`);
       }
 
       function updateSchedule() {
@@ -553,6 +605,7 @@
         $("[data-refresh]").addEventListener("click", () => saveKey().catch(showError));
         $("[data-load-audience]").addEventListener("click", () => loadAudience().catch(showError));
         $("[data-load-campaigns]").addEventListener("click", () => loadCampaigns().catch(showError));
+        $("[data-load-history]").addEventListener("click", () => loadHistory().catch(showError));
         $("[data-campaigns]").addEventListener("click", (event) => {
           const editButton = event.target.closest("[data-edit-campaign]");
           const cancelButton = event.target.closest("[data-cancel-campaign]");
