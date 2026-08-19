@@ -95,7 +95,13 @@ function nextFridayDate() {
 function cleanText(value: unknown, maxLength: number) {
   if (typeof value !== "string") return null;
   const cleaned = expandSmsEmojiShortcodes(
-    value.replace(/\p{C}/gu, "").replace(/\s+/g, " ").trim(),
+    value
+      .replace(/\r\n?/g, "\n")
+      .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, "")
+      .replace(/[ \t]+/g, " ")
+      .replace(/[ \t]*\n[ \t]*/g, "\n")
+      .replace(/\n{3,}/g, "\n\n")
+      .trim(),
   );
   return cleaned ? cleaned.slice(0, maxLength) : null;
 }
