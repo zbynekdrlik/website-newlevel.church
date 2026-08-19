@@ -128,8 +128,9 @@
           <label>Dátum mládeže<input data-event-date type="date" /></label>
           <label>Komu poslať
             <select data-audience>
+              <option value="not_registered_for_event">Nie sú prihlásení na tento dátum</option>
               <option value="registered_for_event">Prihláseným na tento dátum</option>
-              <option value="previously_registered_not_registered">Boli už niekedy, ale teraz nie sú prihlásení</option>
+              <option value="previously_registered_not_registered">Boli už prihlásení, ale nie na tento dátum</option>
               <option value="all_with_phone">Všetkým s kontaktom</option>
             </select>
           </label>
@@ -139,6 +140,7 @@
           <button type="button" data-deselect>Zrušiť výber</button>
           <button type="button" data-load-audience>Obnoviť zoznam</button>
         </div>
+        <p class="hint" data-audience-summary></p>
         <div class="table-wrap">
           <table>
             <thead>
@@ -200,6 +202,7 @@
         campaigns: [],
         history: [],
         editingCampaignId: null,
+        audienceStats: null,
       };
       const $ = (selector) => document.querySelector(selector);
       const endpoint = () => `${$("[data-supabase-url]").value.trim().replace(/\/+$/, "")}/functions/v1/admin-sms`;
@@ -278,8 +281,8 @@
       function audienceLabel(value) {
         return {
           registered_for_event: "Prihlásení",
-          previously_registered_not_registered: "Boli, teraz nie",
-          not_registered_for_event: "Neprihlásení",
+          previously_registered_not_registered: "Boli prihlásení skôr",
+          not_registered_for_event: "Neprihlásení na termín",
           all_with_phone: "Všetci s telefónom",
         }[value] || value;
       }
@@ -384,6 +387,11 @@
         const tbody = $("[data-contacts]");
         tbody.innerHTML = "";
         const visibleContacts = state.contacts.filter((contact) => contact.matches);
+        if (!visibleContacts.length) {
+          const row = document.createElement("tr");
+          row.innerHTML = `<td colspan="5" class="hint">Pre tento filter sa nenašli žiadne kontakty. Skús „Nie sú prihlásení na tento dátum“ alebo „Všetkým s kontaktom“.</td>`;
+          tbody.append(row);
+        }
         for (const contact of visibleContacts) {
           const row = document.createElement("tr");
           const sendable = isContactSendable(contact);
@@ -445,10 +453,17 @@
         });
         state.event = result.event || null;
         state.contacts = result.contacts || [];
+        state.audienceStats = {
+          total: result.total || 0,
+          totalRegistrations: result.totalRegistrations || 0,
+          selectedEventRegistrations: result.selectedEventRegistrations || 0,
+        };
         state.selected.clear();
         renderContacts();
         const visible = state.contacts.filter((contact) => contact.matches);
         const usable = visible.filter((contact) => isContactSendable(contact));
+        const notRegistered = Math.max(0, state.audienceStats.total - state.audienceStats.selectedEventRegistrations);
+        $("[data-audience-summary]").textContent = `Kontakty spolu: ${state.audienceStats.total} · prihlásení na tento dátum: ${state.audienceStats.selectedEventRegistrations} · neprihlásení: ${notRegistered}`;
         setResult(`Načítané: ${visible.length} v zozname, ${usable.length} použiteľných`);
       }
 

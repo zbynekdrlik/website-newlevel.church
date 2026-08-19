@@ -8,8 +8,8 @@ import {
 } from "../_shared/contact.ts";
 import {
   getInfobipSmsLogs,
-  normalizeSmsSender,
   normalizeE164,
+  normalizeSmsSender,
   sendInfobipSms,
   smsRecipientEligibility,
   smsSegmentInfo,
@@ -22,13 +22,7 @@ import {
   updateSmsCampaignStatuses,
 } from "../_shared/sms_campaigns.ts";
 import { buildRegistrationUrl } from "../_shared/registration_url.ts";
-
-type AudienceType =
-  | "all_with_phone"
-  | "registered_for_event"
-  | "not_registered_for_event"
-  | "previously_registered_not_registered"
-  | "custom_selection";
+import { audienceMatches, type AudienceType } from "../_shared/audience.ts";
 
 type MessageChannel = "sms" | "whatsapp" | "email";
 
@@ -375,18 +369,10 @@ async function loadAudience(
       const everRegistered = ever.has(contact.id);
       const previouslyRegisteredNotSelected = everRegistered &&
         !registeredForSelected;
-      let matches = audienceType === "all_with_phone";
-
-      if (audienceType === "registered_for_event") {
-        matches = registeredForSelected;
-      }
-      if (audienceType === "not_registered_for_event") {
-        matches = !registeredForSelected;
-      }
-      if (audienceType === "previously_registered_not_registered") {
-        matches = previouslyRegisteredNotSelected;
-      }
-      if (audienceType === "custom_selection") matches = true;
+      const matches = audienceMatches(audienceType, {
+        registeredForSelected,
+        everRegistered,
+      });
 
       return {
         ...contact,
@@ -408,7 +394,8 @@ async function loadAudience(
             smsEligibility.allowed,
         ),
         emailEligible: Boolean(
-          contact.active && contact.email_enabled && isValidEmail(contact.email),
+          contact.active && contact.email_enabled &&
+            isValidEmail(contact.email),
         ),
         testModeBlocked: smsEligibility.testMode && !smsEligibility.allowed,
       };
@@ -586,7 +573,10 @@ Deno.serve(async (req) => {
       if (!recipients.length) {
         return json(
           req,
-          { success: false, error: "No eligible recipients for selected channels" },
+          {
+            success: false,
+            error: "No eligible recipients for selected channels",
+          },
           400,
         );
       }
@@ -654,7 +644,10 @@ Deno.serve(async (req) => {
       if (!rows.length) {
         return json(
           req,
-          { success: false, error: "No sendable messages for selected channels" },
+          {
+            success: false,
+            error: "No sendable messages for selected channels",
+          },
           400,
         );
       }
@@ -855,16 +848,16 @@ Deno.serve(async (req) => {
       if (error) throw new Error("History load failed");
       const messages = data ?? [];
       const messageIds = messages
-        .filter((message: { channel?: string | null }) => message.channel === "sms")
+        .filter((message: { channel?: string | null }) =>
+          message.channel === "sms"
+        )
         .map((message: { provider_message_id?: string | null }) =>
           message.provider_message_id ?? ""
         )
         .filter(Boolean);
       const logsResult = await getInfobipSmsLogs(messageIds);
       const logsById = new Map(
-        logsResult.ok
-          ? logsResult.logs.map((log) => [log.messageId, log])
-          : [],
+        logsResult.ok ? logsResult.logs.map((log) => [log.messageId, log]) : [],
       );
       const enrichedMessages = messages.map((
         message: { provider_message_id?: string | null },
@@ -898,7 +891,11 @@ Deno.serve(async (req) => {
       const scheduledFor = cleanText(body.scheduledFor, 40);
 
       if (!campaignId) {
-        return json(req, { success: false, error: "Campaign id is required" }, 400);
+        return json(
+          req,
+          { success: false, error: "Campaign id is required" },
+          400,
+        );
       }
       if (audienceType === "custom_selection") {
         return json(req, {
@@ -954,7 +951,11 @@ Deno.serve(async (req) => {
     if (action === "cancel_campaign") {
       const campaignId = cleanUuid(body.campaignId);
       if (!campaignId) {
-        return json(req, { success: false, error: "Campaign id is required" }, 400);
+        return json(
+          req,
+          { success: false, error: "Campaign id is required" },
+          400,
+        );
       }
 
       const { data: campaign, error } = await admin

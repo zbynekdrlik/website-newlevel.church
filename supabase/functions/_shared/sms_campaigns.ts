@@ -4,12 +4,9 @@ import {
   smsRecipientEligibility,
 } from "./infobip.ts";
 import { buildRegistrationUrl } from "./registration_url.ts";
+import { audienceMatches, type AudienceType } from "./audience.ts";
 
-export type SmsAudienceType =
-  | "all_with_phone"
-  | "registered_for_event"
-  | "not_registered_for_event"
-  | "previously_registered_not_registered";
+export type SmsAudienceType = Exclude<AudienceType, "custom_selection">;
 
 type ContactRow = {
   id: string;
@@ -178,18 +175,10 @@ export async function loadSmsAudience(
       const everRegistered = ever.has(contact.id);
       const previouslyRegisteredNotSelected = everRegistered &&
         !registeredForSelected;
-      let matches = audienceType === "all_with_phone";
-
-      if (audienceType === "registered_for_event") {
-        matches = registeredForSelected;
-      }
-      if (audienceType === "not_registered_for_event") {
-        matches = !registeredForSelected;
-      }
-      if (audienceType === "previously_registered_not_registered") {
-        matches = previouslyRegisteredNotSelected;
-      }
-      if (audienceType === "custom_selection") matches = true;
+      const matches = audienceMatches(audienceType, {
+        registeredForSelected,
+        everRegistered,
+      });
 
       return {
         ...contact,
@@ -310,7 +299,9 @@ export async function materializeDueSmsCampaigns(admin: any, limit = 10) {
   const { data: campaigns, error } = await admin
     .schema("invitation")
     .from("sms_campaigns")
-    .select("id,event_id,automation_id,audience_type,sender,message,scheduled_for,status")
+    .select(
+      "id,event_id,automation_id,audience_type,sender,message,scheduled_for,status",
+    )
     .eq("status", "queued")
     .lte("scheduled_for", new Date().toISOString())
     .order("scheduled_for", { ascending: true })
@@ -351,7 +342,12 @@ export async function updateSmsCampaignStatuses(admin: any) {
 
   if (error || !campaigns) return;
 
-  for (const campaign of campaigns as Pick<SmsCampaignRow, "id" | "automation_id">[]) {
+  for (
+    const campaign of campaigns as Pick<
+      SmsCampaignRow,
+      "id" | "automation_id"
+    >[]
+  ) {
     const { data: queueRows } = await admin
       .schema("invitation")
       .from("message_queue")
