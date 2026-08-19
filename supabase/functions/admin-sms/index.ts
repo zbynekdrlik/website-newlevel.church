@@ -22,6 +22,7 @@ import {
   updateSmsCampaignStatuses,
 } from "../_shared/sms_campaigns.ts";
 import { buildRegistrationUrl } from "../_shared/registration_url.ts";
+import { renderPartyEmailHtml, sendEmail } from "../_shared/email.ts";
 import { audienceMatches, type AudienceType } from "../_shared/audience.ts";
 
 type MessageChannel = "sms" | "whatsapp" | "email";
@@ -41,6 +42,7 @@ type AdminSmsBody = {
   scheduledFor?: string;
   sendNow?: boolean;
   phone?: string;
+  email?: string;
   limit?: number;
 };
 
@@ -517,6 +519,47 @@ Deno.serve(async (req) => {
         errorCode: didSend ? null : result.errorCode,
         errorMessage: didSend ? null : result.errorMessage,
         debugDetails: didSend ? null : result.debugDetails ?? null,
+      }, didSend ? 200 : 502);
+    }
+
+    if (action === "send_test_email") {
+      const email = cleanText(body.email, 254)?.toLowerCase() ?? "";
+      const subject = cleanText(body.subject, 180) ?? "";
+      const message = cleanText(body.message, 5000) ?? "";
+
+      if (!isValidEmail(email)) {
+        return json(req, {
+          success: false,
+          error: "Enter a valid test email",
+        }, 400);
+      }
+      if (!subject) {
+        return json(req, {
+          success: false,
+          error: "Email subject is required",
+        }, 400);
+      }
+      if (!message) {
+        return json(req, {
+          success: false,
+          error: "Message is required",
+        }, 400);
+      }
+
+      const result = await sendEmail(
+        email,
+        subject,
+        message,
+        renderPartyEmailHtml(subject, message),
+      );
+      const didSend = result.ok === true;
+      return json(req, {
+        success: didSend,
+        status: didSend ? "sent" : "failed",
+        provider: "resend",
+        providerMessageId: didSend ? result.providerMessageId : null,
+        errorCode: didSend ? null : result.errorCode,
+        errorMessage: didSend ? null : result.errorMessage,
       }, didSend ? 200 : 502);
     }
 

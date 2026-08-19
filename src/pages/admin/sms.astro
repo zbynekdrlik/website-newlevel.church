@@ -54,10 +54,13 @@
       .channel-grid { margin: 14px 0; flex-wrap: wrap; }
       .channel-option { min-width: 150px; padding: 11px 12px; border: 1px solid #363b46; border-radius: 6px; background: #0d0f14; cursor: pointer; }
       .schedule-fields[hidden] { display: none; }
+      [hidden] { display: none !important; }
+      .channel-settings { margin-top: 14px; }
+      .test-grid { display: grid; grid-template-columns: minmax(220px, 420px) auto; gap: 12px; align-items: end; margin-top: 12px; }
       .primary { border-color: #38bdf8; background: #0c4a6e; }
 
       @media (max-width: 820px) {
-        .grid, .login-grid { grid-template-columns: 1fr; }
+        .grid, .login-grid, .test-grid { grid-template-columns: 1fr; }
         .topbar, .section-head { align-items: flex-start; flex-direction: column; }
       }
     </style>
@@ -161,33 +164,41 @@
           <label class="channel-option"><input type="checkbox" data-channel value="whatsapp" /> WhatsApp</label>
           <label class="channel-option"><input type="checkbox" data-channel value="email" /> Email</label>
         </div>
-        <label>Meno odosielateľa<input data-sender maxlength="11" placeholder="NewLevel" /></label>
-        <p class="hint">Max 11 písmen alebo čísiel, bez medzier. Infobip musí tento sender povoliť.</p>
-        <label data-email-subject-wrap>Predmet emailu<input data-email-subject maxlength="180" placeholder="Pozvánka na New Level Youth" /></label>
+        <div class="channel-settings" data-sms-settings>
+          <label>Meno odosielateľa SMS<input data-sender maxlength="11" placeholder="NewLevel" /></label>
+          <p class="hint">Max 11 písmen alebo čísiel, bez medzier. Infobip musí tento sender povoliť.</p>
+          <div class="test-grid">
+            <label>Testovacie telefónne číslo<input data-test-phone placeholder="+421..." /></label>
+            <button type="button" data-send-test-sms>Poslať testovaciu SMS</button>
+          </div>
+        </div>
+        <div class="channel-settings" data-email-settings hidden>
+          <label>Predmet emailu<input data-email-subject maxlength="180" placeholder="Pozvánka na New Level Youth" /></label>
+          <div class="test-grid">
+            <label>Testovací email<input data-test-email type="email" placeholder="vas@email.sk" /></label>
+            <button type="button" data-send-test-email>Poslať testovací email</button>
+          </div>
+        </div>
         <label>Text správy<textarea data-message rows="7" placeholder="Ahoj &#123;&#123;first_name&#125;&#125;, vidíme sa na New Level Youth?"></textarea></label>
         <p class="hint">Môžeš použiť: &#123;&#123;first_name&#125;&#125;, &#123;&#123;name&#125;&#125;, &#123;&#123;event_date&#125;&#125;, &#123;&#123;registration_url&#125;&#125;</p>
-        <div class="preview" data-preview>Preview sa zobrazí po napísaní SMS.</div>
+        <div class="preview" data-preview>Ukážka sa zobrazí po napísaní správy.</div>
       </section>
 
       <section class="panel">
         <div class="section-head">
-          <h2>3. Odošli správu</h2>
+          <h2>3. Odoslanie</h2>
           <span class="result" data-result></span>
         </div>
         <label class="schedule-toggle">
           <input type="checkbox" data-schedule-toggle />
-          Naplánovať odoslanie
+          Odoslať neskôr
         </label>
         <div class="grid schedule-fields" data-schedule-fields hidden>
           <label>Dátum odoslania<input data-date type="date" /></label>
           <label>Čas odoslania<input data-time type="time" /></label>
         </div>
-        <div class="grid">
-          <label>Test číslo<input data-test-phone placeholder="+421..." /></label>
-        </div>
         <div class="actions">
-          <button type="button" data-send-test>Poslať test SMS teraz</button>
-          <button class="primary" type="button" data-submit>Poslať teraz</button>
+          <button class="primary" type="button" data-submit>Odoslať teraz</button>
         </div>
       </section>
     </main>
@@ -224,6 +235,7 @@
         localStorage.setItem("smsAdminKey", $("[data-admin-key]").value.trim());
         localStorage.setItem("smsSender", $("[data-sender]").value.trim());
         localStorage.setItem("smsEmailSubject", $("[data-email-subject]").value.trim());
+        localStorage.setItem("smsTestEmail", $("[data-test-email]").value.trim());
         localStorage.setItem("smsChannels", JSON.stringify(selectedChannels()));
         state.adminKey = $("[data-admin-key]").value.trim();
       }
@@ -234,6 +246,7 @@
         $("[data-admin-key]").value = state.adminKey;
         $("[data-sender]").value = localStorage.getItem("smsSender") || "NewLevel";
         $("[data-email-subject]").value = localStorage.getItem("smsEmailSubject") || "Pozvánka na New Level Youth";
+        $("[data-test-email]").value = localStorage.getItem("smsTestEmail") || "";
         const savedChannels = JSON.parse(localStorage.getItem("smsChannels") || "null");
         if (Array.isArray(savedChannels) && savedChannels.length) {
           document.querySelectorAll("[data-channel]").forEach((input) => {
@@ -340,6 +353,9 @@
         const selectedContact = state.contacts.find((contact) => state.selected.has(contact.id));
         if (selectedContact?.normalizedPhone && !$("[data-test-phone]").value.trim()) {
           $("[data-test-phone]").value = selectedContact.normalizedPhone;
+        }
+        if (selectedContact?.email && !$("[data-test-email]").value.trim()) {
+          $("[data-test-email]").value = selectedContact.email;
         }
       }
 
@@ -613,7 +629,7 @@
           .replaceAll("{{event_name}}", "New Level Party")
           .replaceAll("{{event_date}}", eventDate)
           .replaceAll("{{registration_url}}", "https://www.newlevel.church/youth/#registracia");
-        $("[data-preview]").textContent = preview || "Preview sa zobrazí po napísaní SMS.";
+        $("[data-preview]").textContent = preview || "Ukážka sa zobrazí po napísaní správy.";
       }
 
       async function manualSend(sendNow) {
@@ -640,7 +656,9 @@
         const audience = $("[data-audience]").value;
         const recipientLine = `Príjemcov: ${selected.length}`;
         const scheduleLine = sendNow ? "" : `\nČas: ${localDateTimeLabel(scheduledFor)}`;
-        const ok = confirm(`Potvrdiť odoslanie?\n\nKanály: ${channelLabels.join(", ")}\nOdosielateľ SMS: ${sender}\nPredmet emailu: ${subject}\n${recipientLine}${scheduleLine}\nRežim: ${sendNow ? "poslať teraz" : "naplánovať"}\n\n${message}`);
+        const smsLine = channels.includes("sms") ? `\nOdosielateľ SMS: ${sender}` : "";
+        const emailLine = channels.includes("email") ? `\nPredmet emailu: ${subject}` : "";
+        const ok = confirm(`Potvrdiť odoslanie?\n\nKanály: ${channelLabels.join(", ")}${smsLine}${emailLine}\n${recipientLine}${scheduleLine}\nRežim: ${sendNow ? "odoslať teraz" : "odoslať neskôr"}\n\n${message}`);
         if (!ok) return;
         const result = await api({
           action: "manual_send",
@@ -703,10 +721,44 @@
         await loadHistory();
       }
 
+      async function sendTestEmail() {
+        const email = $("[data-test-email]").value.trim();
+        const subject = $("[data-email-subject]").value.trim();
+        const message = $("[data-preview]").textContent.trim();
+        if (!isValidEmail(email)) throw new Error("Zadaj platný testovací email.");
+        if (!subject) throw new Error("Doplň predmet emailu.");
+        if (!message || message === "Ukážka sa zobrazí po napísaní správy.") throw new Error("Napíš text emailu.");
+        if (!confirm(`Poslať testovací email na ${email}?`)) return;
+        localStorage.setItem("smsTestEmail", email);
+        const result = await api({
+          action: "send_test_email",
+          email,
+          subject,
+          message,
+        });
+        const providerLine = result.providerMessageId ? ` Resend ID: ${result.providerMessageId}` : "";
+        setResult(`Testovací email bol odoslaný.${providerLine}`);
+      }
+
+      function channelActionText(scheduled) {
+        const channels = selectedChannels();
+        if (channels.length !== 1) return scheduled ? "Naplánovať správy" : "Odoslať správy teraz";
+        if (channels[0] === "email") return scheduled ? "Naplánovať emaily" : "Odoslať emaily teraz";
+        if (channels[0] === "sms") return scheduled ? "Naplánovať SMS" : "Odoslať SMS teraz";
+        return scheduled ? "Naplánovať WhatsApp správy" : "Odoslať cez WhatsApp teraz";
+      }
+
+      function updateChannelSettings() {
+        const channels = selectedChannels();
+        $("[data-sms-settings]").hidden = !channels.includes("sms");
+        $("[data-email-settings]").hidden = !channels.includes("email");
+        updateSchedule();
+      }
+
       function updateSchedule() {
         const scheduled = $("[data-schedule-toggle]").checked;
         $("[data-schedule-fields]").hidden = !scheduled;
-        $("[data-submit]").textContent = scheduled ? "Naplánovať manuálne" : "Poslať teraz";
+        $("[data-submit]").textContent = channelActionText(scheduled);
         if (state.editingCampaignId) $("[data-submit]").textContent = "Uložiť zmeny";
       }
 
@@ -757,11 +809,13 @@
             saveConfig();
             renderContacts();
             updateSegmentPreview();
+            updateChannelSettings();
           });
         });
         $("[data-schedule-toggle]").addEventListener("change", updateSchedule);
         $("[data-submit]").addEventListener("click", () => manualSend(!$("[data-schedule-toggle]").checked).catch(showError));
-        $("[data-send-test]").addEventListener("click", () => sendTestSms().catch(showError));
+        $("[data-send-test-sms]").addEventListener("click", () => sendTestSms().catch(showError));
+        $("[data-send-test-email]").addEventListener("click", () => sendTestEmail().catch(showError));
       }
 
       loadConfig();
@@ -769,6 +823,7 @@
       setDefaultEventDate();
       setDefaultSchedule();
       updateSchedule();
+      updateChannelSettings();
       updateSegmentPreview();
       if (state.adminKey) saveKey().catch(showError);
       else $("[data-access]").open = true;
