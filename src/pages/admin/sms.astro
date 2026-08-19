@@ -174,6 +174,7 @@
         </div>
         <div class="channel-settings" data-email-settings hidden>
           <label>Predmet emailu<input data-email-subject maxlength="180" placeholder="Pozvánka na New Level Youth" /></label>
+          <p class="hint">Ukážka predmetu: <strong data-email-subject-preview></strong></p>
           <div class="test-grid">
             <label>Testovací email<input data-test-email type="email" placeholder="vas@email.sk" /></label>
             <button type="button" data-send-test-email>Poslať testovací email</button>
@@ -352,6 +353,7 @@
       function updateCounts() {
         const visible = state.contacts.filter((contact) => contact.matches);
         $("[data-counts]").textContent = `${state.selected.size} vybraných / ${visible.length} v zozname`;
+        updateEmailSubjectPreview();
       }
 
       function contactStatus(contact) {
@@ -611,20 +613,29 @@
         $("[data-segments]").textContent = selectedChannels().includes("sms")
           ? `${chars} znakov, približne ${segments} SMS segment${segments === 1 ? "" : "y"}`
           : `${chars} znakov`;
+        const preview = renderPreviewTemplate(text);
+        $("[data-preview]").textContent = preview || "Ukážka sa zobrazí po napísaní správy.";
+        updateEmailSubjectPreview();
+      }
+
+      function renderPreviewTemplate(template) {
         const first =
           state.contacts.find((contact) => state.selected.has(contact.id)) ||
           state.contacts.find((contact) => contact.matches) ||
           state.contacts[0];
         const eventDate = state.event?.event_date || $("[data-event-date]").value || "";
-        const preview = text
-          .replaceAll("{{first_name}}", first?.name?.split(/\s+/)[0] || "Ahoj")
-          .replaceAll("{{name}}", first?.name || "")
-          .replaceAll("{{email}}", first?.email || "")
-          .replaceAll("{{phone}}", first?.normalizedPhone || first?.phone || "")
-          .replaceAll("{{event_name}}", "New Level Party")
-          .replaceAll("{{event_date}}", eventDate)
-          .replaceAll("{{registration_url}}", "https://www.newlevel.church/youth/#registracia");
-        $("[data-preview]").textContent = preview || "Ukážka sa zobrazí po napísaní správy.";
+        return template
+          .replace(/\{\{\s*first_name\s*\}\}/g, first?.name?.split(/\s+/)[0] || "Ahoj")
+          .replace(/\{\{\s*name\s*\}\}/g, first?.name || "")
+          .replace(/\{\{\s*email\s*\}\}/g, first?.email || "")
+          .replace(/\{\{\s*phone\s*\}\}/g, first?.normalizedPhone || first?.phone || "")
+          .replace(/\{\{\s*event_name\s*\}\}/g, "New Level Party")
+          .replace(/\{\{\s*event_date\s*\}\}/g, eventDate)
+          .replace(/\{\{\s*registration_url\s*\}\}/g, "https://www.newlevel.church/youth/#registracia");
+      }
+
+      function updateEmailSubjectPreview() {
+        $("[data-email-subject-preview]").textContent = renderPreviewTemplate($("[data-email-subject]").value.trim());
       }
 
       async function manualSend(sendNow) {
@@ -652,7 +663,7 @@
         const recipientLine = `Príjemcov: ${selected.length}`;
         const scheduleLine = sendNow ? "" : `\nČas: ${localDateTimeLabel(scheduledFor)}`;
         const smsLine = channels.includes("sms") ? `\nOdosielateľ SMS: ${sender}` : "";
-        const emailLine = channels.includes("email") ? `\nPredmet emailu: ${subject}` : "";
+        const emailLine = channels.includes("email") ? `\nPredmet emailu (ukážka): ${renderPreviewTemplate(subject)}` : "";
         const ok = confirm(`Potvrdiť odoslanie?\n\nKanály: ${channelLabels.join(", ")}${smsLine}${emailLine}\n${recipientLine}${scheduleLine}\nRežim: ${sendNow ? "odoslať teraz" : "odoslať neskôr"}\n\n${message}`);
         if (!ok) return;
         const result = await api({
@@ -718,7 +729,7 @@
 
       async function sendTestEmail() {
         const email = $("[data-test-email]").value.trim();
-        const subject = $("[data-email-subject]").value.trim();
+        const subject = renderPreviewTemplate($("[data-email-subject]").value.trim());
         const message = $("[data-preview]").textContent.trim();
         if (!isValidEmail(email)) throw new Error("Zadaj platný testovací email.");
         if (!subject) throw new Error("Doplň predmet emailu.");
@@ -798,7 +809,10 @@
         $("[data-audience]").addEventListener("change", () => loadAudience().catch(showError));
         $("[data-event-date]").addEventListener("change", () => loadAudience().catch(showError));
         $("[data-message]").addEventListener("input", updateSegmentPreview);
-        $("[data-email-subject]").addEventListener("input", saveConfig);
+        $("[data-email-subject]").addEventListener("input", () => {
+          saveConfig();
+          updateEmailSubjectPreview();
+        });
         document.querySelectorAll("[data-channel]").forEach((input) => {
           input.addEventListener("change", () => {
             saveConfig();

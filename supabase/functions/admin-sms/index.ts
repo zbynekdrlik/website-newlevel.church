@@ -21,8 +21,8 @@ import {
   materializeDueSmsCampaigns,
   updateSmsCampaignStatuses,
 } from "../_shared/sms_campaigns.ts";
-import { buildRegistrationUrl } from "../_shared/registration_url.ts";
 import { renderPartyEmailHtml, sendEmail } from "../_shared/email.ts";
+import { renderContactTemplate } from "../_shared/message_template.ts";
 import { audienceMatches, type AudienceType } from "../_shared/audience.ts";
 
 type MessageChannel = "sms" | "whatsapp" | "email";
@@ -179,40 +179,6 @@ function registrationCount(
   return contacts.filter((contact) =>
     kind === "selected" ? contact.registeredForSelected : contact.everRegistered
   ).length;
-}
-
-function renderMessage(
-  template: string,
-  contact: Record<string, unknown>,
-  event: Record<string, unknown> | null,
-) {
-  const startsAt = typeof event?.starts_at === "string" ? event.starts_at : "";
-  const eventDate = startsAt
-    ? new Intl.DateTimeFormat("sk-SK", {
-      dateStyle: "medium",
-      timeStyle: "short",
-      timeZone: "Europe/Bratislava",
-    }).format(new Date(startsAt))
-    : String(event?.event_date ?? "");
-
-  const name = typeof contact.name === "string" ? contact.name : "";
-  const values: Record<string, string> = {
-    name,
-    first_name: name.trim().split(/\s+/)[0] || "Ahoj",
-    email: typeof contact.email === "string" ? contact.email : "",
-    phone: typeof contact.phone === "string" ? contact.phone : "",
-    event_name: String(event?.title ?? "New Level Party"),
-    event_date: eventDate,
-    registration_url: buildRegistrationUrl({
-      name,
-      email: typeof contact.email === "string" ? contact.email : null,
-      phone: typeof contact.phone === "string" ? contact.phone : null,
-    }),
-  };
-
-  return template.replace(/\{\{\s*([a-z_]+)\s*\}\}/g, (_match, key: string) => {
-    return values[key] ?? "";
-  });
 }
 
 async function sendManualSmsRows(
@@ -641,7 +607,7 @@ Deno.serve(async (req) => {
 
       const queuedAt = new Date(scheduledFor).toISOString();
       const rows = recipients.flatMap((contact: AudienceContact) => {
-        const bodyText = renderMessage(message, contact, event);
+        const bodyText = renderContactTemplate(message, contact, event);
         const baseRow = {
           batch_id: batch.id,
           event_id: null,
@@ -677,7 +643,10 @@ Deno.serve(async (req) => {
             channel: "email",
             recipient: contact.email,
             template_name: null,
-            subject,
+            subject: renderContactTemplate(subject, contact, event).slice(
+              0,
+              180,
+            ),
           });
         }
 
@@ -841,7 +810,7 @@ Deno.serve(async (req) => {
         automation_id: automationId,
         channel: "sms",
         recipient: contact.normalizedPhone,
-        body: renderMessage(message, contact, event),
+        body: renderContactTemplate(message, contact, event),
         template_name: sender,
         scheduled_for: new Date(scheduledFor).toISOString(),
         subject: name,
