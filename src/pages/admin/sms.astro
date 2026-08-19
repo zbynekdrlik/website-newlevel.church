@@ -235,6 +235,7 @@
         localStorage.setItem("smsAdminKey", $("[data-admin-key]").value.trim());
         localStorage.setItem("smsSender", $("[data-sender]").value.trim());
         localStorage.setItem("smsEmailSubject", $("[data-email-subject]").value.trim());
+        localStorage.setItem("smsTestPhone", $("[data-test-phone]").value.trim());
         localStorage.setItem("smsTestEmail", $("[data-test-email]").value.trim());
         localStorage.setItem("smsChannels", JSON.stringify(selectedChannels()));
         state.adminKey = $("[data-admin-key]").value.trim();
@@ -246,6 +247,7 @@
         $("[data-admin-key]").value = state.adminKey;
         $("[data-sender]").value = localStorage.getItem("smsSender") || "NewLevel";
         $("[data-email-subject]").value = localStorage.getItem("smsEmailSubject") || "Pozvánka na New Level Youth";
+        $("[data-test-phone]").value = localStorage.getItem("smsTestPhone") || "";
         $("[data-test-email]").value = localStorage.getItem("smsTestEmail") || "";
         const savedChannels = JSON.parse(localStorage.getItem("smsChannels") || "null");
         if (Array.isArray(savedChannels) && savedChannels.length) {
@@ -350,13 +352,6 @@
       function updateCounts() {
         const visible = state.contacts.filter((contact) => contact.matches);
         $("[data-counts]").textContent = `${state.selected.size} vybraných / ${visible.length} v zozname`;
-        const selectedContact = state.contacts.find((contact) => state.selected.has(contact.id));
-        if (selectedContact?.normalizedPhone && !$("[data-test-phone]").value.trim()) {
-          $("[data-test-phone]").value = selectedContact.normalizedPhone;
-        }
-        if (selectedContact?.email && !$("[data-test-email]").value.trim()) {
-          $("[data-test-email]").value = selectedContact.email;
-        }
       }
 
       function contactStatus(contact) {
@@ -700,14 +695,14 @@
 
       async function sendTestSms() {
         const sender = $("[data-sender]").value.trim();
-        const selectedContact = state.contacts.find((contact) => state.selected.has(contact.id));
-        const phone = $("[data-test-phone]").value.trim() || selectedContact?.normalizedPhone || "";
+        const phone = $("[data-test-phone]").value.trim();
         const message = expandEmojiShortcodes($("[data-message]").value);
-        if (!phone) throw new Error("Zadaj test číslo alebo vyber jeden kontakt.");
+        if (!phone) throw new Error("Zadaj testovacie telefónne číslo.");
         if (!/^[A-Za-z0-9]{1,11}$/.test(sender)) throw new Error("Meno odosielateľa musí mať 1-11 písmen alebo čísiel bez medzier.");
         if (!message.trim()) throw new Error("Napíš text SMS.");
         const ok = confirm(`Poslať test SMS hneď?\n\nOdosielateľ: ${sender}\nČíslo: ${phone}\n\n${message}`);
         if (!ok) return;
+        localStorage.setItem("smsTestPhone", phone);
         const result = await api({
           action: "send_test",
           sender,
