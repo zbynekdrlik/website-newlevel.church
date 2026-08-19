@@ -57,10 +57,12 @@
       [hidden] { display: none !important; }
       .channel-settings { margin-top: 14px; }
       .test-grid { display: grid; grid-template-columns: minmax(220px, 420px) auto; gap: 12px; align-items: end; margin-top: 12px; }
+      .concept-toolbar { display: grid; grid-template-columns: minmax(240px, 1fr) auto auto auto; gap: 10px; align-items: end; margin-top: 14px; }
+      button:disabled { cursor: not-allowed; opacity: .45; }
       .primary { border-color: #38bdf8; background: #0c4a6e; }
 
       @media (max-width: 820px) {
-        .grid, .login-grid, .test-grid { grid-template-columns: 1fr; }
+        .grid, .login-grid, .test-grid, .concept-toolbar { grid-template-columns: 1fr; }
         .topbar, .section-head { align-items: flex-start; flex-direction: column; }
       }
     </style>
@@ -159,6 +161,16 @@
           <h2>2. Napíš správu</h2>
           <span data-segments>0 znakov</span>
         </div>
+        <div class="concept-toolbar">
+          <label>Uložený koncept
+            <select data-concept-select>
+              <option value="">Vyber koncept</option>
+            </select>
+          </label>
+          <button type="button" data-save-concept>Uložiť koncept</button>
+          <button type="button" data-load-concept disabled>Načítať</button>
+          <button type="button" data-delete-concept disabled>Vymazať</button>
+        </div>
         <div class="channel-grid" aria-label="Kanály odoslania">
           <label class="channel-option"><input type="checkbox" data-channel value="sms" checked /> SMS</label>
           <label class="channel-option"><input type="checkbox" data-channel value="whatsapp" /> WhatsApp</label>
@@ -206,6 +218,8 @@
 
     <script>
       const DEFAULT_SUPABASE_URL = "https://kbpuhcuiljbwgxgiauku.supabase.co";
+      const CONCEPTS_STORAGE_KEY = "messageConceptsV1";
+      const MAX_CONCEPTS = 30;
       const state = {
         adminKey: "",
         contacts: [],
@@ -215,6 +229,7 @@
         history: [],
         editingCampaignId: null,
         audienceStats: null,
+        concepts: [],
       };
       const $ = (selector) => document.querySelector(selector);
       const endpoint = () => `${$("[data-supabase-url]").value.trim().replace(/\/+$/, "")}/functions/v1/admin-sms`;
@@ -256,6 +271,105 @@
             input.checked = savedChannels.includes(input.value);
           });
         }
+      }
+
+      function readConcepts() {
+        try {
+          const saved = JSON.parse(localStorage.getItem(CONCEPTS_STORAGE_KEY) || "[]");
+          if (!Array.isArray(saved)) return [];
+          return saved
+            .filter((concept) => concept && typeof concept.id === "string" && typeof concept.name === "string")
+            .slice(0, MAX_CONCEPTS);
+        } catch {
+          return [];
+        }
+      }
+
+      function writeConcepts() {
+        localStorage.setItem(CONCEPTS_STORAGE_KEY, JSON.stringify(state.concepts.slice(0, MAX_CONCEPTS)));
+      }
+
+      function renderConcepts(selectedId = "") {
+        const select = $("[data-concept-select]");
+        select.innerHTML = "";
+        const placeholder = document.createElement("option");
+        placeholder.value = "";
+        placeholder.textContent = state.concepts.length ? "Vyber koncept" : "Zatiaľ žiadny koncept";
+        select.append(placeholder);
+
+        for (const concept of state.concepts) {
+          const option = document.createElement("option");
+          option.value = concept.id;
+          option.textContent = concept.name;
+          select.append(option);
+        }
+
+        select.value = state.concepts.some((concept) => concept.id === selectedId) ? selectedId : "";
+        updateConceptButtons();
+      }
+
+      function updateConceptButtons() {
+        const hasSelection = Boolean($("[data-concept-select]").value);
+        $("[data-load-concept]").disabled = !hasSelection;
+        $("[data-delete-concept]").disabled = !hasSelection;
+      }
+
+      function defaultConceptName() {
+        const subject = $("[data-email-subject]").value.trim();
+        const firstLine = $("[data-message]").value.trim().split("\n")[0]?.trim() || "";
+        return (subject || firstLine || `Koncept ${new Date().toLocaleDateString("sk-SK")}`).slice(0, 80);
+      }
+
+      function saveConcept() {
+        const message = $("[data-message]").value;
+        const subject = $("[data-email-subject]").value;
+        if (!message.trim() && !subject.trim()) throw new Error("Najprv napíš predmet alebo text správy.");
+        const requestedName = prompt("Názov konceptu", defaultConceptName());
+        if (requestedName === null) return;
+        const name = requestedName.trim().slice(0, 80);
+        if (!name) throw new Error("Zadaj názov konceptu.");
+
+        const concept = {
+          id: crypto.randomUUID(),
+          name,
+          updatedAt: new Date().toISOString(),
+          channels: selectedChannels(),
+          sender: $("[data-sender]").value.trim(),
+          subject,
+          message,
+        };
+        state.concepts = [concept, ...state.concepts].slice(0, MAX_CONCEPTS);
+        writeConcepts();
+        renderConcepts(concept.id);
+        setResult(`Koncept „${name}“ je uložený v tomto zariadení.`);
+      }
+
+      function loadSelectedConcept() {
+        const concept = state.concepts.find((item) => item.id === $("[data-concept-select]").value);
+        if (!concept) throw new Error("Vyber koncept, ktorý chceš načítať.");
+        const channels = Array.isArray(concept.channels) ? concept.channels : [];
+        document.querySelectorAll("[data-channel]").forEach((input) => {
+          input.checked = channels.includes(input.value);
+        });
+        $("[data-sender]").value = typeof concept.sender === "string" ? concept.sender : "NewLevel";
+        $("[data-email-subject]").value = typeof concept.subject === "string" ? concept.subject : "";
+        $("[data-message]").value = typeof concept.message === "string" ? concept.message : "";
+        saveConfig();
+        updateChannelSettings();
+        renderContacts();
+        updateSegmentPreview();
+        setResult(`Koncept „${concept.name}“ je načítaný.`);
+      }
+
+      function deleteSelectedConcept() {
+        const id = $("[data-concept-select]").value;
+        const concept = state.concepts.find((item) => item.id === id);
+        if (!concept) return;
+        if (!confirm(`Vymazať koncept „${concept.name}“?`)) return;
+        state.concepts = state.concepts.filter((item) => item.id !== id);
+        writeConcepts();
+        renderConcepts();
+        setResult("Koncept bol vymazaný.");
       }
 
       async function api(body) {
@@ -825,9 +939,19 @@
         $("[data-submit]").addEventListener("click", () => manualSend(!$("[data-schedule-toggle]").checked).catch(showError));
         $("[data-send-test-sms]").addEventListener("click", () => sendTestSms().catch(showError));
         $("[data-send-test-email]").addEventListener("click", () => sendTestEmail().catch(showError));
+        $("[data-concept-select]").addEventListener("change", updateConceptButtons);
+        $("[data-save-concept]").addEventListener("click", () => {
+          try { saveConcept(); } catch (error) { showError(error); }
+        });
+        $("[data-load-concept]").addEventListener("click", () => {
+          try { loadSelectedConcept(); } catch (error) { showError(error); }
+        });
+        $("[data-delete-concept]").addEventListener("click", deleteSelectedConcept);
       }
 
       loadConfig();
+      state.concepts = readConcepts();
+      renderConcepts();
       bind();
       setDefaultEventDate();
       setDefaultSchedule();
