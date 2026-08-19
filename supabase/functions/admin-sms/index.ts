@@ -7,6 +7,7 @@ import {
   validateRequestBasics,
 } from "../_shared/contact.ts";
 import {
+  getInfobipSmsLogs,
   normalizeSmsSender,
   normalizeE164,
   sendInfobipSms,
@@ -757,7 +758,39 @@ Deno.serve(async (req) => {
         .limit(Math.min(Number(body.limit ?? 100), 300));
 
       if (error) throw new Error("History load failed");
-      return json(req, { success: true, messages: data ?? [] });
+      const messages = data ?? [];
+      const messageIds = messages
+        .map((message: { provider_message_id?: string | null }) =>
+          message.provider_message_id ?? ""
+        )
+        .filter(Boolean);
+      const logsResult = await getInfobipSmsLogs(messageIds);
+      const logsById = new Map(
+        logsResult.ok
+          ? logsResult.logs.map((log) => [log.messageId, log])
+          : [],
+      );
+      const enrichedMessages = messages.map((
+        message: { provider_message_id?: string | null },
+      ) => {
+        const log = message.provider_message_id
+          ? logsById.get(message.provider_message_id)
+          : null;
+        return {
+          ...message,
+          delivery_status: log?.statusName ?? null,
+          delivery_status_group: log?.statusGroup ?? null,
+          delivery_description: log?.statusDescription ?? null,
+          delivery_error: log?.errorName ?? null,
+          delivery_error_group: log?.errorGroup ?? null,
+          delivery_error_description: log?.errorDescription ?? null,
+          delivery_done_at: log?.doneAt ?? null,
+          delivery_sms_count: log?.smsCount ?? null,
+          delivery_lookup_error: logsResult.ok ? null : logsResult.errorMessage,
+        };
+      });
+
+      return json(req, { success: true, messages: enrichedMessages });
     }
 
     if (action === "update_campaign") {

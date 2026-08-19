@@ -11,6 +11,33 @@ export type InfobipSmsResult =
     debugDetails?: string;
   };
 
+export type InfobipSmsLog = {
+  messageId: string;
+  to: string | null;
+  from: string | null;
+  sentAt: string | null;
+  doneAt: string | null;
+  smsCount: number | null;
+  statusGroup: string | null;
+  statusName: string | null;
+  statusDescription: string | null;
+  errorGroup: string | null;
+  errorName: string | null;
+  errorDescription: string | null;
+};
+
+export type InfobipSmsLogsResult =
+  | {
+    ok: true;
+    logs: InfobipSmsLog[];
+  }
+  | {
+    ok: false;
+    errorCode: string;
+    errorMessage: string;
+    debugDetails?: string;
+  };
+
 const GSM_7 =
   "@£$¥èéùìòÇ\nØø\rÅåΔ_ΦΓΛΩΠΨΣΘΞ ÆæßÉ !\"#¤%&'()*+,-./0123456789:;<=>?¡ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÑÜ§¿abcdefghijklmnopqrstuvwxyzäöñüà";
 const GSM_7_EXT = "^{}\\[~]|€";
@@ -92,6 +119,42 @@ function parseJsonMaybe(text: string) {
   } catch {
     return null;
   }
+}
+
+function stringValue(value: unknown) {
+  return typeof value === "string" && value.trim() ? value : null;
+}
+
+function numberValue(value: unknown) {
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+function mapInfobipSmsLog(value: unknown): InfobipSmsLog | null {
+  if (!value || typeof value !== "object") return null;
+  const row = value as Record<string, unknown>;
+  const status = row.status && typeof row.status === "object"
+    ? row.status as Record<string, unknown>
+    : {};
+  const error = row.error && typeof row.error === "object"
+    ? row.error as Record<string, unknown>
+    : {};
+  const messageId = stringValue(row.messageId);
+  if (!messageId) return null;
+
+  return {
+    messageId,
+    to: stringValue(row.to),
+    from: stringValue(row.from),
+    sentAt: stringValue(row.sentAt),
+    doneAt: stringValue(row.doneAt),
+    smsCount: numberValue(row.smsCount),
+    statusGroup: stringValue(status.groupName),
+    statusName: stringValue(status.name),
+    statusDescription: stringValue(status.description),
+    errorGroup: stringValue(error.groupName),
+    errorName: stringValue(error.name),
+    errorDescription: stringValue(error.description),
+  };
 }
 
 export function normalizeE164(value: string | null | undefined) {
@@ -276,5 +339,73 @@ export async function sendInfobipSms(
     };
   } finally {
     clearTimeout(timer);
+  }
+}
+
+export async function getInfobipSmsLogs(
+  messageIds: string[],
+): Promise<InfobipSmsLogsResult> {
+  const config = readInfobipConfig();
+  const ids = [...new Set(
+    messageIds
+      .map((id) => id.trim())
+      .filter((id) => /^[A-Za-z0-9._:-]+$/.test(id)),
+  )].slice(0, 100);
+
+  if (!ids.length) return { ok: true, logs: [] };
+
+  if (!config.apiKey || !config.baseUrl) {
+    return {
+      ok: false,
+      errorCode: "INFOBIP_NOT_CONFIGURED",
+      errorMessage: "Infobip is not configured",
+    };
+  }
+
+  const params = new URLSearchParams({
+    messageId: ids.join(","),
+    limit: String(ids.length),
+  });
+
+  try {
+    const response = await fetch(`${config.baseUrl}/sms/3/logs?${params}`, {
+      method: "GET",
+      headers: {
+        "Authorization": `App ${config.apiKey}`,
+        "Accept": "application/json",
+      },
+    });
+    const responseText = await response.text().catch(() => "");
+    const data = parseJsonMaybe(responseText);
+
+    if (!response.ok) {
+      const details = safeDebugSnippet(data ?? responseText);
+      const message = providerMessage(data, details || "Infobip logs failed");
+      return {
+        ok: false,
+        errorCode: `INFOBIP_LOGS_HTTP_${response.status}`,
+        errorMessage: `Infobip logs HTTP ${response.status}: ${message}`,
+        debugDetails: details || undefined,
+      };
+    }
+
+    const rawResults = Array.isArray(data?.results) ? data.results : [];
+    const logs = rawResults
+      .map((item: unknown) => mapInfobipSmsLog(item))
+      .filter((log: InfobipSmsLog | null): log is InfobipSmsLog =>
+        Boolean(log)
+      );
+    return {
+      ok: true,
+      logs,
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      errorCode: "INFOBIP_LOGS_NETWORK_ERROR",
+      errorMessage: `Infobip logs failed: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    };
   }
 }

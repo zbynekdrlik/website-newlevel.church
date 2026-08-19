@@ -110,7 +110,7 @@
         <div class="table-wrap">
           <table>
             <thead>
-              <tr><th>Čas</th><th>Telefón</th><th>Stav</th><th>Infobip ID</th><th>Chyba</th></tr>
+              <tr><th>Čas</th><th>Telefón</th><th>Stav</th><th>Infobip ID</th><th>Detail</th></tr>
             </thead>
             <tbody data-history></tbody>
           </table>
@@ -439,12 +439,22 @@
         for (const item of state.history) {
           const row = document.createElement("tr");
           const time = item.sent_at || item.created_at;
+          const deliveryStatus = item.delivery_status || item.delivery_status_group || "";
+          const status = deliveryStatus ? `${item.status || ""} / ${deliveryStatus}` : item.status || "";
+          const detailParts = [
+            item.delivery_description,
+            item.delivery_error && item.delivery_error !== "NO_ERROR" ? item.delivery_error : "",
+            item.delivery_error_description && item.delivery_error_description !== "No Error" ? item.delivery_error_description : "",
+            item.delivery_sms_count ? `${item.delivery_sms_count} segment${item.delivery_sms_count === 1 ? "" : "y"}` : "",
+            item.delivery_lookup_error ? `Infobip log: ${item.delivery_lookup_error}` : "",
+            item.last_error,
+          ].filter(Boolean);
           row.innerHTML = `
             <td>${time ? localDateTimeLabel(time) : ""}</td>
             <td>${item.recipient || ""}</td>
-            <td>${item.status || ""}</td>
+            <td>${status}</td>
             <td>${item.provider_message_id || ""}</td>
-            <td class="message-cell">${item.last_error || ""}</td>
+            <td class="message-cell">${detailParts.join(" | ")}</td>
           `;
           tbody.append(row);
         }
