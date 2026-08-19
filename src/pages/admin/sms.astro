@@ -19,7 +19,7 @@
       * { box-sizing: border-box; }
       body { margin: 0; background: #0b0c0f; }
       .app { width: min(1120px, calc(100vw - 32px)); margin: 0 auto; padding: 28px 0 56px; }
-      .topbar, .section-head, .actions, .status, .schedule-toggle { display: flex; align-items: center; gap: 12px; }
+      .topbar, .section-head, .actions, .status, .schedule-toggle, .channel-grid, .channel-option { display: flex; align-items: center; gap: 12px; }
       .topbar, .section-head { justify-content: space-between; }
       .eyebrow, .hint, summary { color: #a9abb3; }
       h1, h2, p { margin: 0; }
@@ -50,7 +50,9 @@
       .result { color: #7dd3fc; font-weight: 800; }
       .result.is-error { color: #f87171; }
       .schedule-toggle { display: inline-flex; margin-top: 14px; cursor: pointer; }
-      .schedule-toggle input, td input { width: 18px; height: 18px; margin: 0; accent-color: #38bdf8; }
+      .schedule-toggle input, .channel-option input, td input { width: 18px; height: 18px; margin: 0; accent-color: #38bdf8; }
+      .channel-grid { margin: 14px 0; flex-wrap: wrap; }
+      .channel-option { min-width: 150px; padding: 11px 12px; border: 1px solid #363b46; border-radius: 6px; background: #0d0f14; cursor: pointer; }
       .schedule-fields[hidden] { display: none; }
       .primary { border-color: #38bdf8; background: #0c4a6e; }
 
@@ -65,7 +67,7 @@
       <header class="topbar">
         <div>
           <p class="eyebrow">New Level Admin</p>
-          <h1>SMS kampane</h1>
+          <h1>Správy</h1>
         </div>
         <div class="status">
           <span class="badge" data-test-mode>TEST MODE?</span>
@@ -104,13 +106,13 @@
 
       <section class="panel">
         <div class="section-head">
-          <h2>Posledné SMS</h2>
+          <h2>Posledné správy</h2>
           <button type="button" data-load-history>Obnoviť históriu</button>
         </div>
         <div class="table-wrap">
           <table>
             <thead>
-              <tr><th>Čas</th><th>Telefón</th><th>Stav</th><th>Infobip ID</th><th>Detail</th></tr>
+              <tr><th>Čas</th><th>Kanál</th><th>Príjemca</th><th>Stav</th><th>Provider ID</th><th>Detail</th></tr>
             </thead>
             <tbody data-history></tbody>
           </table>
@@ -119,7 +121,7 @@
 
       <section class="panel">
         <div class="section-head">
-          <h2>1. Vyber čísla</h2>
+          <h2>1. Vyber príjemcov</h2>
           <span data-counts>0 vybraných</span>
         </div>
         <div class="grid">
@@ -128,7 +130,7 @@
             <select data-audience>
               <option value="registered_for_event">Prihláseným na tento dátum</option>
               <option value="previously_registered_not_registered">Boli už niekedy, ale teraz nie sú prihlásení</option>
-              <option value="all_with_phone">Všetkým s telefónom</option>
+              <option value="all_with_phone">Všetkým s kontaktom</option>
             </select>
           </label>
         </div>
@@ -140,7 +142,7 @@
         <div class="table-wrap">
           <table>
             <thead>
-              <tr><th></th><th>Meno</th><th>Telefón</th><th>Stav</th></tr>
+              <tr><th></th><th>Meno</th><th>Telefón</th><th>Email</th><th>Stav</th></tr>
             </thead>
             <tbody data-contacts></tbody>
           </table>
@@ -149,24 +151,30 @@
 
       <section class="panel">
         <div class="section-head">
-          <h2>2. Napíš SMS</h2>
+          <h2>2. Napíš správu</h2>
           <span data-segments>0 znakov</span>
+        </div>
+        <div class="channel-grid" aria-label="Kanály odoslania">
+          <label class="channel-option"><input type="checkbox" data-channel value="sms" checked /> SMS</label>
+          <label class="channel-option"><input type="checkbox" data-channel value="whatsapp" /> WhatsApp</label>
+          <label class="channel-option"><input type="checkbox" data-channel value="email" /> Email</label>
         </div>
         <label>Meno odosielateľa<input data-sender maxlength="11" placeholder="NewLevel" /></label>
         <p class="hint">Max 11 písmen alebo čísiel, bez medzier. Infobip musí tento sender povoliť.</p>
-        <label>Text SMS<textarea data-message rows="7" placeholder="Ahoj &#123;&#123;first_name&#125;&#125;, vidíme sa na New Level Youth?"></textarea></label>
+        <label data-email-subject-wrap>Predmet emailu<input data-email-subject maxlength="180" placeholder="Pozvánka na New Level Youth" /></label>
+        <label>Text správy<textarea data-message rows="7" placeholder="Ahoj &#123;&#123;first_name&#125;&#125;, vidíme sa na New Level Youth?"></textarea></label>
         <p class="hint">Môžeš použiť: &#123;&#123;first_name&#125;&#125;, &#123;&#123;name&#125;&#125;, &#123;&#123;event_date&#125;&#125;, &#123;&#123;registration_url&#125;&#125;</p>
         <div class="preview" data-preview>Preview sa zobrazí po napísaní SMS.</div>
       </section>
 
       <section class="panel">
         <div class="section-head">
-          <h2>3. Odošli SMS</h2>
+          <h2>3. Odošli správu</h2>
           <span class="result" data-result></span>
         </div>
         <label class="schedule-toggle">
           <input type="checkbox" data-schedule-toggle />
-          Naplánovať manuálne odoslanie
+          Naplánovať odoslanie
         </label>
         <div class="grid schedule-fields" data-schedule-fields hidden>
           <label>Dátum odoslania<input data-date type="date" /></label>
@@ -212,6 +220,8 @@
         localStorage.setItem("smsAdminUrl", $("[data-supabase-url]").value.trim());
         localStorage.setItem("smsAdminKey", $("[data-admin-key]").value.trim());
         localStorage.setItem("smsSender", $("[data-sender]").value.trim());
+        localStorage.setItem("smsEmailSubject", $("[data-email-subject]").value.trim());
+        localStorage.setItem("smsChannels", JSON.stringify(selectedChannels()));
         state.adminKey = $("[data-admin-key]").value.trim();
       }
 
@@ -220,6 +230,13 @@
         state.adminKey = localStorage.getItem("smsAdminKey") || "";
         $("[data-admin-key]").value = state.adminKey;
         $("[data-sender]").value = localStorage.getItem("smsSender") || "NewLevel";
+        $("[data-email-subject]").value = localStorage.getItem("smsEmailSubject") || "Pozvánka na New Level Youth";
+        const savedChannels = JSON.parse(localStorage.getItem("smsChannels") || "null");
+        if (Array.isArray(savedChannels) && savedChannels.length) {
+          document.querySelectorAll("[data-channel]").forEach((input) => {
+            input.checked = savedChannels.includes(input.value);
+          });
+        }
       }
 
       async function api(body) {
@@ -271,6 +288,19 @@
         return Array.isArray(campaign.event) ? campaign.event[0] : campaign.event;
       }
 
+      function selectedChannels() {
+        return [...document.querySelectorAll("[data-channel]:checked")].map((input) => input.value);
+      }
+
+      function selectedChannelLabels() {
+        const labels = { sms: "SMS", whatsapp: "WhatsApp", email: "Email" };
+        return selectedChannels().map((channel) => labels[channel] || channel);
+      }
+
+      function isValidEmail(value) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || "").trim());
+      }
+
       function expandEmojiShortcodes(value) {
         const emoji = {
           smiling_face_with_tear: "🥲",
@@ -311,10 +341,43 @@
       }
 
       function contactStatus(contact) {
-        if (!contact.normalizedPhone) return "neplatné číslo";
-        if (!contact.sms_enabled) return "SMS vypnuté";
-        if (contact.testModeBlocked) return "v test režime nepovolené";
-        return "pripravené";
+        const channels = selectedChannels();
+        if (!channels.length) return "vyber kanál";
+
+        const ready = [];
+        const blocked = [];
+        if (channels.includes("sms")) {
+          if (contact.smsEligible) ready.push("SMS");
+          else if (!contact.normalizedPhone) blocked.push("SMS: neplatné číslo");
+          else if (!contact.sms_enabled) blocked.push("SMS vypnuté");
+          else if (contact.testModeBlocked) blocked.push("SMS test nepovolené");
+          else blocked.push("SMS nedostupné");
+        }
+        if (channels.includes("whatsapp")) {
+          if (contact.whatsappEligible) ready.push("WhatsApp");
+          else if (!contact.normalizedPhone) blocked.push("WhatsApp: neplatné číslo");
+          else if (!contact.sms_enabled) blocked.push("WhatsApp vypnutý");
+          else if (contact.testModeBlocked) blocked.push("WhatsApp test nepovolený");
+          else blocked.push("WhatsApp nedostupný");
+        }
+        if (channels.includes("email")) {
+          if (contact.emailEligible || (contact.active && isValidEmail(contact.email))) ready.push("Email");
+          else if (!isValidEmail(contact.email)) blocked.push("Email chýba");
+          else if (!contact.email_enabled) blocked.push("Email vypnutý");
+          else blocked.push("Email nedostupný");
+        }
+
+        return ready.length ? `pripravené: ${ready.join(", ")}` : blocked.join(", ");
+      }
+
+      function isContactSendable(contact) {
+        const channels = selectedChannels();
+        return channels.some((channel) => {
+          if (channel === "sms") return contact.smsEligible;
+          if (channel === "whatsapp") return contact.whatsappEligible;
+          if (channel === "email") return contact.emailEligible || (contact.active && isValidEmail(contact.email));
+          return false;
+        });
       }
 
       function renderContacts() {
@@ -323,16 +386,19 @@
         const visibleContacts = state.contacts.filter((contact) => contact.matches);
         for (const contact of visibleContacts) {
           const row = document.createElement("tr");
-          if (!contact.eligible) row.classList.add("is-muted");
+          const sendable = isContactSendable(contact);
+          if (!sendable) row.classList.add("is-muted");
           row.innerHTML = `
             <td><input type="checkbox" data-contact-id="${contact.id}"></td>
             <td>${contact.name || ""}</td>
             <td>${contact.normalizedPhone || contact.phone || ""}</td>
+            <td>${contact.email || ""}</td>
             <td>${contactStatus(contact)}</td>
           `;
           const checkbox = row.querySelector("input");
           checkbox.checked = state.selected.has(contact.id);
-          checkbox.disabled = !contact.eligible;
+          checkbox.disabled = !sendable;
+          if (!sendable) state.selected.delete(contact.id);
           checkbox.addEventListener("change", () => {
             if (checkbox.checked) state.selected.add(contact.id);
             else state.selected.delete(contact.id);
@@ -382,7 +448,7 @@
         state.selected.clear();
         renderContacts();
         const visible = state.contacts.filter((contact) => contact.matches);
-        const usable = visible.filter((contact) => contact.eligible);
+        const usable = visible.filter((contact) => isContactSendable(contact));
         setResult(`Načítané: ${visible.length} v zozname, ${usable.length} použiteľných`);
       }
 
@@ -431,7 +497,7 @@
         tbody.innerHTML = "";
         if (!state.history.length) {
           const row = document.createElement("tr");
-          row.innerHTML = `<td colspan="5" class="hint">Zatiaľ žiadna história</td>`;
+          row.innerHTML = `<td colspan="6" class="hint">Zatiaľ žiadna história</td>`;
           tbody.append(row);
           return;
         }
@@ -451,6 +517,7 @@
           ].filter(Boolean);
           row.innerHTML = `
             <td>${time ? localDateTimeLabel(time) : ""}</td>
+            <td>${item.channel || ""}</td>
             <td>${item.recipient || ""}</td>
             <td>${status}</td>
             <td>${item.provider_message_id || ""}</td>
@@ -515,7 +582,9 @@
         const single = hasUnicode ? 70 : 160;
         const multi = hasUnicode ? 67 : 153;
         const segments = chars <= single ? 1 : Math.ceil(chars / multi);
-        $("[data-segments]").textContent = `${chars} znakov, približne ${segments} SMS segment${segments === 1 ? "" : "y"}`;
+        $("[data-segments]").textContent = selectedChannels().includes("sms")
+          ? `${chars} znakov, približne ${segments} SMS segment${segments === 1 ? "" : "y"}`
+          : `${chars} znakov`;
         const first =
           state.contacts.find((contact) => state.selected.has(contact.id)) ||
           state.contacts.find((contact) => contact.matches) ||
@@ -534,28 +603,37 @@
 
       async function manualSend(sendNow) {
         const selected = [...state.selected];
+        const channels = selectedChannels();
+        const channelLabels = selectedChannelLabels();
         const sender = $("[data-sender]").value.trim();
+        const subject = $("[data-email-subject]").value.trim();
         const message = expandEmojiShortcodes($("[data-message]").value);
         if (state.editingCampaignId) {
           await updateCampaign();
           return;
         }
-        if (!selected.length) throw new Error("Vyber aspoň jedno telefónne číslo.");
-        if (!/^[A-Za-z0-9]{1,11}$/.test(sender)) throw new Error("Meno odosielateľa musí mať 1-11 písmen alebo čísiel bez medzier.");
-        if (!message.trim()) throw new Error("Napíš text SMS.");
+        if (!selected.length) throw new Error("Vyber aspoň jedného príjemcu.");
+        if (!channels.length) throw new Error("Vyber aspoň jeden kanál: SMS, WhatsApp alebo Email.");
+        if (channels.includes("sms") && !/^[A-Za-z0-9]{1,11}$/.test(sender)) throw new Error("Meno odosielateľa pre SMS musí mať 1-11 písmen alebo čísiel bez medzier.");
+        if (channels.includes("email") && !subject) throw new Error("Doplň predmet emailu.");
+        if (!message.trim()) throw new Error("Napíš text správy.");
         const scheduledFor = sendNow ? new Date().toISOString() : localScheduledIso();
         if (!sendNow && !scheduledFor) throw new Error("Vyber dátum a čas odoslania.");
         localStorage.setItem("smsSender", sender);
+        localStorage.setItem("smsEmailSubject", subject);
+        localStorage.setItem("smsChannels", JSON.stringify(channels));
         const audience = $("[data-audience]").value;
         const recipientLine = `Príjemcov: ${selected.length}`;
         const scheduleLine = sendNow ? "" : `\nČas: ${localDateTimeLabel(scheduledFor)}`;
-        const ok = confirm(`Potvrdiť manuálne SMS?\n\nOdosielateľ: ${sender}\n${recipientLine}${scheduleLine}\nRežim: ${sendNow ? "poslať teraz" : "naplánovať manuálne"}\n\n${message}`);
+        const ok = confirm(`Potvrdiť odoslanie?\n\nKanály: ${channelLabels.join(", ")}\nOdosielateľ SMS: ${sender}\nPredmet emailu: ${subject}\n${recipientLine}${scheduleLine}\nRežim: ${sendNow ? "poslať teraz" : "naplánovať"}\n\n${message}`);
         if (!ok) return;
         const result = await api({
           action: "manual_send",
-          name: "Manual SMS",
+          name: "Manual message",
           sender,
+          subject,
           message,
+          channels,
           eventDate: $("[data-event-date]").value,
           audienceType: audience,
           selectedContactIds: selected,
@@ -564,7 +642,7 @@
         });
         if (!sendNow) {
           await loadHistory();
-          setResult(`Manuálne SMS naplánované: ${result.queued} príjemcov`);
+          setResult(`Naplánované: ${result.queued} správ cez ${channelLabels.join(", ")}`);
           return;
         }
 
@@ -573,7 +651,7 @@
         const failed = deliveries.find((delivery) => !delivery.ok);
         if (failed) {
           const parts = [
-            "SMS sa neodoslala",
+            `${failed.channel || "Správa"} sa neodoslala`,
             failed.errorCode,
             failed.errorMessage,
             failed.debugDetails ? `Debug: ${failed.debugDetails}` : "",
@@ -581,14 +659,10 @@
           throw new Error(parts.join("\n"));
         }
         if (sent !== result.queued) {
-          throw new Error("Nie všetky SMS boli prijaté Infobipom. Pozri históriu nižšie.");
+          throw new Error("Nie všetky správy boli prijaté providerom. Pozri históriu nižšie.");
         }
-        const accepted = deliveries.find((delivery) => delivery.ok);
-        const providerLine = accepted?.providerMessageId
-          ? ` Infobip ID: ${accepted.providerMessageId}${accepted.providerStatus ? `, status: ${accepted.providerStatus}` : ""}`
-          : "";
         await loadHistory();
-        setResult(`Infobip prijal manuálne SMS: ${sent}.${providerLine}`);
+        setResult(`Odoslané cez ${channelLabels.join(", ")}: ${sent} správ`);
       }
 
       async function sendTestSms() {
@@ -654,7 +728,7 @@
         });
         $("[data-select-filtered]").addEventListener("click", () => {
           for (const contact of state.contacts) {
-            if (contact.matches && contact.eligible) state.selected.add(contact.id);
+            if (contact.matches && isContactSendable(contact)) state.selected.add(contact.id);
           }
           renderContacts();
         });
@@ -662,6 +736,14 @@
         $("[data-audience]").addEventListener("change", () => loadAudience().catch(showError));
         $("[data-event-date]").addEventListener("change", () => loadAudience().catch(showError));
         $("[data-message]").addEventListener("input", updateSegmentPreview);
+        $("[data-email-subject]").addEventListener("input", saveConfig);
+        document.querySelectorAll("[data-channel]").forEach((input) => {
+          input.addEventListener("change", () => {
+            saveConfig();
+            renderContacts();
+            updateSegmentPreview();
+          });
+        });
         $("[data-schedule-toggle]").addEventListener("change", updateSchedule);
         $("[data-submit]").addEventListener("click", () => manualSend(!$("[data-schedule-toggle]").checked).catch(showError));
         $("[data-send-test]").addEventListener("click", () => sendTestSms().catch(showError));

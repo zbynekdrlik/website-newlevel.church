@@ -30,12 +30,15 @@ type AudienceType =
   | "previously_registered_not_registered"
   | "custom_selection";
 
+type MessageChannel = "sms" | "whatsapp" | "email";
+
 type AdminSmsBody = {
   action?: string;
   eventId?: string;
   eventDate?: string;
   audienceType?: AudienceType;
   selectedContactIds?: string[];
+  channels?: MessageChannel[];
   campaignId?: string;
   name?: string;
   message?: string;
@@ -70,6 +73,9 @@ type AudienceContact = ContactRow & {
   previouslyRegisteredNotSelected: boolean;
   matches: boolean;
   eligible: boolean;
+  smsEligible: boolean;
+  whatsappEligible: boolean;
+  emailEligible: boolean;
   testModeBlocked: boolean;
 };
 
@@ -117,6 +123,29 @@ function cleanUuid(value: unknown) {
   return typeof value === "string" && /^[0-9a-f-]{36}$/i.test(value)
     ? value
     : null;
+}
+
+function cleanChannels(value: unknown): MessageChannel[] {
+  const allowed = new Set<MessageChannel>(["sms", "whatsapp", "email"]);
+  if (!Array.isArray(value)) return ["sms"];
+  const channels = value.filter((item): item is MessageChannel =>
+    typeof item === "string" && allowed.has(item as MessageChannel)
+  );
+  return [...new Set(channels)];
+}
+
+function isValidEmail(value: string | null | undefined) {
+  return Boolean(value && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value));
+}
+
+function channelStrategy(channels: MessageChannel[]) {
+  if (channels.length === 1) {
+    if (channels[0] === "email") return "email_only";
+    if (channels[0] === "whatsapp") return "whatsapp_only";
+    return "sms_only";
+  }
+  if (channels.includes("sms")) return "sms_then_email";
+  return "whatsapp_then_email";
 }
 
 function readAdminSmsKey() {
@@ -309,7 +338,6 @@ async function loadAudience(
     .schema("invitation")
     .from("contacts")
     .select("id,name,email,phone,active,sms_enabled,email_enabled,created_at")
-    .not("phone", "is", null)
     .order("created_at", { ascending: true })
     .limit(10000);
 
@@ -370,6 +398,17 @@ async function loadAudience(
         eligible: Boolean(
           normalizedPhone && contact.active && contact.sms_enabled &&
             smsEligibility.allowed,
+        ),
+        smsEligible: Boolean(
+          normalizedPhone && contact.active && contact.sms_enabled &&
+            smsEligibility.allowed,
+        ),
+        whatsappEligible: Boolean(
+          normalizedPhone && contact.active && contact.sms_enabled &&
+            smsEligibility.allowed,
+        ),
+        emailEligible: Boolean(
+          contact.active && contact.email_enabled && isValidEmail(contact.email),
         ),
         testModeBlocked: smsEligibility.testMode && !smsEligibility.allowed,
       };
@@ -498,8 +537,10 @@ Deno.serve(async (req) => {
       const event = await getOrCreateEvent(admin, body);
       const audienceType = body.audienceType ?? "all_with_phone";
       const selectedIds = new Set(cleanUuidList(body.selectedContactIds));
+      const channels = cleanChannels(body.channels);
       const message = cleanText(body.message, 1000);
-      const name = cleanText(body.name, 120) ?? "Manual SMS";
+      const name = cleanText(body.name, 120) ?? "Manual message";
+      const subject = cleanText(body.subject, 180) ?? "New Level Youth";
       const sender = normalizeSmsSender(body.sender);
       const scheduledFor = body.sendNow
         ? new Date().toISOString()
@@ -511,10 +552,16 @@ Deno.serve(async (req) => {
           error: "Select at least one recipient",
         }, 400);
       }
+      if (!channels.length) {
+        return json(req, {
+          success: false,
+          error: "Select at least one channel",
+        }, 400);
+      }
       if (!message) {
         return json(req, { success: false, error: "Message is required" }, 400);
       }
-      if (!sender) {
+      if (channels.includes("sms") && !sender) {
         return json(req, {
           success: false,
           error: "SMS sender must be 1-11 letters/numbers",
@@ -530,12 +577,16 @@ Deno.serve(async (req) => {
       const contacts = await loadAudience(admin, event.id, audienceType);
       const recipients = contacts
         .filter((contact: AudienceContact) => selectedIds.has(contact.id))
-        .filter((contact: AudienceContact) => contact.eligible);
+        .filter((contact: AudienceContact) =>
+          (channels.includes("sms") && contact.smsEligible) ||
+          (channels.includes("whatsapp") && contact.whatsappEligible) ||
+          (channels.includes("email") && contact.emailEligible)
+        );
 
       if (!recipients.length) {
         return json(
           req,
-          { success: false, error: "No eligible recipients" },
+          { success: false, error: "No eligible recipients for selected channels" },
           400,
         );
       }
@@ -547,7 +598,7 @@ Deno.serve(async (req) => {
         .insert({
           event_id: event.id,
           kind: "custom",
-          channel_strategy: "sms_only",
+          channel_strategy: channelStrategy(channels),
           created_by: null,
         })
         .select("id")
@@ -556,25 +607,63 @@ Deno.serve(async (req) => {
       if (batchError || !batch) throw new Error("Batch create failed");
 
       const queuedAt = new Date(scheduledFor).toISOString();
-      const rows = recipients.map((contact: AudienceContact) => ({
-        batch_id: batch.id,
-        event_id: null,
-        contact_id: contact.id,
-        automation_id: automationId,
-        channel: "sms",
-        recipient: contact.normalizedPhone,
-        body: renderMessage(message, contact, event),
-        template_name: sender,
-        status: body.sendNow ? "processing" : "queued",
-        scheduled_for: queuedAt,
-        subject: name,
-      }));
+      const rows = recipients.flatMap((contact: AudienceContact) => {
+        const bodyText = renderMessage(message, contact, event);
+        const baseRow = {
+          batch_id: batch.id,
+          event_id: null,
+          contact_id: contact.id,
+          automation_id: automationId,
+          body: bodyText,
+          status: "queued",
+          scheduled_for: queuedAt,
+        };
+        const contactRows = [];
+
+        if (channels.includes("sms") && contact.smsEligible) {
+          contactRows.push({
+            ...baseRow,
+            channel: "sms",
+            recipient: contact.normalizedPhone,
+            template_name: sender,
+            subject: name,
+          });
+        }
+        if (channels.includes("whatsapp") && contact.whatsappEligible) {
+          contactRows.push({
+            ...baseRow,
+            channel: "whatsapp",
+            recipient: contact.normalizedPhone,
+            template_name: null,
+            subject: name,
+          });
+        }
+        if (channels.includes("email") && contact.emailEligible) {
+          contactRows.push({
+            ...baseRow,
+            channel: "email",
+            recipient: contact.email,
+            template_name: null,
+            subject,
+          });
+        }
+
+        return contactRows;
+      });
+
+      if (!rows.length) {
+        return json(
+          req,
+          { success: false, error: "No sendable messages for selected channels" },
+          400,
+        );
+      }
 
       const { data: insertedRows, error: queueError } = await admin
         .schema("invitation")
         .from("message_queue")
         .insert(rows)
-        .select("id,contact_id,recipient,body");
+        .select("id,contact_id,channel,recipient,body");
 
       if (queueError || !insertedRows) {
         throw new Error(
@@ -590,24 +679,25 @@ Deno.serve(async (req) => {
           mode: "manual_scheduled",
           automationId,
           queued: insertedRows.length,
+          channels,
           scheduledFor: queuedAt,
         });
       }
 
-      const processed = await sendManualSmsRows(
+      const processed = await dispatchDueMessages(
         admin,
-        insertedRows as ManualDeliveryRow[],
-        sender,
-        automationId,
+        Math.min(insertedRows.length, 50),
+        { automationId },
       );
 
       return json(req, {
-        success: true,
+        success: processed.ok,
         mode: "manual_now",
         automationId,
         queued: insertedRows.length,
+        channels,
         processed,
-      });
+      }, processed.ok ? 200 : 500);
     }
 
     if (action === "create_campaign") {
@@ -759,13 +849,13 @@ Deno.serve(async (req) => {
         .select(
           "id,automation_id,channel,recipient,subject,status,provider,provider_message_id,last_error,scheduled_for,sent_at,created_at",
         )
-        .eq("channel", "sms")
         .order("created_at", { ascending: false })
         .limit(Math.min(Number(body.limit ?? 100), 300));
 
       if (error) throw new Error("History load failed");
       const messages = data ?? [];
       const messageIds = messages
+        .filter((message: { channel?: string | null }) => message.channel === "sms")
         .map((message: { provider_message_id?: string | null }) =>
           message.provider_message_id ?? ""
         )
