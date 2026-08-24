@@ -184,6 +184,9 @@
             <button type="button" data-send-test-sms>Poslať testovaciu SMS</button>
           </div>
         </div>
+        <p class="hint" data-whatsapp-settings hidden>
+          WhatsApp je dostupný pre každý aktívny kontakt s platným číslom. Voľný text možno poslať iba do 24 hodín od poslednej správy používateľa; prvá správa alebo správa mimo tohto okna musí použiť schválenú Meta šablónu.
+        </p>
         <div class="channel-settings" data-email-settings hidden>
           <label>Predmet emailu<input data-email-subject maxlength="180" placeholder="Pozvánka na New Level Youth" /></label>
           <p class="hint">Ukážka predmetu: <strong data-email-subject-preview></strong></p>
@@ -480,14 +483,13 @@
           if (contact.smsEligible) ready.push("SMS");
           else if (!contact.normalizedPhone) blocked.push("SMS: neplatné číslo");
           else if (!contact.sms_enabled) blocked.push("SMS vypnuté");
-          else if (contact.testModeBlocked) blocked.push("SMS test nepovolené");
+          else if (contact.smsTestModeBlocked) blocked.push("SMS test nepovolené");
           else blocked.push("SMS nedostupné");
         }
         if (channels.includes("whatsapp")) {
           if (contact.whatsappEligible) ready.push("WhatsApp");
           else if (!contact.normalizedPhone) blocked.push("WhatsApp: neplatné číslo");
           else if (!contact.sms_enabled) blocked.push("WhatsApp vypnutý");
-          else if (contact.testModeBlocked) blocked.push("WhatsApp test nepovolený");
           else blocked.push("WhatsApp nedostupný");
         }
         if (channels.includes("email")) {
@@ -871,6 +873,7 @@
       function updateChannelSettings() {
         const channels = selectedChannels();
         $("[data-sms-settings]").hidden = !channels.includes("sms");
+        $("[data-whatsapp-settings]").hidden = !channels.includes("whatsapp");
         $("[data-email-settings]").hidden = !channels.includes("email");
         updateSchedule();
       }

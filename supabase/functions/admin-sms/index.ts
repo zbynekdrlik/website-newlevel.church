@@ -72,7 +72,7 @@ type AudienceContact = ContactRow & {
   smsEligible: boolean;
   whatsappEligible: boolean;
   emailEligible: boolean;
-  testModeBlocked: boolean;
+  smsTestModeBlocked: boolean;
 };
 
 type ManualDeliveryRow = {
@@ -359,13 +359,14 @@ async function loadAudience(
         ),
         whatsappEligible: Boolean(
           normalizedPhone && contact.active && contact.sms_enabled &&
-            smsEligibility.allowed,
+            Deno.env.get("WHATSAPP_ACCESS_TOKEN")?.trim() &&
+            Deno.env.get("WHATSAPP_PHONE_NUMBER_ID")?.trim(),
         ),
         emailEligible: Boolean(
           contact.active && contact.email_enabled &&
             isValidEmail(contact.email),
         ),
-        testModeBlocked: smsEligibility.testMode && !smsEligibility.allowed,
+        smsTestModeBlocked: smsEligibility.testMode && !smsEligibility.allowed,
       };
     },
   );
