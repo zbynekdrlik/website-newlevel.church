@@ -14,7 +14,8 @@ function nextFridayDate() {
   );
   const day = bratislava.getDay();
   let daysUntilFriday = (5 - day + 7) % 7;
-  if (day === 5 || day === 6) daysUntilFriday = day === 5 ? 7 : 6;
+  // A registration made on Friday still belongs to that day's party.
+  if (day === 6) daysUntilFriday = 6;
   bratislava.setDate(bratislava.getDate() + daysUntilFriday);
   return bratislava.toISOString().slice(0, 10);
 }
