@@ -9,6 +9,8 @@ Toto je serverova brana pre tyzdenne New Level Party pozvanky.
 - Novy tyzden sa neresetuje mazanim. Vytvori sa novy event a registracie sa pocitaju iba pre tento event.
 - Pozvanky sa najprv zapisu do `invitation.message_queue`.
 - Odosielanie robi az `dispatch-message-queue`.
+- WhatsApp kampane pouzivaju schvalenu Meta sablonu. `template_name`,
+  `template_language` a `template_parameters` sa ukladaju priamo do queue riadku.
 
 ## Pravidlo vyberu
 
@@ -29,6 +31,20 @@ TextBee endpoint pouziva iba serverova Supabase Edge Function:
 - body `recipients`, `message`, `deviceId`
 
 API key a device ID su iba v Supabase secrets.
+
+## WhatsApp cez Meta Cloud API
+
+Kampan alebo prva sprava mimo 24-hodinoveho okna musi pouzit schvalenu Meta
+sablonu. Admin predvolene pouziva `youth_invitation_sk` (`sk`): prvy parameter
+je krstne meno kontaktu a druhy parameter je datum vybranej mladeze. Volny text
+je urceny iba na odpoved do 24 hodin od poslednej spravy pouzivatela.
+
+Token a ID telefonneho cisla su iba v Supabase secrets:
+
+```bash
+supabase secrets set WHATSAPP_ACCESS_TOKEN="..."
+supabase secrets set WHATSAPP_PHONE_NUMBER_ID="..."
+```
 
 ## Manualny tok cez queue
 

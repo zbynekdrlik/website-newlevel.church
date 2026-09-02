@@ -26,6 +26,7 @@ import { renderContactTemplate } from "../_shared/message_template.ts";
 import { audienceMatches, type AudienceType } from "../_shared/audience.ts";
 
 type MessageChannel = "sms" | "whatsapp" | "email";
+type WhatsAppMode = "template" | "text";
 
 type AdminSmsBody = {
   action?: string;
@@ -44,6 +45,9 @@ type AdminSmsBody = {
   phone?: string;
   email?: string;
   limit?: number;
+  whatsappMode?: WhatsAppMode;
+  whatsappTemplateName?: string;
+  whatsappTemplateLanguage?: string;
 };
 
 type ContactRow = {
@@ -128,6 +132,42 @@ function cleanChannels(value: unknown): MessageChannel[] {
     typeof item === "string" && allowed.has(item as MessageChannel)
   );
   return [...new Set(channels)];
+}
+
+function cleanWhatsAppMode(value: unknown): WhatsAppMode {
+  return value === "text" ? "text" : "template";
+}
+
+function cleanWhatsAppTemplateName(value: unknown) {
+  if (typeof value !== "string") return null;
+  const name = value.trim().toLowerCase();
+  return /^[a-z0-9_]{1,512}$/.test(name) ? name : null;
+}
+
+function cleanWhatsAppTemplateLanguage(value: unknown) {
+  if (typeof value !== "string") return null;
+  const language = value.trim();
+  return /^[a-z]{2,3}(?:_[A-Z]{2})?$/.test(language) ? language : null;
+}
+
+function whatsappEventDate(event: Record<string, unknown>) {
+  const raw = typeof event.event_date === "string" ? event.event_date : "";
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
+  const label = new Intl.DateTimeFormat("sk-SK", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    timeZone: "Europe/Bratislava",
+  }).format(new Date(`${raw}T12:00:00+02:00`));
+  return label ? label[0].toUpperCase() + label.slice(1) : raw;
+}
+
+function whatsappTemplateParameters(
+  contact: AudienceContact,
+  event: Record<string, unknown>,
+) {
+  const firstName = contact.name?.trim().split(/\s+/)[0] || "priateľ";
+  return [firstName, whatsappEventDate(event)];
 }
 
 function isValidEmail(value: string | null | undefined) {
@@ -535,6 +575,13 @@ Deno.serve(async (req) => {
       const audienceType = body.audienceType ?? "all_with_phone";
       const selectedIds = new Set(cleanUuidList(body.selectedContactIds));
       const channels = cleanChannels(body.channels);
+      const whatsappMode = cleanWhatsAppMode(body.whatsappMode);
+      const whatsappTemplateName = cleanWhatsAppTemplateName(
+        body.whatsappTemplateName,
+      );
+      const whatsappTemplateLanguage = cleanWhatsAppTemplateLanguage(
+        body.whatsappTemplateLanguage,
+      );
       const message = cleanText(body.message, 1000);
       const name = cleanText(body.name, 120) ?? "Manual message";
       const subject = cleanText(body.subject, 180) ?? "New Level Youth";
@@ -555,8 +602,21 @@ Deno.serve(async (req) => {
           error: "Select at least one channel",
         }, 400);
       }
-      if (!message) {
+      const needsFreeText = channels.some((channel) =>
+        channel !== "whatsapp"
+      ) ||
+        (channels.includes("whatsapp") && whatsappMode === "text");
+      if (needsFreeText && !message) {
         return json(req, { success: false, error: "Message is required" }, 400);
+      }
+      if (
+        channels.includes("whatsapp") && whatsappMode === "template" &&
+        (!whatsappTemplateName || !whatsappTemplateLanguage)
+      ) {
+        return json(req, {
+          success: false,
+          error: "A valid WhatsApp template name and language are required",
+        }, 400);
       }
       if (channels.includes("sms") && !sender) {
         return json(req, {
@@ -608,7 +668,9 @@ Deno.serve(async (req) => {
 
       const queuedAt = new Date(scheduledFor).toISOString();
       const rows = recipients.flatMap((contact: AudienceContact) => {
-        const bodyText = renderContactTemplate(message, contact, event);
+        const bodyText = message
+          ? renderContactTemplate(message, contact, event)
+          : `[WhatsApp template: ${whatsappTemplateName}]`;
         const baseRow = {
           batch_id: batch.id,
           event_id: null,
@@ -617,6 +679,8 @@ Deno.serve(async (req) => {
           body: bodyText,
           status: "queued",
           scheduled_for: queuedAt,
+          template_language: null,
+          template_parameters: [],
         };
         const contactRows = [];
 
@@ -634,7 +698,15 @@ Deno.serve(async (req) => {
             ...baseRow,
             channel: "whatsapp",
             recipient: contact.normalizedPhone,
-            template_name: null,
+            template_name: whatsappMode === "template"
+              ? whatsappTemplateName
+              : null,
+            template_language: whatsappMode === "template"
+              ? whatsappTemplateLanguage
+              : null,
+            template_parameters: whatsappMode === "template"
+              ? whatsappTemplateParameters(contact, event)
+              : [],
             subject: name,
           });
         }
@@ -686,6 +758,10 @@ Deno.serve(async (req) => {
           automationId,
           queued: insertedRows.length,
           channels,
+          whatsappMode: channels.includes("whatsapp") ? whatsappMode : null,
+          whatsappTemplateName: whatsappMode === "template"
+            ? whatsappTemplateName
+            : null,
           scheduledFor: queuedAt,
         });
       }
@@ -702,6 +778,10 @@ Deno.serve(async (req) => {
         automationId,
         queued: insertedRows.length,
         channels,
+        whatsappMode: channels.includes("whatsapp") ? whatsappMode : null,
+        whatsappTemplateName: whatsappMode === "template"
+          ? whatsappTemplateName
+          : null,
         processed,
       }, processed.ok ? 200 : 500);
     }

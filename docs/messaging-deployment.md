@@ -22,6 +22,8 @@ supabase secrets set INFOBIP_BASE_URL="https://xxxxx.api.infobip.com"
 supabase secrets set INFOBIP_SMS_SENDER="NewLevel"
 supabase secrets set SMS_TEST_MODE="true"
 supabase secrets set SMS_TEST_ALLOWED_NUMBERS="+421..."
+supabase secrets set WHATSAPP_ACCESS_TOKEN="..."
+supabase secrets set WHATSAPP_PHONE_NUMBER_ID="..."
 ```
 
 `CRON_SECRET` must also be stored in Supabase Vault under the exact name
@@ -58,7 +60,7 @@ Cloudflare Pages only needs public/static site config. Do not put `RESEND_API_KE
 ```bash
 supabase functions deploy admin-sms --project-ref kbpuhcuiljbwgxgiauku --use-api --no-verify-jwt
 supabase functions deploy dispatch-message-cron --project-ref kbpuhcuiljbwgxgiauku --use-api --no-verify-jwt
-supabase functions deploy dispatch-message-queue --project-ref kbpuhcuiljbwgxgiauku --use-api
+supabase functions deploy dispatch-message-queue --project-ref kbpuhcuiljbwgxgiauku --use-api --no-verify-jwt
 supabase functions deploy dispatch-messages --project-ref kbpuhcuiljbwgxgiauku --use-api
 supabase functions deploy queue-party-invitations --project-ref kbpuhcuiljbwgxgiauku --use-api
 supabase functions deploy test-email --project-ref kbpuhcuiljbwgxgiauku --use-api
@@ -90,6 +92,12 @@ Admin API key: value from ADMIN_SMS_KEY
 The admin page stores the key only in this browser's local storage. The key is
 sent to the `admin-sms` Edge Function as `x-admin-sms-key`; the Infobip API key
 and Supabase service role key stay only in Supabase secrets.
+
+For campaign WhatsApp messages, use an approved Meta template. The admin defaults
+to `youth_invitation_sk` in language `sk`; template body parameter 1 is the
+recipient's first name and parameter 2 is the selected event date in Slovak.
+Free-text WhatsApp messages are only for replies inside Meta's 24-hour
+customer-service window.
 
 ## Test Mode
 

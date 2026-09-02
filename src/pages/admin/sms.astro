@@ -184,9 +184,24 @@
             <button type="button" data-send-test-sms>Poslať testovaciu SMS</button>
           </div>
         </div>
-        <p class="hint" data-whatsapp-settings hidden>
-          WhatsApp je dostupný pre každý aktívny kontakt s platným číslom. Voľný text možno poslať iba do 24 hodín od poslednej správy používateľa; prvá správa alebo správa mimo tohto okna musí použiť schválenú Meta šablónu.
-        </p>
+        <div class="channel-settings" data-whatsapp-settings hidden>
+          <label>Spôsob odoslania cez WhatsApp
+            <select data-whatsapp-mode>
+              <option value="template">Schválená Meta šablóna (kampane)</option>
+              <option value="text">Voľný text (iba odpoveď do 24 hodín)</option>
+            </select>
+          </label>
+          <div class="grid" data-whatsapp-template-fields>
+            <label>Názov Meta šablóny<input data-whatsapp-template-name value="youth_invitation_sk" /></label>
+            <label>Jazyk šablóny<input data-whatsapp-template-language value="sk" maxlength="8" /></label>
+          </div>
+          <p class="hint" data-whatsapp-template-hint>
+            Použije sa schválená šablóna <strong data-whatsapp-template-preview>youth_invitation_sk</strong>. Premenná 1 je krstné meno a premenná 2 je dátum mládeže.
+          </p>
+          <p class="hint" data-whatsapp-text-hint hidden>
+            Voľný text Meta povolí iba do 24 hodín od poslednej správy používateľa. Pre prvú správu a kampane použi schválenú šablónu.
+          </p>
+        </div>
         <div class="channel-settings" data-email-settings hidden>
           <label>Predmet emailu<input data-email-subject maxlength="180" placeholder="Pozvánka na New Level Youth" /></label>
           <p class="hint">Ukážka predmetu: <strong data-email-subject-preview></strong></p>
@@ -195,7 +210,7 @@
             <button type="button" data-send-test-email>Poslať testovací email</button>
           </div>
         </div>
-        <label>Text správy<textarea data-message rows="7" placeholder="Ahoj &#123;&#123;first_name&#125;&#125;, vidíme sa na New Level Youth?"></textarea></label>
+        <label><span data-message-label>Text správy</span><textarea data-message rows="7" placeholder="Ahoj &#123;&#123;first_name&#125;&#125;, vidíme sa na New Level Youth?"></textarea></label>
         <p class="hint">Môžeš použiť: &#123;&#123;first_name&#125;&#125;, &#123;&#123;name&#125;&#125;, &#123;&#123;event_date&#125;&#125;, &#123;&#123;registration_url&#125;&#125;</p>
         <div class="preview" data-preview>Ukážka sa zobrazí po napísaní správy.</div>
       </section>
@@ -257,6 +272,9 @@
         localStorage.setItem("smsTestPhone", $("[data-test-phone]").value.trim());
         localStorage.setItem("smsTestEmail", $("[data-test-email]").value.trim());
         localStorage.setItem("smsChannels", JSON.stringify(selectedChannels()));
+        localStorage.setItem("smsWhatsappMode", $("[data-whatsapp-mode]").value);
+        localStorage.setItem("smsWhatsappTemplateName", $("[data-whatsapp-template-name]").value.trim());
+        localStorage.setItem("smsWhatsappTemplateLanguage", $("[data-whatsapp-template-language]").value.trim());
         state.adminKey = $("[data-admin-key]").value.trim();
       }
 
@@ -268,6 +286,9 @@
         $("[data-email-subject]").value = localStorage.getItem("smsEmailSubject") || "Pozvánka na New Level Youth";
         $("[data-test-phone]").value = localStorage.getItem("smsTestPhone") || "";
         $("[data-test-email]").value = localStorage.getItem("smsTestEmail") || "";
+        $("[data-whatsapp-mode]").value = localStorage.getItem("smsWhatsappMode") || "template";
+        $("[data-whatsapp-template-name]").value = localStorage.getItem("smsWhatsappTemplateName") || "youth_invitation_sk";
+        $("[data-whatsapp-template-language]").value = localStorage.getItem("smsWhatsappTemplateLanguage") || "sk";
         const savedChannels = JSON.parse(localStorage.getItem("smsChannels") || "null");
         if (Array.isArray(savedChannels) && savedChannels.length) {
           document.querySelectorAll("[data-channel]").forEach((input) => {
@@ -340,6 +361,9 @@
           sender: $("[data-sender]").value.trim(),
           subject,
           message,
+          whatsappMode: $("[data-whatsapp-mode]").value,
+          whatsappTemplateName: $("[data-whatsapp-template-name]").value.trim(),
+          whatsappTemplateLanguage: $("[data-whatsapp-template-language]").value.trim(),
         };
         state.concepts = [concept, ...state.concepts].slice(0, MAX_CONCEPTS);
         writeConcepts();
@@ -357,6 +381,9 @@
         $("[data-sender]").value = typeof concept.sender === "string" ? concept.sender : "NewLevel";
         $("[data-email-subject]").value = typeof concept.subject === "string" ? concept.subject : "";
         $("[data-message]").value = typeof concept.message === "string" ? concept.message : "";
+        $("[data-whatsapp-mode]").value = concept.whatsappMode === "text" ? "text" : "template";
+        $("[data-whatsapp-template-name]").value = typeof concept.whatsappTemplateName === "string" ? concept.whatsappTemplateName : "youth_invitation_sk";
+        $("[data-whatsapp-template-language]").value = typeof concept.whatsappTemplateLanguage === "string" ? concept.whatsappTemplateLanguage : "sk";
         saveConfig();
         updateChannelSettings();
         renderContacts();
@@ -431,6 +458,10 @@
       function selectedChannelLabels() {
         const labels = { sms: "SMS", whatsapp: "WhatsApp", email: "Email" };
         return selectedChannels().map((channel) => labels[channel] || channel);
+      }
+
+      function usesWhatsAppTemplate() {
+        return selectedChannels().includes("whatsapp") && $("[data-whatsapp-mode]").value === "template";
       }
 
       function isValidEmail(value) {
@@ -721,6 +752,15 @@
 
       function updateSegmentPreview() {
         const text = expandEmojiShortcodes($("[data-message]").value);
+        const channels = selectedChannels();
+        const templateOnly = channels.length === 1 && channels[0] === "whatsapp" && usesWhatsAppTemplate();
+        if (templateOnly) {
+          const templateName = $("[data-whatsapp-template-name]").value.trim() || "youth_invitation_sk";
+          $("[data-segments]").textContent = "Schválená WhatsApp šablóna";
+          $("[data-preview]").textContent = `Meta šablóna: ${templateName}\n{{1}} = krstné meno príjemcu\n{{2}} = dátum vybranej mládeže`;
+          updateEmailSubjectPreview();
+          return;
+        }
         const chars = [...text].length;
         const hasUnicode = /[^\x00-\x7F]/.test(text);
         const single = hasUnicode ? 70 : 160;
@@ -761,6 +801,9 @@
         const sender = $("[data-sender]").value.trim();
         const subject = $("[data-email-subject]").value.trim();
         const message = expandEmojiShortcodes($("[data-message]").value);
+        const whatsappMode = $("[data-whatsapp-mode]").value;
+        const whatsappTemplateName = $("[data-whatsapp-template-name]").value.trim().toLowerCase();
+        const whatsappTemplateLanguage = $("[data-whatsapp-template-language]").value.trim();
         if (state.editingCampaignId) {
           await updateCampaign();
           return;
@@ -769,7 +812,10 @@
         if (!channels.length) throw new Error("Vyber aspoň jeden kanál: SMS, WhatsApp alebo Email.");
         if (channels.includes("sms") && !/^[A-Za-z0-9]{1,11}$/.test(sender)) throw new Error("Meno odosielateľa pre SMS musí mať 1-11 písmen alebo čísiel bez medzier.");
         if (channels.includes("email") && !subject) throw new Error("Doplň predmet emailu.");
-        if (!message.trim()) throw new Error("Napíš text správy.");
+        const needsFreeText = channels.some((channel) => channel !== "whatsapp") || (channels.includes("whatsapp") && whatsappMode === "text");
+        if (needsFreeText && !message.trim()) throw new Error("Napíš text správy.");
+        if (channels.includes("whatsapp") && whatsappMode === "template" && !/^[a-z0-9_]{1,512}$/.test(whatsappTemplateName)) throw new Error("Názov WhatsApp šablóny môže obsahovať iba malé písmená, čísla a podčiarkovníky.");
+        if (channels.includes("whatsapp") && whatsappMode === "template" && !/^[a-z]{2,3}(?:_[A-Z]{2})?$/.test(whatsappTemplateLanguage)) throw new Error("Skontroluj jazyk WhatsApp šablóny, napríklad sk.");
         const scheduledFor = sendNow ? new Date().toISOString() : localScheduledIso();
         if (!sendNow && !scheduledFor) throw new Error("Vyber dátum a čas odoslania.");
         localStorage.setItem("smsSender", sender);
@@ -780,7 +826,9 @@
         const scheduleLine = sendNow ? "" : `\nČas: ${localDateTimeLabel(scheduledFor)}`;
         const smsLine = channels.includes("sms") ? `\nOdosielateľ SMS: ${sender}` : "";
         const emailLine = channels.includes("email") ? `\nPredmet emailu (ukážka): ${renderPreviewTemplate(subject)}` : "";
-        const ok = confirm(`Potvrdiť odoslanie?\n\nKanály: ${channelLabels.join(", ")}${smsLine}${emailLine}\n${recipientLine}${scheduleLine}\nRežim: ${sendNow ? "odoslať teraz" : "odoslať neskôr"}\n\n${message}`);
+        const whatsappLine = channels.includes("whatsapp") && whatsappMode === "template" ? `\nMeta šablóna: ${whatsappTemplateName} (${whatsappTemplateLanguage})` : "";
+        const confirmationBody = channels.length === 1 && usesWhatsAppTemplate() ? "Premenné šablóny sa doplnia menom a dátumom mládeže." : message;
+        const ok = confirm(`Potvrdiť odoslanie?\n\nKanály: ${channelLabels.join(", ")}${smsLine}${emailLine}${whatsappLine}\n${recipientLine}${scheduleLine}\nRežim: ${sendNow ? "odoslať teraz" : "odoslať neskôr"}\n\n${confirmationBody}`);
         if (!ok) return;
         const result = await api({
           action: "manual_send",
@@ -789,6 +837,9 @@
           subject,
           message,
           channels,
+          whatsappMode,
+          whatsappTemplateName,
+          whatsappTemplateLanguage,
           eventDate: $("[data-event-date]").value,
           audienceType: audience,
           selectedContactIds: selected,
@@ -875,6 +926,15 @@
         $("[data-sms-settings]").hidden = !channels.includes("sms");
         $("[data-whatsapp-settings]").hidden = !channels.includes("whatsapp");
         $("[data-email-settings]").hidden = !channels.includes("email");
+        const templateMode = $("[data-whatsapp-mode]").value === "template";
+        $("[data-whatsapp-template-fields]").hidden = !templateMode;
+        $("[data-whatsapp-template-hint]").hidden = !templateMode;
+        $("[data-whatsapp-text-hint]").hidden = templateMode;
+        $("[data-whatsapp-template-preview]").textContent = $("[data-whatsapp-template-name]").value.trim() || "youth_invitation_sk";
+        const templateOnly = channels.length === 1 && channels[0] === "whatsapp" && templateMode;
+        $("[data-message]").disabled = templateOnly;
+        $("[data-message-label]").textContent = templateOnly ? "Text správy (pri Meta šablóne sa nepoužije)" : "Text správy";
+        updateSegmentPreview();
         updateSchedule();
       }
 
@@ -938,6 +998,15 @@
             updateChannelSettings();
           });
         });
+        $("[data-whatsapp-mode]").addEventListener("change", () => {
+          saveConfig();
+          updateChannelSettings();
+        });
+        $("[data-whatsapp-template-name]").addEventListener("input", () => {
+          saveConfig();
+          updateChannelSettings();
+        });
+        $("[data-whatsapp-template-language]").addEventListener("input", saveConfig);
         $("[data-schedule-toggle]").addEventListener("change", updateSchedule);
         $("[data-submit]").addEventListener("click", () => manualSend(!$("[data-schedule-toggle]").checked).catch(showError));
         $("[data-send-test-sms]").addEventListener("click", () => sendTestSms().catch(showError));

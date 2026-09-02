@@ -24,6 +24,8 @@ type QueueMessage = {
   subject: string | null;
   body: string;
   template_name: string | null;
+  template_language: string | null;
+  template_parameters: unknown;
   attempts: number | null;
 };
 
@@ -34,7 +36,22 @@ type RegistrationContact = {
   phone: string | null;
 };
 
-async function sendWhatsApp(to: string, body: string): Promise<SendResult> {
+function cleanTemplateParameters(value: unknown) {
+  if (!Array.isArray(value)) return [];
+  return value
+    .filter((item): item is string => typeof item === "string")
+    .map((item) => item.trim().slice(0, 1024));
+}
+
+async function sendWhatsApp(
+  to: string,
+  body: string,
+  options: {
+    templateName?: string | null;
+    templateLanguage?: string | null;
+    templateParameters?: unknown;
+  } = {},
+): Promise<SendResult> {
   const token = Deno.env.get("WHATSAPP_ACCESS_TOKEN");
   const phoneNumberId = Deno.env.get("WHATSAPP_PHONE_NUMBER_ID");
   if (!token || !phoneNumberId) {
@@ -45,6 +62,39 @@ async function sendWhatsApp(to: string, body: string): Promise<SendResult> {
     };
   }
 
+  const templateName = options.templateName?.trim() ?? "";
+  const templateLanguage = options.templateLanguage?.trim() || "sk";
+  const templateParameters = cleanTemplateParameters(
+    options.templateParameters,
+  );
+  const messagePayload = templateName
+    ? {
+      messaging_product: "whatsapp",
+      to: to.replace(/^\+/, ""),
+      type: "template",
+      template: {
+        name: templateName,
+        language: { code: templateLanguage },
+        ...(templateParameters.length
+          ? {
+            components: [{
+              type: "body",
+              parameters: templateParameters.map((text) => ({
+                type: "text",
+                text,
+              })),
+            }],
+          }
+          : {}),
+      },
+    }
+    : {
+      messaging_product: "whatsapp",
+      to: to.replace(/^\+/, ""),
+      type: "text",
+      text: { preview_url: false, body },
+    };
+
   const response = await fetch(
     `https://graph.facebook.com/v20.0/${phoneNumberId}/messages`,
     {
@@ -53,12 +103,7 @@ async function sendWhatsApp(to: string, body: string): Promise<SendResult> {
         "Authorization": `Bearer ${token}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        messaging_product: "whatsapp",
-        to: to.replace(/^\+/, ""),
-        type: "text",
-        text: { preview_url: false, body },
-      }),
+      body: JSON.stringify(messagePayload),
     },
   );
 
@@ -88,7 +133,7 @@ export async function dispatchDueMessages(
     .schema("invitation")
     .from("message_queue")
     .select(
-      "id,automation_id,contact_id,channel,recipient,subject,body,template_name,attempts",
+      "id,automation_id,contact_id,channel,recipient,subject,body,template_name,template_language,template_parameters,attempts",
     )
     .eq("status", "queued")
     .lte("scheduled_for", new Date().toISOString())
@@ -114,7 +159,9 @@ export async function dispatchDueMessages(
   }
 
   const queueMessages = messages as QueueMessage[];
-  const contactIds = [...new Set(queueMessages.map((message) => message.contact_id))];
+  const contactIds = [
+    ...new Set(queueMessages.map((message) => message.contact_id)),
+  ];
   const { data: contacts } = contactIds.length
     ? await admin
       .schema("invitation")
@@ -153,7 +200,11 @@ export async function dispatchDueMessages(
         sender: message.template_name,
       })
       : message.channel === "whatsapp"
-      ? await sendWhatsApp(message.recipient, renderedBody)
+      ? await sendWhatsApp(message.recipient, renderedBody, {
+        templateName: message.template_name,
+        templateLanguage: message.template_language,
+        templateParameters: message.template_parameters,
+      })
       : await sendEmail(
         message.recipient,
         message.subject ?? "New Level Youth",
@@ -174,7 +225,9 @@ export async function dispatchDueMessages(
     const sentAt = result.ok === true ? new Date().toISOString() : null;
     const errorCode = result.ok === true ? null : result.errorCode;
     const errorMessage = result.ok === true ? null : result.errorMessage;
-    const debugDetails = result.ok === true ? null : result.debugDetails ?? null;
+    const debugDetails = result.ok === true
+      ? null
+      : result.debugDetails ?? null;
     const providerMessageId = result.ok === true
       ? result.providerMessageId
       : null;
