@@ -12,13 +12,13 @@ const heroBackgroundPhotos = partyPhotos
   .filter((photo) => !excludedHeroBackgroundImages.has(photo.image))
   .map((photo) => ({ image: photo.image, caption: photo.caption }));
 const heroPhoto = heroBackgroundPhotos[0] || { image: '/images/uploads/party-image00002.jpg', caption: 'Wrapy a hranolky' };
-const activityPhotos = [
-  '/images/uploads/party-image00010.jpg',
-  '/images/uploads/party-image00011.jpg',
-  '/images/uploads/party-image00007.jpg',
-  '/images/uploads/party-image00002.jpg',
-  '/images/uploads/party-image00006.jpg',
-];
+const activityPhotosByTitle: Record<string, string> = {
+  'Jedlo od šéfkuchára': '/images/uploads/party-image00002.jpg',
+  'Ping Pong': '/images/uploads/party-image00010.jpg',
+  'Kalčeto': '/images/uploads/party-image00011.jpg',
+  'Varenie zadarmo': '/images/uploads/party-image00003.jpg',
+  'Karaoke': '/images/uploads/party-image00006.jpg',
+};
 const partyReels = [
   {
     url: 'https://www.instagram.com/reel/DVfGHeagLHp/?utm_source=ig_web_copy_link&igsh=NTc4MTIwNjQ2YQ==',
@@ -91,7 +91,7 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
           <div class="hero-secondary">
             <p>{page.hero.subtitle}</p>
             <div class="hero-actions">
-              <a href="#registracia" class="poster-button">Registrovať sa na jedlo</a>
+              <a href="#party-form" class="poster-button">Registrovať sa na jedlo</a>
               <a href={youthInstagramUrl} target="_blank" rel="noopener noreferrer" class="poster-button poster-button-instagram">
                 <span set:html={instagramIcon}></span>
               </a>
@@ -194,6 +194,13 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
                     <path d="M12 2.16c3.2 0 3.58.01 4.85.07 3.25.15 4.77 1.69 4.92 4.92.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.15 3.25-1.67 4.77-4.92 4.92-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-3.25-.15-4.77-1.67-4.92-4.92-.06-1.27-.07-1.65-.07-4.85s.01-3.58.07-4.85c.15-3.25 1.67-4.77 4.92-4.92 1.27-.06 1.65-.07 4.85-.07Zm0 2.13c-3.15 0-3.52.01-4.75.07-2.17.1-2.79 1.13-2.89 2.89-.06 1.23-.07 1.6-.07 4.75s.01 3.52.07 4.75c.1 1.76.72 2.79 2.89 2.89 1.23.06 1.6.07 4.75.07s3.52-.01 4.75-.07c2.17-.1 2.79-1.13 2.89-2.89.06-1.23.07-1.6.07-4.75s-.01-3.52-.07-4.75c-.1-1.76-.72-2.79-2.89-2.89-1.23-.06-1.6-.07-4.75-.07Zm0 3.55a4.16 4.16 0 1 1 0 8.32 4.16 4.16 0 0 1 0-8.32Zm0 2.13a2.03 2.03 0 1 0 0 4.06 2.03 2.03 0 0 0 0-4.06Zm4.4-3.75a1.38 1.38 0 1 1 0 2.76 1.38 1.38 0 0 1 0-2.76Z"></path>
                   </svg>
                 </a>
+                <div class="party-reel-actions" aria-hidden="true">
+                  <span class="instagram-action-sprite instagram-action-like"><img src="/images/instagram-actions.png" alt="" width="960" height="90"></span>
+                  <span class="instagram-action-sprite instagram-action-comment"><img src="/images/instagram-actions.png" alt="" width="960" height="90"></span>
+                  <span class="instagram-action-sprite instagram-action-repost"><img src="/images/instagram-actions.png" alt="" width="960" height="90"></span>
+                  <span class="instagram-action-sprite instagram-action-share"><img src="/images/instagram-actions.png" alt="" width="960" height="90"></span>
+                  <span class="instagram-action-sprite instagram-action-save"><img src="/images/instagram-actions.png" alt="" width="960" height="90"></span>
+                </div>
               </div>
             </article>
           ))}
@@ -214,7 +221,7 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
             <h3>{page.menu.dish}</h3>
             <p>{page.menu.description}</p>
           </div>
-          <a href="#registracia" class="poster-button">Registrovať sa na jedlo</a>
+          <a href="#party-form" class="poster-button">Registrovať sa na jedlo</a>
         </div>
       </div>
     </section>
@@ -284,7 +291,7 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
         </div>
         <div class="activity-row" aria-label="Aktivity">
           {page.activities.map((item: { emoji: string; title: string; description: string }, index: number) => {
-            const activityPhoto = activityPhotos[index] || partyPhotos[index % partyPhotos.length]?.image;
+            const activityPhoto = activityPhotosByTitle[item.title] || partyPhotos[index % partyPhotos.length]?.image;
             return (
             <div class={`activity-item activity-item-${(index % 4) + 1}`}>
               <div class="activity-image">
@@ -315,9 +322,8 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
           </div>
           <div class="gallery-collage">
             {partyPhotos.map((photo, index: number) => (
-              <button class={`gallery-item gallery-polaroid gallery-polaroid-${(index % 6) + 1}`} type="button" data-index={index} data-src={photo.image} data-caption={photo.caption}>
+              <button class={`gallery-item gallery-polaroid gallery-polaroid-${(index % 6) + 1}`} type="button" data-index={index} data-src={photo.image} aria-label={`Otvoriť fotografiu: ${photo.caption}`}>
                 <img src={photo.image} alt={photo.caption} loading="lazy" width="450" height="600">
-                <span>{photo.caption}</span>
               </button>
             ))}
           </div>
@@ -344,7 +350,6 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
     </button>
     <div class="lightbox-content">
       <img id="lightbox-image" src="" alt="">
-      <p id="lightbox-caption" class="text-white text-center mt-4 text-lg"></p>
     </div>
   </div>
 
@@ -664,6 +669,7 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
   .registration-form {
     display: grid;
     gap: 1rem;
+    scroll-margin-top: 5rem;
   }
 
   .registration-field label,
@@ -1479,12 +1485,12 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
 
   .party-reel-embed {
     position: relative;
-    aspect-ratio: 9 / 16;
+    aspect-ratio: 4 / 5;
     overflow: hidden;
     border: 0;
-    border-radius: clamp(1.1rem, 3vw, 1.8rem);
+    border-radius: 0;
     background: #000000;
-    box-shadow: 0 1.25rem 3rem rgba(17, 17, 17, 0.2);
+    box-shadow: none;
     isolation: isolate;
   }
 
@@ -1531,6 +1537,76 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
     outline: none;
   }
 
+  .party-reel-actions {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 12;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 3.2rem;
+    padding: 0.25rem 0.35rem;
+    background: #0b1013;
+  }
+
+  .instagram-action-sprite {
+    position: relative;
+    display: block;
+    flex: 0 0 auto;
+    height: 2.7rem;
+    overflow: hidden;
+  }
+
+  .instagram-action-sprite img {
+    position: absolute;
+    top: 0;
+    width: 28.8rem;
+    max-width: none;
+    height: 2.7rem;
+  }
+
+  .instagram-action-like {
+    width: 4rem;
+  }
+
+  .instagram-action-like img {
+    left: -0.65rem;
+  }
+
+  .instagram-action-comment {
+    width: 3.4rem;
+  }
+
+  .instagram-action-comment img {
+    left: -5.35rem;
+  }
+
+  .instagram-action-repost {
+    width: 3.15rem;
+  }
+
+  .instagram-action-repost img {
+    left: -9.6rem;
+  }
+
+  .instagram-action-share {
+    width: 1.6rem;
+  }
+
+  .instagram-action-share img {
+    left: -13.5rem;
+  }
+
+  .instagram-action-save {
+    width: 1.45rem;
+  }
+
+  .instagram-action-save img {
+    left: -26.1rem;
+  }
+
   .menu-layout {
     display: grid;
     grid-template-columns: minmax(260px, 0.78fr) minmax(0, 1fr);
@@ -1542,13 +1618,13 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
     position: relative;
     display: grid;
     grid-template-columns: auto minmax(0, 1fr);
-    gap: 1.4rem;
+    gap: 1.1rem 1.4rem;
     align-items: center;
-    border: 2px solid var(--party-ink);
-    background: var(--party-paper);
-    padding: clamp(1.5rem, 4vw, 3rem);
-    box-shadow: 10px 10px 0 var(--party-ink);
-    transform: rotate(0.8deg);
+    border: 0;
+    background: transparent;
+    padding: 0;
+    box-shadow: none;
+    transform: none;
   }
 
   .menu-ticket > div {
@@ -1556,26 +1632,17 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
   }
 
   .menu-ticket::after {
-    content: "";
-    position: absolute;
-    right: 1rem;
-    bottom: 1rem;
-    width: 8rem;
-    height: 2rem;
-    background: var(--party-lime);
-    transform: rotate(-3deg);
-    z-index: -1;
+    content: none;
   }
 
   .menu-emoji {
     display: grid;
-    width: 5rem;
-    height: 5rem;
+    width: 3.5rem;
+    height: 3.5rem;
     place-items: center;
-    border: 2px solid var(--party-ink);
-    border-radius: 999px;
-    background: var(--party-lime);
-    font-size: 2.35rem;
+    border: 0;
+    background: transparent;
+    font-size: 2.7rem;
   }
 
   .menu-ticket h3 {
@@ -1750,25 +1817,26 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
 
   .activity-row {
     display: grid;
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-    gap: 0.8rem;
+    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+    gap: clamp(1.25rem, 2.5vw, 2rem);
     margin-top: 2.2rem;
   }
 
   .activity-item {
     position: relative;
-    min-height: 19rem;
-    overflow: hidden;
-    border-top: 2px solid var(--party-ink);
-    padding: 0.7rem 0.5rem 0;
+    min-height: 0;
+    overflow: visible;
+    border: 0;
+    padding: 0;
     text-align: left;
   }
 
   .activity-image {
     position: relative;
     overflow: hidden;
-    border: 2px solid var(--party-ink);
-    background: var(--party-ink);
+    border: 0;
+    border-radius: 0.65rem;
+    background: transparent;
   }
 
   .activity-image img {
@@ -1779,12 +1847,7 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
   }
 
   .activity-image::after {
-    content: "";
-    position: absolute;
-    inset: auto 0 0;
-    height: 40%;
-    background: linear-gradient(180deg, transparent, rgba(17, 17, 17, 0.68));
-    pointer-events: none;
+    content: none;
   }
 
   .activity-emoji-fallback {
@@ -1795,7 +1858,7 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
   }
 
   .activity-copy {
-    padding-top: 0.9rem;
+    padding-top: 0.8rem;
   }
 
   .activity-item h3 {
@@ -1835,59 +1898,40 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
     display: block;
     grid-column: span 2;
     min-width: 0;
-    border: 2px solid var(--party-ink);
-    background: var(--party-paper);
-    padding: 0.5rem 0.5rem 2.4rem;
-    box-shadow: 6px 6px 0 rgba(17, 17, 17, 0.85);
+    overflow: hidden;
+    border: 0;
+    border-radius: 0.75rem;
+    background: transparent;
+    padding: 0;
+    box-shadow: none;
     cursor: pointer;
-    transition: transform 180ms ease, box-shadow 180ms ease;
+    transform: none;
   }
 
   .gallery-polaroid:hover,
   .gallery-polaroid:focus-visible {
-    transform: rotate(0deg) translateY(-0.25rem) !important;
-    box-shadow: 8px 8px 0 var(--party-ink);
-    outline: none;
+    transform: none !important;
+    box-shadow: none;
+  }
+
+  .gallery-polaroid:focus-visible {
+    outline: 3px solid var(--party-purple);
+    outline-offset: 3px;
   }
 
   .gallery-polaroid img {
+    display: block;
     width: 100%;
     aspect-ratio: 1 / 1;
     object-fit: cover;
     filter: saturate(1.06) contrast(1.05);
+    transition: transform 220ms ease, filter 220ms ease;
   }
 
-  .gallery-polaroid span {
-    position: absolute;
-    left: 0.65rem;
-    right: 0.65rem;
-    bottom: 0.55rem;
-    overflow: hidden;
-    color: var(--party-ink);
-    font-weight: 900;
-    line-height: 1;
-    text-align: left;
-    text-overflow: ellipsis;
-    text-transform: uppercase;
-    white-space: nowrap;
-  }
-
-  .gallery-polaroid-1,
-  .gallery-polaroid-5 {
-    transform: rotate(-1.5deg);
-  }
-
-  .gallery-polaroid-2,
-  .gallery-polaroid-6 {
-    transform: rotate(1.2deg);
-  }
-
-  .gallery-polaroid-3 {
-    transform: rotate(-0.4deg);
-  }
-
-  .gallery-polaroid-4 {
-    transform: rotate(1.8deg);
+  .gallery-polaroid:hover img,
+  .gallery-polaroid:focus-visible img {
+    transform: scale(1.025);
+    filter: saturate(1.1) contrast(1.04);
   }
 
   .registration-poster-section {
@@ -2077,7 +2121,7 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
     }
 
     .party-reel-embed {
-      border-radius: 1.25rem;
+      border-radius: 0;
     }
 
     .party-reel-instagram {
@@ -2187,8 +2231,9 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
       width: 100%;
       max-width: 100%;
       overflow: visible;
-      padding: 1.25rem;
-      transform: rotate(0.35deg);
+      gap: 0.75rem;
+      padding: 0;
+      transform: none;
     }
 
     .menu-ticket h3 {
@@ -2268,31 +2313,31 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
       min-height: 0;
       scroll-snap-align: start;
       scroll-snap-stop: always;
-      border: 2px solid var(--party-ink);
-      background: var(--party-paper);
-      padding: 0.65rem 0.65rem 0.9rem;
-      box-shadow: 7px 7px 0 var(--party-ink);
-      transform: rotate(-0.8deg);
+      border: 0;
+      background: transparent;
+      padding: 0;
+      box-shadow: none;
+      transform: none;
     }
 
     .activity-item:nth-child(even) {
-      transform: rotate(0.8deg);
+      transform: none;
     }
 
     .activity-item-2 {
-      background: var(--party-paper);
+      background: transparent;
     }
 
     .activity-item-3 {
-      background: var(--party-paper);
+      background: transparent;
     }
 
     .activity-image {
-      transform: rotate(-1deg);
+      transform: none;
     }
 
     .activity-item:nth-child(even) .activity-image {
-      transform: rotate(1deg);
+      transform: none;
     }
 
     .activity-image img {
@@ -2300,7 +2345,7 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
     }
 
     .activity-copy {
-      padding: 0.8rem 0.25rem 0;
+      padding: 0.8rem 0 0;
     }
 
     .activity-item h3 {
@@ -2344,10 +2389,10 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
     .gallery-polaroid {
       flex: 0 0 min(82vw, 21rem);
       grid-column: auto;
-      padding: 0.55rem 0.55rem 2.1rem;
+      padding: 0;
       scroll-snap-align: start;
       scroll-snap-stop: always;
-      box-shadow: 7px 7px 0 var(--party-ink);
+      box-shadow: none;
     }
 
     .gallery-polaroid img {
@@ -2601,7 +2646,7 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
 </script>
 
 <script type="module">
-const items=document.querySelectorAll(".gallery-item"),lb=document.getElementById("lightbox"),lbImg=document.getElementById("lightbox-image"),lbCap=document.getElementById("lightbox-caption"),closeBtn=document.getElementById("lightbox-close"),prevBtn=document.getElementById("lightbox-prev"),nextBtn=document.getElementById("lightbox-next");let idx=0;const data=Array.from(items).map(i=>({src:i.getAttribute("data-src")||"",caption:i.getAttribute("data-caption")||""}));function open(i){idx=i;update();lb?.classList.add("active");document.body.style.overflow="hidden";}function close(){lb?.classList.remove("active");document.body.style.overflow="";}function update(){if(lbImg&&lbCap){lbImg.src=data[idx].src;lbCap.textContent=data[idx].caption;}}function next(){idx=(idx+1)%data.length;update();}function prev(){idx=(idx-1+data.length)%data.length;update();}items.forEach((el,i)=>{el.addEventListener("click",()=>open(i));});closeBtn?.addEventListener("click",close);nextBtn?.addEventListener("click",next);prevBtn?.addEventListener("click",prev);lb?.addEventListener("click",e=>{if(e.target===lb)close();});document.addEventListener("keydown",e=>{if(lb?.classList.contains("active")){if(e.key==="Escape")close();if(e.key==="ArrowRight")next();if(e.key==="ArrowLeft")prev();}});
+const items=document.querySelectorAll(".gallery-item"),lb=document.getElementById("lightbox"),lbImg=document.getElementById("lightbox-image"),closeBtn=document.getElementById("lightbox-close"),prevBtn=document.getElementById("lightbox-prev"),nextBtn=document.getElementById("lightbox-next");let idx=0;const data=Array.from(items).map(i=>i.getAttribute("data-src")||"");function open(i){idx=i;update();lb?.classList.add("active");document.body.style.overflow="hidden";}function close(){lb?.classList.remove("active");document.body.style.overflow="";}function update(){if(lbImg)lbImg.src=data[idx];}function next(){idx=(idx+1)%data.length;update();}function prev(){idx=(idx-1+data.length)%data.length;update();}items.forEach((el,i)=>{el.addEventListener("click",()=>open(i));});closeBtn?.addEventListener("click",close);nextBtn?.addEventListener("click",next);prevBtn?.addEventListener("click",prev);lb?.addEventListener("click",e=>{if(e.target===lb)close();});document.addEventListener("keydown",e=>{if(lb?.classList.contains("active")){if(e.key==="Escape")close();if(e.key==="ArrowRight")next();if(e.key==="ArrowLeft")prev();}});
 </script>
 
 <script type="module">

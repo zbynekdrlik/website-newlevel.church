@@ -24,6 +24,32 @@ supabase secrets set SMS_TEST_MODE="true"
 supabase secrets set SMS_TEST_ALLOWED_NUMBERS="+421..."
 ```
 
+`CRON_SECRET` must also be stored in Supabase Vault under the exact name
+`dispatch_message_cron_secret`. Both values must be identical: the database
+cron reads the Vault value into the `x-cron-secret` header and the
+`dispatch-message-cron` Edge Function compares it with `CRON_SECRET`.
+
+Create one random value, set it as the Edge Function secret, and store the same
+value in Vault through the Supabase SQL editor:
+
+```bash
+CRON_SECRET_VALUE="$(openssl rand -hex 32)"
+supabase secrets set CRON_SECRET="$CRON_SECRET_VALUE" \
+  --project-ref kbpuhcuiljbwgxgiauku
+```
+
+```sql
+select vault.create_secret(
+  'same-value-as-CRON_SECRET',
+  'dispatch_message_cron_secret',
+  'Shared secret for the dispatch-message-cron Edge Function'
+);
+```
+
+Before enabling or repairing the cron in an existing environment, inspect
+`invitation.message_queue` for overdue `queued` rows. Once authentication is
+fixed, all due rows are eligible for immediate delivery.
+
 Cloudflare Pages only needs public/static site config. Do not put `RESEND_API_KEY`,
 `INFOBIP_API_KEY`, or `SUPABASE_SERVICE_ROLE_KEY` into browser code.
 
