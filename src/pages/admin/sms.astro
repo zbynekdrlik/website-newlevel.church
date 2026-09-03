@@ -774,12 +774,23 @@
         updateEmailSubjectPreview();
       }
 
+      function formatEventDate(value) {
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+        const [year, month, day] = value.split("-").map(Number);
+        return new Intl.DateTimeFormat("sk-SK", {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+          timeZone: "Europe/Bratislava",
+        }).format(new Date(Date.UTC(year, month - 1, day, 12)));
+      }
+
       function renderPreviewTemplate(template) {
         const first =
           state.contacts.find((contact) => state.selected.has(contact.id)) ||
           state.contacts.find((contact) => contact.matches) ||
           state.contacts[0];
-        const eventDate = state.event?.event_date || $("[data-event-date]").value || "";
+        const eventDate = formatEventDate(state.event?.event_date || $("[data-event-date]").value || "");
         return template
           .replace(/\{\{\s*first_name\s*\}\}/g, first?.name?.split(/\s+/)[0] || "Ahoj")
           .replace(/\{\{\s*name\s*\}\}/g, first?.name || "")

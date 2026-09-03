@@ -29,3 +29,23 @@ Deno.test("supports whitespace inside subject placeholders", () => {
 
   assertEquals(subject, "Pozvánka pre Mária");
 });
+
+Deno.test("formats an event date naturally in Slovak", () => {
+  const message = renderContactTemplate(
+    "Stretneme sa {{event_date}}.",
+    {},
+    { event_date: "2026-09-04", title: "New Level Youth" },
+  );
+
+  assertEquals(message, "Stretneme sa 4. septembra 2026.");
+});
+
+Deno.test("formats the date from starts_at when event_date is unavailable", () => {
+  const message = renderContactTemplate(
+    "Stretneme sa {{event_date}}.",
+    {},
+    { starts_at: "2026-09-04T18:30:00+02:00" },
+  );
+
+  assertEquals(message, "Stretneme sa 4. septembra 2026.");
+});
