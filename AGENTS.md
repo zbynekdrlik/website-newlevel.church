@@ -13,6 +13,7 @@
 - Campaign WhatsApp messages must use an approved Meta template. The default is `youth_invitation_sk` with language `sk`; body parameter 1 is the contact's first name and parameter 2 is the localized event date.
 - WhatsApp free text is only appropriate inside the 24-hour customer-service window.
 - Provider credentials and the service-role key belong only in Supabase secrets, never browser code.
+- Party registrations are handled by `register-party`; it sends Discord notifications directly with the `DISCORD_PARTY_WEBHOOK_URL` Supabase secret. Do not reintroduce n8n into this path.
 - Before enabling or repairing the cron, inspect overdue queued rows: all due rows can be delivered immediately once the cron becomes healthy.
 
 ## Commands

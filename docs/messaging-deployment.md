@@ -26,6 +26,18 @@ supabase secrets set WHATSAPP_ACCESS_TOKEN="..."
 supabase secrets set WHATSAPP_PHONE_NUMBER_ID="..."
 ```
 
+Discord notifications for new Party registrations use an incoming webhook that
+targets the `PARTY registracia` thread. Configure it without writing the secret
+to the repository or shell history:
+
+```bash
+./configure-discord-webhook.sh
+```
+
+The script asks for the base Discord webhook URL and the thread ID separately,
+then stores the combined `DISCORD_PARTY_WEBHOOK_URL` in the linked Supabase
+project.
+
 `CRON_SECRET` must also be stored in Supabase Vault under the exact name
 `dispatch_message_cron_secret`. Both values must be identical: the database
 cron reads the Vault value into the `x-cron-secret` header and the

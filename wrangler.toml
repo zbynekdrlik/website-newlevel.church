@@ -4,7 +4,6 @@ pages_build_output_dir = "dist"
 
 [vars]
 UPDATE_TOKEN = "eae4131880546e0581bb16cebd2e6ad4cc8395d331dd12695f9c07c6e6a21b67"
-N8N_WEBHOOK_URL = "https://n8n-wh.newlevel.media/webhook/party-register"
 FOOD_REGISTRATION_BASE_COUNT = "0"
 
 [[kv_namespaces]]
