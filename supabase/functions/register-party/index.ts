@@ -123,15 +123,6 @@ Deno.serve(async (req) => {
     return new Response(null, { status: 204, headers: corsHeaders(req) });
   }
 
-  const basics = validateRequestBasics(req);
-  if (!basics.ok) return basics.response;
-
-  const parsed = await readJsonBody(req);
-  if (!parsed.ok) {
-    return json(req, { success: false, error: parsed.error }, 400);
-  }
-
-  const body = parsed.data;
   const admin = createAdminClient(readServiceKey());
   if (!admin) {
     return json(
@@ -141,6 +132,38 @@ Deno.serve(async (req) => {
     );
   }
 
+  if (req.method === "GET") {
+    const requestedDate = new URL(req.url).searchParams.get("eventDate");
+    const eventDate = requestedDate || nextFridayDate();
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(eventDate)) {
+      return json(req, { success: false, error: "Invalid eventDate" }, 400);
+    }
+
+    const { data, error } = await (admin as any).rpc(
+      "get_party_food_registration_count",
+      { p_event_date: eventDate },
+    );
+    if (error) {
+      return json(req, { success: false, error: "Count failed" }, 500);
+    }
+
+    const count = Number(data);
+    return json(req, {
+      success: true,
+      eventDate,
+      count: Number.isFinite(count) ? count : 0,
+    });
+  }
+
+  const basics = validateRequestBasics(req);
+  if (!basics.ok) return basics.response;
+
+  const parsed = await readJsonBody(req);
+  if (!parsed.ok) {
+    return json(req, { success: false, error: parsed.error }, 400);
+  }
+
+  const body = parsed.data;
   const eventDate = typeof body.eventDate === "string" && body.eventDate
     ? body.eventDate
     : nextFridayDate();
