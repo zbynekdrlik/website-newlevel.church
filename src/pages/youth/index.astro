@@ -24,31 +24,36 @@ const partyReels = [
     url: 'https://www.instagram.com/reel/DVfGHeagLHp/?utm_source=ig_web_copy_link&igsh=NTc4MTIwNjQ2YQ==',
     embedUrl: 'https://www.instagram.com/reel/DVfGHeagLHp/embed/',
     title: 'Party reel 01',
+    likes: '547.1K',
+    comments: '6.9K',
   },
   {
     url: 'https://www.instagram.com/reel/DbGrmxpiKg4/?utm_source=ig_web_copy_link&igsh=NTc4MTIwNjQ2YQ==',
     embedUrl: 'https://www.instagram.com/reel/DbGrmxpiKg4/embed/',
     title: 'Party reel 02',
+    likes: '431',
+    comments: '21',
   },
   {
     url: 'https://www.instagram.com/reel/DU_FOveIEKa/?utm_source=ig_web_copy_link&igsh=NTc4MTIwNjQ2YQ==',
     embedUrl: 'https://www.instagram.com/reel/DU_FOveIEKa/embed/',
     title: 'Party reel 03',
+    likes: '170K',
+    comments: '283',
   },
   {
     url: 'https://www.instagram.com/reel/Dau3JRKufJB/?utm_source=ig_web_copy_link&igsh=NTc4MTIwNjQ2YQ==',
     embedUrl: 'https://www.instagram.com/reel/Dau3JRKufJB/embed/',
     title: 'Party reel 04',
+    likes: '8,784',
+    comments: '16',
   },
   {
     url: 'https://www.instagram.com/reel/DZJYhtihpjz/?utm_source=ig_web_copy_link&igsh=NTc4MTIwNjQ2YQ==',
     embedUrl: 'https://www.instagram.com/reel/DZJYhtihpjz/embed/',
     title: 'Party reel 05',
-  },
-  {
-    url: 'https://www.instagram.com/reel/DbdPbjCNsW6/?utm_source=ig_web_copy_link&igsh=NTc4MTIwNjQ2YQ==',
-    embedUrl: 'https://www.instagram.com/reel/DbdPbjCNsW6/embed/',
-    title: 'Party reel 06',
+    likes: '51.3K',
+    comments: '1,840',
   },
 ];
 const quickInfoIcons = [
@@ -195,8 +200,14 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
                   </svg>
                 </a>
                 <div class="party-reel-actions" aria-hidden="true">
-                  <span class="instagram-action-sprite instagram-action-like"><img src="/images/instagram-actions.png" alt="" width="960" height="90"></span>
-                  <span class="instagram-action-sprite instagram-action-comment"><img src="/images/instagram-actions.png" alt="" width="960" height="90"></span>
+                  <span class="party-reel-metric">
+                    <span class="instagram-action-sprite instagram-action-like"><img src="/images/instagram-actions.png" alt="" width="960" height="90"></span>
+                    <strong>{reel.likes}</strong>
+                  </span>
+                  <span class="party-reel-metric">
+                    <span class="instagram-action-sprite instagram-action-comment"><img src="/images/instagram-actions.png" alt="" width="960" height="90"></span>
+                    <strong>{reel.comments}</strong>
+                  </span>
                   <span class="instagram-action-sprite instagram-action-repost"><img src="/images/instagram-actions.png" alt="" width="960" height="90"></span>
                   <span class="instagram-action-sprite instagram-action-share"><img src="/images/instagram-actions.png" alt="" width="960" height="90"></span>
                   <span class="instagram-action-sprite instagram-action-save"><img src="/images/instagram-actions.png" alt="" width="960" height="90"></span>
@@ -1544,8 +1555,9 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
     left: 0;
     z-index: 12;
     display: flex;
+    gap: 0.5rem;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
     height: 3.2rem;
     padding: 0.25rem 0.35rem;
     background: #0b1013;
@@ -1568,7 +1580,7 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
   }
 
   .instagram-action-like {
-    width: 4rem;
+    width: 1.7rem;
   }
 
   .instagram-action-like img {
@@ -1576,7 +1588,7 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
   }
 
   .instagram-action-comment {
-    width: 3.4rem;
+    width: 1.55rem;
   }
 
   .instagram-action-comment img {
@@ -1584,7 +1596,7 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
   }
 
   .instagram-action-repost {
-    width: 3.15rem;
+    width: 1.45rem;
   }
 
   .instagram-action-repost img {
@@ -1601,10 +1613,25 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
 
   .instagram-action-save {
     width: 1.45rem;
+    margin-left: auto;
   }
 
   .instagram-action-save img {
     left: -26.1rem;
+  }
+
+  .party-reel-metric {
+    display: inline-flex;
+    gap: 0.18rem;
+    align-items: center;
+  }
+
+  .party-reel-metric strong {
+    color: #ffffff;
+    font-family: Inter, system-ui, sans-serif;
+    font-size: 0.78rem;
+    line-height: 1;
+    white-space: nowrap;
   }
 
   .menu-layout {
