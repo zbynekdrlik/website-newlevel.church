@@ -59,16 +59,18 @@ async function sendDiscordNotification(
       title: "Nová registrácia na Party",
       color: 0x9acd32,
       fields: [
-        { name: "Meno", value: name, inline: false },
-        { name: "Email", value: email, inline: false },
-        { name: "Telefón", value: phone, inline: false },
+        { name: "Meno", value: name, inline: true },
+        { name: "Telefón", value: phone, inline: true },
         { name: "Jedlo", value: food, inline: true },
+        { name: "Email", value: email, inline: true },
         {
           name: "Termín",
           value: discordEventDate(eventDate),
           inline: true,
         },
-        { name: "Správa", value: message, inline: false },
+        ...(message === "žiadna"
+          ? []
+          : [{ name: "Správa", value: message, inline: false }]),
       ],
       footer: { text: "Reaguj ✅ na potvrdenie registrácie." },
       timestamp: new Date().toISOString(),
