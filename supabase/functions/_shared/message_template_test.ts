@@ -35,6 +35,7 @@ Deno.test("formats an event date naturally in Slovak", () => {
     "Stretneme sa {{event_date}}.",
     {},
     { event_date: "2026-09-04", title: "New Level Youth" },
+    "2026-08-30T12:00:00+02:00",
   );
 
   assertEquals(message, "Stretneme sa 4. septembra 2026.");
@@ -45,7 +46,19 @@ Deno.test("formats the date from starts_at when event_date is unavailable", () =
     "Stretneme sa {{event_date}}.",
     {},
     { starts_at: "2026-09-04T18:30:00+02:00" },
+    "2026-08-30T12:00:00+02:00",
   );
 
   assertEquals(message, "Stretneme sa 4. septembra 2026.");
+});
+
+Deno.test("adds zajtra when the message is sent the day before the event", () => {
+  const message = renderContactTemplate(
+    "Stretneme sa {{event_date}}.",
+    {},
+    { event_date: "2026-09-04", title: "New Level Youth" },
+    "2026-09-03T18:30:00+02:00",
+  );
+
+  assertEquals(message, "Stretneme sa zajtra 4. septembra 2026.");
 });

@@ -669,7 +669,7 @@ Deno.serve(async (req) => {
       const queuedAt = new Date(scheduledFor).toISOString();
       const rows = recipients.flatMap((contact: AudienceContact) => {
         const bodyText = message
-          ? renderContactTemplate(message, contact, event)
+          ? renderContactTemplate(message, contact, event, queuedAt)
           : `[WhatsApp template: ${whatsappTemplateName}]`;
         const baseRow = {
           batch_id: batch.id,
@@ -716,10 +716,11 @@ Deno.serve(async (req) => {
             channel: "email",
             recipient: contact.email,
             template_name: null,
-            subject: renderContactTemplate(subject, contact, event).slice(
-              0,
-              180,
-            ),
+            subject: renderContactTemplate(subject, contact, event, queuedAt)
+              .slice(
+                0,
+                180,
+              ),
           });
         }
 
@@ -891,7 +892,7 @@ Deno.serve(async (req) => {
         automation_id: automationId,
         channel: "sms",
         recipient: contact.normalizedPhone,
-        body: renderContactTemplate(message, contact, event),
+        body: renderContactTemplate(message, contact, event, scheduledFor),
         template_name: sender,
         scheduled_for: new Date(scheduledFor).toISOString(),
         subject: name,

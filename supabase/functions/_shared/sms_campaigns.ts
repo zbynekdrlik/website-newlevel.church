@@ -237,7 +237,12 @@ export async function materializeSmsCampaign(
     automation_id: campaign.automation_id,
     channel: "sms",
     recipient: contact.normalizedPhone,
-    body: renderSmsMessage(campaign.message, contact, event),
+    body: renderSmsMessage(
+      campaign.message,
+      contact,
+      event,
+      campaign.scheduled_for,
+    ),
     template_name: sender,
     scheduled_for: new Date(campaign.scheduled_for).toISOString(),
     subject: "New Level SMS",
