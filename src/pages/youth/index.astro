@@ -2,6 +2,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import page from '../../content/party/page.json';
 import contactInfo from '../../content/settings/contact.json';
+import general from '../../content/settings/general.json';
 import { getPartyPhotos } from '../../utils/gallery';
 
 const partyPhotos = getPartyPhotos();
@@ -64,7 +65,7 @@ const quickInfoIcons = [
 const countdownTitleLines = page.countdown.title === 'Registrácia sa uzatvára o'
   ? ['Registrácia', 'sa uzatvára o']
   : [page.countdown.title];
-const youthInstagramUrl = 'https://www.instagram.com/newlevel_youth/';
+const youthInstagramUrl = general.social.instagramYouth;
 const foodRegistrationBaseCount = Number(page.countdown.foodRegistrationBaseCount ?? 0);
 const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.16c3.2 0 3.58.01 4.85.07 3.25.15 4.77 1.69 4.92 4.92.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.15 3.25-1.67 4.77-4.92 4.92-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-3.25-.15-4.77-1.67-4.92-4.92-.06-1.27-.07-1.65-.07-4.85s.01-3.58.07-4.85c.15-3.25 1.67-4.77 4.92-4.92 1.27-.06 1.65-.07 4.85-.07Zm0 2.13c-3.15 0-3.52.01-4.75.07-2.17.1-2.79 1.13-2.89 2.89-.06 1.23-.07 1.6-.07 4.75s.01 3.52.07 4.75c.1 1.76.72 2.79 2.89 2.89 1.23.06 1.6.07 4.75.07s3.52-.01 4.75-.07c2.17-.1 2.79-1.13 2.89-2.89.06-1.23.07-1.6.07-4.75s-.01-3.52-.07-4.75c-.1-1.76-.72-2.79-2.89-2.89-1.23-.06-1.6-.07-4.75-.07Zm0 3.55a4.16 4.16 0 1 1 0 8.32 4.16 4.16 0 0 1 0-8.32Zm0 2.13a2.03 2.03 0 1 0 0 4.06 2.03 2.03 0 0 0 0-4.06Zm4.4-3.75a1.38 1.38 0 1 1 0 2.76 1.38 1.38 0 0 1 0-2.76Z"></path></svg>';
 ---
@@ -323,7 +324,172 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
       </div>
     </section>
 
-    <!-- Section 5: Photo Gallery -->
+    <!-- Section 5: Spotify Playlist -->
+    <section id="playlist" class="poster-section spotify-poster-section" aria-labelledby="spotify-playlist-title">
+      <div class="poster-wrap spotify-layout">
+        <div class="spotify-header">
+          <div>
+            <h2 id="spotify-playlist-title">{page.spotify.title}</h2>
+            <p>New Level Youth playlist</p>
+          </div>
+          <div class="spotify-actions">
+            <button type="button" id="spotify-play-toggle" class="poster-button poster-button-lime spotify-play-toggle" disabled data-state="paused">
+              <svg class="spotify-control-icon spotify-icon-play" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="m8 5 11 7-11 7V5Z"></path>
+              </svg>
+              <svg class="spotify-control-icon spotify-icon-pause" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M8 5v14M16 5v14"></path>
+              </svg>
+              <span data-spotify-control-label>Načítavam…</span>
+            </button>
+          </div>
+        </div>
+        <div class="spotify-player-shell">
+          <div id="spotify-embed" data-spotify-url={page.spotify.playlistUrl}></div>
+        </div>
+        <p id="spotify-playback-status" class="spotify-playback-status" aria-live="polite">
+          Spotify prehrávač sa načítava.
+        </p>
+      </div>
+    </section>
+
+    <button type="button" id="spotify-floating-toggle" class="spotify-floating-toggle" hidden data-state="playing" aria-label="Pozastaviť hudbu">
+      <span class="spotify-floating-indicator" aria-hidden="true"></span>
+      <svg class="spotify-control-icon spotify-icon-play" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="m8 5 11 7-11 7V5Z"></path>
+      </svg>
+      <svg class="spotify-control-icon spotify-icon-pause" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M8 5v14M16 5v14"></path>
+      </svg>
+      <span data-spotify-floating-label>Pauza</span>
+    </button>
+
+    <script is:inline>
+      (() => {
+        const section = document.getElementById('playlist');
+        const embed = document.getElementById('spotify-embed');
+        const playToggle = document.getElementById('spotify-play-toggle');
+        const floatingToggle = document.getElementById('spotify-floating-toggle');
+        const status = document.getElementById('spotify-playback-status');
+
+        if (!section || !embed || !playToggle || !floatingToggle || !status) return;
+
+        const controlLabel = playToggle.querySelector('[data-spotify-control-label]');
+        const floatingLabel = floatingToggle.querySelector('[data-spotify-floating-label]');
+        const spotifyUrl = embed.dataset.spotifyUrl;
+        let controller = null;
+        let controllerReady = false;
+        let isPlaying = false;
+        let hasStarted = false;
+        let sectionInView = false;
+        let autoPlayAttempted = false;
+        let autoPlayTimer = 0;
+
+        const updateControls = () => {
+          const state = isPlaying ? 'playing' : 'paused';
+          playToggle.dataset.state = state;
+          floatingToggle.dataset.state = state;
+          controlLabel.textContent = isPlaying ? 'Pauza' : 'Prehrať';
+          floatingLabel.textContent = isPlaying ? 'Pauza' : 'Prehrať';
+          floatingToggle.setAttribute('aria-label', isPlaying ? 'Pozastaviť hudbu' : 'Spustiť hudbu');
+          floatingToggle.hidden = !hasStarted || sectionInView;
+        };
+
+        const markPlaying = () => {
+          window.clearTimeout(autoPlayTimer);
+          isPlaying = true;
+          hasStarted = true;
+          playToggle.classList.remove('spotify-play-attention');
+          status.textContent = 'Prehráva sa playlist PARTY NL. Hudba pokračuje aj počas scrollovania.';
+          updateControls();
+        };
+
+        const tryAutoPlay = () => {
+          if (!controllerReady || !sectionInView || autoPlayAttempted) return;
+          autoPlayAttempted = true;
+          status.textContent = 'Spúšťam Youth playlist…';
+          controller.play();
+          autoPlayTimer = window.setTimeout(() => {
+            if (isPlaying) return;
+            playToggle.classList.add('spotify-play-attention');
+            status.textContent = 'Prehliadač zablokoval automatické prehrávanie. Spusti hudbu jedným kliknutím.';
+          }, 1800);
+        };
+
+        const togglePlayback = () => {
+          if (!controllerReady) return;
+          window.clearTimeout(autoPlayTimer);
+          playToggle.classList.remove('spotify-play-attention');
+
+          if (isPlaying) {
+            controller.pause();
+            isPlaying = false;
+            status.textContent = 'Hudba je pozastavená.';
+            updateControls();
+            return;
+          }
+
+          status.textContent = 'Spúšťam Youth playlist…';
+          controller.resume();
+          autoPlayTimer = window.setTimeout(() => {
+            if (isPlaying) return;
+            status.textContent = 'Ak hudba nezačala hrať, použi zelené tlačidlo priamo v Spotify prehrávači.';
+          }, 1800);
+        };
+
+        playToggle.addEventListener('click', togglePlayback);
+        floatingToggle.addEventListener('click', togglePlayback);
+
+        const observer = new IntersectionObserver(([entry]) => {
+          sectionInView = entry.isIntersecting && entry.intersectionRatio >= 0.3;
+          updateControls();
+          tryAutoPlay();
+        }, { threshold: [0, 0.3, 0.6] });
+        observer.observe(section);
+
+        window.onSpotifyIframeApiReady = (IFrameAPI) => {
+          IFrameAPI.createController(embed, {
+            width: '100%',
+            height: 352,
+            url: spotifyUrl,
+          }, (EmbedController) => {
+            controller = EmbedController;
+
+            controller.addListener('ready', () => {
+              controllerReady = true;
+              playToggle.disabled = false;
+              controlLabel.textContent = 'Prehrať';
+              tryAutoPlay();
+            });
+
+            controller.addListener('playback_started', markPlaying);
+            controller.addListener('playback_update', (event) => {
+              const nextIsPlaying = !event.data.isPaused && !event.data.isBuffering;
+              if (nextIsPlaying) {
+                markPlaying();
+                return;
+              }
+
+              if (isPlaying && event.data.isPaused) {
+                isPlaying = false;
+                status.textContent = 'Hudba je pozastavená.';
+                updateControls();
+              }
+            });
+          });
+        };
+
+        if (!document.querySelector('script[data-spotify-iframe-api]')) {
+          const script = document.createElement('script');
+          script.src = 'https://open.spotify.com/embed/iframe-api/v1';
+          script.async = true;
+          script.dataset.spotifyIframeApi = 'true';
+          document.body.appendChild(script);
+        }
+      })();
+    </script>
+
+    <!-- Section 6: Photo Gallery -->
     <section class="poster-section gallery-poster-section">
       <div class="poster-wrap">
         <div class="gallery-layout">
@@ -364,7 +530,7 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
     </div>
   </div>
 
-    <!-- Section 6: Registration Form -->
+    <!-- Section 7: Registration Form -->
     <section id="registracia" class="registration-poster-section">
       <div class="registration-poster-noise" aria-hidden="true"></div>
       <div class="registration-poster-wrap">
@@ -455,14 +621,14 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
     </div>
     </section>
 
-    <!-- Section 7: CTA Banner -->
+    <!-- Section 8: CTA Banner -->
     <section class="poster-section final-cta-section">
       <div class="poster-wrap final-cta-layout">
         <div>
           <h2>{page.cta.title}</h2>
           <p>{page.cta.text}</p>
         </div>
-        <a href={page.cta.buttonUrl} target="_blank" rel="noopener noreferrer" class="poster-button poster-button-lime">
+        <a href={youthInstagramUrl} target="_blank" rel="noopener noreferrer" class="poster-button poster-button-lime">
           {page.cta.buttonText}
         </a>
       </div>
@@ -1347,6 +1513,7 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
   .menu-poster-section,
   .party-reels-section,
   .activities-poster-section,
+  .spotify-poster-section,
   .gallery-poster-section,
   .registration-poster-section {
     padding: clamp(3.5rem, 7vw, 6rem) 0;
@@ -1714,23 +1881,35 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
     padding: clamp(1.5rem, 4vw, 2.5rem);
   }
 
+  .countdown-poster {
+    border: 0;
+    padding: 0;
+    scroll-margin-top: 6rem;
+  }
+
   .countdown-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 0.8rem;
+    gap: 0;
     margin-top: 2rem;
   }
 
   .countdown-grid div {
-    border: 2px solid var(--party-paper);
-    background: var(--party-lime);
-    color: var(--party-ink);
-    padding: 1rem 0.75rem;
+    position: relative;
+    border: 0;
+    background: transparent;
+    color: var(--party-paper);
+    padding: 0.75rem clamp(0.35rem, 1.6vw, 1rem);
     text-align: center;
+  }
+
+  .countdown-grid div + div {
+    border-left: 1px solid rgba(246, 244, 238, 0.24);
   }
 
   .countdown-number {
     display: block;
+    color: var(--party-lime);
     font-family: var(--poster-display);
     font-size: 4.8rem;
     font-weight: 900;
@@ -1826,7 +2005,8 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
   .counter-poster {
     display: grid;
     align-content: center;
-    background: var(--party-purple);
+    border: 0;
+    background: transparent;
     color: var(--party-paper);
     text-align: center;
   }
@@ -1836,6 +2016,7 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
   }
 
   .counter-number {
+    color: var(--party-purple);
     font-family: var(--poster-display);
     font-size: 8rem;
     font-weight: 900;
@@ -1905,6 +2086,172 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
     font-size: 0.78rem;
     font-weight: 700;
     line-height: 1.28;
+  }
+
+  .spotify-poster-section {
+    padding: clamp(2.75rem, 5vw, 4rem) 0;
+    background:
+      radial-gradient(circle at 8% 10%, rgba(123, 62, 255, 0.22), transparent 24rem),
+      var(--party-ink);
+    color: var(--party-paper);
+  }
+
+  .spotify-layout {
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  .spotify-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 1.25rem;
+    align-items: end;
+  }
+
+  .spotify-header h2 {
+    margin: 0;
+    color: var(--party-paper);
+    font-family: var(--poster-display);
+    font-size: clamp(3.2rem, 6vw, 5rem);
+    font-weight: 900;
+    line-height: 0.88;
+    text-transform: uppercase;
+  }
+
+  .spotify-header p {
+    margin: 0.55rem 0 0;
+    color: rgba(246, 244, 238, 0.58);
+    font-family: var(--poster-mono);
+    font-size: 0.72rem;
+    font-weight: 700;
+    line-height: 1.2;
+    text-transform: uppercase;
+  }
+
+  .spotify-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1rem;
+    align-items: center;
+  }
+
+  .spotify-play-toggle {
+    min-height: 2.55rem;
+    gap: 0.55rem;
+    padding: 0.65rem 0.9rem;
+    font-size: 0.78rem;
+    box-shadow: 4px 4px 0 var(--party-purple);
+    cursor: pointer;
+  }
+
+  .spotify-play-toggle:disabled {
+    cursor: wait;
+    opacity: 0.62;
+  }
+
+  .spotify-play-toggle.spotify-play-attention {
+    animation: spotify-attention 1.15s ease-in-out infinite alternate;
+  }
+
+  @keyframes spotify-attention {
+    from { box-shadow: 4px 4px 0 var(--party-purple); }
+    to { box-shadow: 6px 6px 0 var(--party-purple); transform: translate(-1px, -1px); }
+  }
+
+  .spotify-control-icon {
+    width: 1.05rem;
+    height: 1.05rem;
+    fill: currentColor;
+    stroke: currentColor;
+    stroke-width: 2.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  [data-state="paused"] .spotify-icon-pause,
+  [data-state="playing"] .spotify-icon-play {
+    display: none;
+  }
+
+  .spotify-playback-status {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    margin: -1px;
+    padding: 0;
+    border: 0;
+    white-space: nowrap;
+  }
+
+  .spotify-player-shell {
+    position: relative;
+    z-index: 1;
+    min-width: 0;
+    overflow: hidden;
+    border-radius: 0.75rem;
+    background: #121212;
+  }
+
+  .spotify-player-shell iframe {
+    display: block;
+    width: 100%;
+    height: 352px;
+    border: 0;
+    border-radius: 0.5rem;
+  }
+
+  .spotify-floating-toggle {
+    position: fixed;
+    right: clamp(0.85rem, 2.2vw, 1.5rem);
+    bottom: clamp(0.85rem, 2.2vw, 1.5rem);
+    z-index: 60;
+    display: inline-flex;
+    min-height: 3rem;
+    align-items: center;
+    gap: 0.55rem;
+    border: 2px solid var(--party-paper);
+    border-radius: 999px;
+    background: var(--party-ink);
+    color: var(--party-paper);
+    padding: 0.7rem 1rem;
+    font-family: var(--poster-sans);
+    font-size: 0.78rem;
+    font-weight: 900;
+    line-height: 1;
+    text-transform: uppercase;
+    box-shadow: 5px 5px 0 var(--party-purple);
+    cursor: pointer;
+    transition: transform 160ms ease, box-shadow 160ms ease;
+  }
+
+  .spotify-floating-toggle[hidden] {
+    display: none;
+  }
+
+  .spotify-floating-toggle:hover,
+  .spotify-floating-toggle:focus-visible {
+    box-shadow: 5px 5px 0 var(--party-lime);
+    transform: translate(-1px, -1px);
+  }
+
+  .spotify-floating-indicator {
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 50%;
+    background: #1ed760;
+    box-shadow: 0 0 0 0 rgba(30, 215, 96, 0.55);
+  }
+
+  .spotify-floating-toggle[data-state="playing"] .spotify-floating-indicator {
+    animation: spotify-playing 1.4s ease-out infinite;
+  }
+
+  @keyframes spotify-playing {
+    0% { box-shadow: 0 0 0 0 rgba(30, 215, 96, 0.55); }
+    75%, 100% { box-shadow: 0 0 0 0.45rem rgba(30, 215, 96, 0); }
   }
 
   .gallery-layout {
@@ -2019,7 +2366,26 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
     }
 
     .counter-poster {
-      min-height: 12rem;
+      display: flex;
+      min-height: 0;
+      align-items: baseline;
+      justify-content: center;
+      gap: 0.65rem;
+      padding: 0.9rem 0 0;
+      border-top: 1px solid rgba(246, 244, 238, 0.24);
+      text-align: center;
+    }
+
+    .counter-number {
+      flex: 0 0 auto;
+      font-size: 3rem;
+      line-height: 0.9;
+    }
+
+    .counter-poster span:last-child {
+      margin-top: 0;
+      font-size: 0.75rem;
+      line-height: 1.05;
     }
 
     .hero-copy h1 {
@@ -2058,6 +2424,15 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
   }
 
   @media (max-width: 680px) {
+    .spotify-header {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .spotify-header h2 {
+      font-size: 3.4rem;
+    }
+
     .hero-poster {
       min-height: calc(100svh - 5rem);
       padding: 5.2rem 0 2.6rem;
@@ -2102,12 +2477,36 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
 
     .countdown-poster .poster-heading h2 {
       max-width: 13ch;
-      font-size: 3.15rem;
+      font-size: 2.35rem;
       line-height: 1.02;
     }
 
+    .countdown-poster-section {
+      padding: 2rem 0;
+    }
+
+    .countdown-layout {
+      gap: 0.7rem;
+    }
+
+    .countdown-poster {
+      padding: 0;
+    }
+
     .activities-poster-section .poster-heading h2 {
-      max-width: 6.45ch;
+      max-width: none;
+      font-size: clamp(2.8rem, 14vw, 3.45rem);
+      white-space: nowrap;
+    }
+
+    .activities-poster-section {
+      padding: 2.25rem 0;
+    }
+
+    .activities-poster-section .poster-heading p {
+      margin-top: 0.45rem;
+      padding: 0.28rem 0.45rem;
+      font-size: 0.82rem;
     }
 
     .gallery-poster-section .poster-heading h2 {
@@ -2122,32 +2521,69 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
     }
 
     .party-reels-section {
-      padding: 3rem 0;
+      padding: 2.25rem 0;
+    }
+
+    .party-reels-layout {
+      gap: 1rem;
+    }
+
+    .party-reels-header {
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 0.75rem 1rem;
+      align-items: center;
+    }
+
+    .party-reels-header > div:first-child {
+      grid-column: 1 / -1;
     }
 
     .party-reels-header h2 {
-      font-size: 4.1rem;
+      max-width: none;
+      font-size: clamp(2.55rem, 12vw, 3.1rem);
+      line-height: 0.95;
     }
 
     .party-reels-header p {
-      max-width: 18rem;
-      font-size: 0.95rem;
+      margin-top: 0.35rem;
+      font-size: 0.78rem;
+    }
+
+    .party-reels-instagram-cta {
+      min-height: 2.35rem;
+      padding: 0.5rem 0.8rem;
+      font-size: 0.75rem;
     }
 
     .party-reels-controls {
-      justify-self: start;
+      grid-template-columns: 2.35rem 4.25rem 2.35rem;
+      gap: 0.35rem;
+      justify-self: end;
+    }
+
+    .party-reels-arrow {
+      width: 2.35rem;
+      height: 2.35rem;
+      font-size: 0.9rem;
+    }
+
+    .party-reels-counter {
+      font-size: 0.75rem;
     }
 
     .party-reels-track {
       width: calc(100% + 1rem);
-      grid-auto-columns: minmax(15.5rem, 72vw);
+      grid-auto-columns: minmax(13.5rem, 68vw);
+      gap: 0.8rem;
       margin-left: -0.25rem;
       padding-left: 0.25rem;
       padding-right: 1rem;
+      padding-bottom: 0.65rem;
       scroll-padding-left: 0.25rem;
     }
 
     .party-reel-embed {
+      aspect-ratio: 4 / 4.25;
       border-radius: 0;
     }
 
@@ -2254,33 +2690,91 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
     }
 
     .menu-ticket {
-      grid-template-columns: 1fr;
+      grid-template-columns: 2.75rem minmax(0, 1fr);
       width: 100%;
       max-width: 100%;
       overflow: visible;
-      gap: 0.75rem;
+      gap: 0.35rem 0.7rem;
       padding: 0;
       transform: none;
     }
 
+    .menu-poster-section {
+      padding: 2.25rem 0;
+    }
+
+    .menu-layout {
+      gap: 1.15rem;
+    }
+
+    .menu-layout .poster-heading h2 {
+      display: inline-block;
+      max-width: none;
+      padding: 0.3rem 0.45rem;
+      background: var(--party-lime);
+      font-family: var(--poster-mono);
+      font-size: 0.78rem;
+      line-height: 1;
+      box-shadow: 4px 4px 0 var(--party-ink);
+      white-space: nowrap;
+    }
+
+    .menu-layout .poster-heading p {
+      display: none;
+    }
+
+    .menu-emoji {
+      width: 2.75rem;
+      height: 2.75rem;
+      font-size: 2.2rem;
+    }
+
     .menu-ticket h3 {
       max-width: 100%;
-      font-size: clamp(2.45rem, 11.5vw, 3.15rem);
-      line-height: 1.12;
+      font-size: clamp(2rem, 9.5vw, 2.5rem);
+      line-height: 1;
       overflow-wrap: anywhere;
       word-break: break-word;
     }
 
     .menu-ticket p {
-      font-size: 1.05rem;
+      margin-top: 0.25rem;
+      font-size: 0.82rem;
+      line-height: 1.15;
     }
 
     .menu-ticket .poster-button {
+      grid-column: 1 / -1;
       width: min(100%, 20rem);
+      margin-top: 0.45rem;
     }
 
     .countdown-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0;
+      margin-top: 1rem;
+    }
+
+    .countdown-grid div {
+      padding: 0.45rem 0.2rem;
+    }
+
+    .countdown-number {
+      font-size: clamp(2rem, 12vw, 3rem);
+    }
+
+    .countdown-grid span:last-child {
+      margin-top: 0.2rem;
+      font-size: clamp(0.52rem, 2.5vw, 0.7rem);
+      line-height: 1;
+    }
+
+    .counter-number {
+      font-size: 2.8rem;
+    }
+
+    .counter-poster span:last-child {
+      font-size: 0.7rem;
     }
 
     .deadline-poster {
@@ -2317,13 +2811,13 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
     .activity-row {
       display: flex;
       grid-template-columns: none;
-      gap: 1rem;
+      gap: 0.8rem;
       width: calc(100% + 1rem);
-      margin-top: 1.75rem;
+      margin-top: 1.15rem;
       margin-left: -0.25rem;
       overflow-x: auto;
       overflow-y: hidden;
-      padding: 0.25rem 1rem 1.2rem 0.25rem;
+      padding: 0.2rem 1rem 0.8rem 0.25rem;
       scroll-padding-left: 0.25rem;
       scroll-snap-type: x mandatory;
       scrollbar-width: none;
@@ -2336,7 +2830,7 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
     }
 
     .activity-item {
-      flex: 0 0 min(82vw, 21rem);
+      flex: 0 0 min(76vw, 18rem);
       min-height: 0;
       scroll-snap-align: start;
       scroll-snap-stop: always;
@@ -2368,24 +2862,28 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
     }
 
     .activity-image img {
-      aspect-ratio: 16 / 10.5;
+      aspect-ratio: 16 / 9;
     }
 
     .activity-copy {
-      padding: 0.8rem 0 0;
+      padding: 0.55rem 0 0;
     }
 
     .activity-item h3 {
-      max-width: 13rem;
-      font-size: 3rem;
-      line-height: 1.05;
+      max-width: 15rem;
+      font-size: 2rem;
+      line-height: 1;
     }
 
     .activity-item p {
-      max-width: 17rem;
-      margin-top: 0.7rem;
-      font-size: 0.98rem;
-      line-height: 1.18;
+      display: -webkit-box;
+      max-width: 16rem;
+      margin-top: 0.45rem;
+      overflow: hidden;
+      font-size: 0.8rem;
+      line-height: 1.2;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
     }
 
     .activity-row::after {
@@ -2460,8 +2958,8 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
     }
 
     .menu-layout .poster-heading h2 {
-      max-width: 8.6ch;
-      font-size: 3.55rem;
+      max-width: none;
+      font-size: 0.74rem;
     }
 
     .quick-strip-item h2 {
@@ -2469,11 +2967,11 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
     }
 
     .menu-ticket h3 {
-      font-size: 2.55rem;
+      font-size: 2.1rem;
     }
 
     .countdown-poster .poster-heading h2 {
-      font-size: 2.85rem;
+      font-size: 2.15rem;
     }
 
     .registration-poster-header h2 {
@@ -2481,7 +2979,7 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
     }
 
     .activity-item h3 {
-      font-size: 2.55rem;
+      font-size: 1.85rem;
     }
 
     .final-cta-layout h2 {

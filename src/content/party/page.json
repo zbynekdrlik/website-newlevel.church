@@ -63,6 +63,10 @@
       "description": "Spievaj svoje obľúbené piesne s kamošmi."
     }
   ],
+  "spotify": {
+    "title": "PARTY NL",
+    "playlistUrl": "https://open.spotify.com/playlist/3I1lLSnRYllbNwsnsoGiWq"
+  },
   "registration": {
     "formTitle": "Prihláška na Youth",
     "time": "18:00 (dvere otvorené od 17:30)",
@@ -72,7 +76,6 @@
   "cta": {
     "title": "Vidíme sa v piatok!",
     "text": "Sleduj nás na Instagrame, nech ti neuniknú žiadne novinky.",
-    "buttonText": "Sledovať na Instagrame",
-    "buttonUrl": "https://www.instagram.com/newlevelchurch/"
+    "buttonText": "Sledovať na Instagrame"
   }
 }

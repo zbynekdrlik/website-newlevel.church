@@ -50,10 +50,10 @@ const colors = theme.colors;
   </head>
   <body class={`min-h-screen flex flex-col ${bodyClass}`.trim()}>
     <Header currentPage={currentPage} />
-    <SocialSidebar />
+    <SocialSidebar currentPage={currentPage} />
     <main class="flex-grow">
       <slot />
     </main>
-    <Footer />
+    <Footer currentPage={currentPage} />
   </body>
 </html>
