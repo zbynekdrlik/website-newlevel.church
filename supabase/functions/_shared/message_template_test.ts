@@ -1,6 +1,9 @@
-import { renderContactTemplate } from "./message_template.ts";
+import {
+  findUnsafeRelativeDatePhrase,
+  renderContactTemplate,
+} from "./message_template.ts";
 
-function assertEquals(actual: string, expected: string) {
+function assertEquals<T>(actual: T, expected: T) {
   if (actual !== expected) {
     throw new Error(
       `Expected ${JSON.stringify(expected)}, received ${
@@ -38,7 +41,7 @@ Deno.test("formats an event date naturally in Slovak", () => {
     "2026-08-30T12:00:00+02:00",
   );
 
-  assertEquals(message, "Stretneme sa 4. septembra 2026.");
+  assertEquals(message, "Stretneme sa v piatok 4. septembra 2026 o 18:00.");
 });
 
 Deno.test("formats the date from starts_at when event_date is unavailable", () => {
@@ -49,10 +52,10 @@ Deno.test("formats the date from starts_at when event_date is unavailable", () =
     "2026-08-30T12:00:00+02:00",
   );
 
-  assertEquals(message, "Stretneme sa 4. septembra 2026.");
+  assertEquals(message, "Stretneme sa v piatok 4. septembra 2026 o 18:30.");
 });
 
-Deno.test("adds zajtra when the message is sent the day before the event", () => {
+Deno.test("keeps the absolute date when sent the day before the event", () => {
   const message = renderContactTemplate(
     "Stretneme sa {{event_date}}.",
     {},
@@ -60,5 +63,22 @@ Deno.test("adds zajtra when the message is sent the day before the event", () =>
     "2026-09-03T18:30:00+02:00",
   );
 
-  assertEquals(message, "Stretneme sa zajtra 4. septembra 2026.");
+  assertEquals(message, "Stretneme sa v piatok 4. septembra 2026 o 18:00.");
+});
+
+Deno.test("detects relative date wording that can become stale", () => {
+  assertEquals(findUnsafeRelativeDatePhrase("Príď zajtra o 18:00."), "zajtra");
+  assertEquals(
+    findUnsafeRelativeDatePhrase("Vidíme sa tento piatok."),
+    "tento piatok",
+  );
+  assertEquals(findUnsafeRelativeDatePhrase("Vidíme sa v piatok."), "v piatok");
+  assertEquals(
+    findUnsafeRelativeDatePhrase("Vidíme sa {{event_date}}."),
+    null,
+  );
+  assertEquals(
+    findUnsafeRelativeDatePhrase("Stretávame sa každý piatok."),
+    null,
+  );
 });

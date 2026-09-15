@@ -22,7 +22,11 @@ import {
   updateSmsCampaignStatuses,
 } from "../_shared/sms_campaigns.ts";
 import { renderPartyEmailHtml, sendEmail } from "../_shared/email.ts";
-import { renderContactTemplate } from "../_shared/message_template.ts";
+import {
+  findUnsafeRelativeDatePhrase,
+  formatEventDate,
+  renderContactTemplate,
+} from "../_shared/message_template.ts";
 import { audienceMatches, type AudienceType } from "../_shared/audience.ts";
 
 type MessageChannel = "sms" | "whatsapp" | "email";
@@ -150,24 +154,27 @@ function cleanWhatsAppTemplateLanguage(value: unknown) {
   return /^[a-z]{2,3}(?:_[A-Z]{2})?$/.test(language) ? language : null;
 }
 
-function whatsappEventDate(event: Record<string, unknown>) {
-  const raw = typeof event.event_date === "string" ? event.event_date : "";
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
-  const label = new Intl.DateTimeFormat("sk-SK", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    timeZone: "Europe/Bratislava",
-  }).format(new Date(`${raw}T12:00:00+02:00`));
-  return label ? label[0].toUpperCase() + label.slice(1) : raw;
-}
-
 function whatsappTemplateParameters(
   contact: AudienceContact,
   event: Record<string, unknown>,
 ) {
   const firstName = contact.name?.trim().split(/\s+/)[0] || "priateľ";
-  return [firstName, whatsappEventDate(event)];
+  return [firstName, formatEventDate(event)];
+}
+
+function bratislavaDate(value: Date | string) {
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    timeZone: "Europe/Bratislava",
+  }).formatToParts(date);
+  const values = Object.fromEntries(
+    parts.map((part) => [part.type, part.value]),
+  );
+  return `${values.year}-${values.month}-${values.day}`;
 }
 
 function isValidEmail(value: string | null | undefined) {
@@ -628,6 +635,30 @@ Deno.serve(async (req) => {
         return json(req, {
           success: false,
           error: "Scheduled time is required",
+        }, 400);
+      }
+      const unsafeMessagePhrase = message && needsFreeText
+        ? findUnsafeRelativeDatePhrase(message)
+        : null;
+      const unsafeSubjectPhrase = channels.includes("email")
+        ? findUnsafeRelativeDatePhrase(subject)
+        : null;
+      const unsafePhrase = unsafeMessagePhrase || unsafeSubjectPhrase;
+      if (unsafePhrase) {
+        return json(req, {
+          success: false,
+          error:
+            `Text „${unsafePhrase}“ sa môže pri inom dni odoslania stať nesprávnym. Použi {{event_date}}.`,
+        }, 400);
+      }
+      const eventDate = typeof event.event_date === "string"
+        ? event.event_date
+        : "";
+      const sendDate = bratislavaDate(scheduledFor);
+      if (eventDate && sendDate && sendDate > eventDate) {
+        return json(req, {
+          success: false,
+          error: "Správu nie je možné naplánovať po dátume udalosti.",
         }, 400);
       }
 

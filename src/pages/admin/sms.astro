@@ -60,6 +60,8 @@
       .concept-toolbar { display: grid; grid-template-columns: minmax(240px, 1fr) auto auto auto; gap: 10px; align-items: end; margin-top: 14px; }
       button:disabled { cursor: not-allowed; opacity: .45; }
       .primary { border-color: #38bdf8; background: #0c4a6e; }
+      .date-summary { margin-top: 12px; color: #7dd3fc; font-weight: 800; }
+      .date-warning { margin-top: 8px; color: #fbbf24; }
 
       @media (max-width: 820px) {
         .grid, .login-grid, .test-grid, .concept-toolbar { grid-template-columns: 1fr; }
@@ -140,6 +142,7 @@
             </select>
           </label>
         </div>
+        <p class="date-summary" data-event-date-summary></p>
         <div class="actions">
           <button type="button" data-select-filtered>Vybrať všetkých</button>
           <button type="button" data-deselect>Zrušiť výber</button>
@@ -196,7 +199,7 @@
             <label>Jazyk šablóny<input data-whatsapp-template-language value="sk" maxlength="8" /></label>
           </div>
           <p class="hint" data-whatsapp-template-hint>
-            Použije sa schválená šablóna <strong data-whatsapp-template-preview>youth_invitation_sk</strong>. Premenná 1 je krstné meno a premenná 2 je dátum mládeže.
+            Použije sa schválená šablóna <strong data-whatsapp-template-preview>youth_invitation_sk</strong>. V Meta šablóne musí byť celý časový riadok <strong>🕕 &#123;&#123;2&#125;&#125;</strong>; premenná 2 dostane úplný dátum aj čas.
           </p>
           <p class="hint" data-whatsapp-text-hint hidden>
             Voľný text Meta povolí iba do 24 hodín od poslednej správy používateľa. Pre prvú správu a kampane použi schválenú šablónu.
@@ -211,7 +214,8 @@
           </div>
         </div>
         <label><span data-message-label>Text správy</span><textarea data-message rows="7" placeholder="Ahoj &#123;&#123;first_name&#125;&#125;, vidíme sa na New Level Youth?"></textarea></label>
-        <p class="hint">Môžeš použiť: &#123;&#123;first_name&#125;&#125;, &#123;&#123;name&#125;&#125;, &#123;&#123;event_date&#125;&#125;, &#123;&#123;registration_url&#125;&#125;</p>
+        <p class="hint">Môžeš použiť: &#123;&#123;first_name&#125;&#125;, &#123;&#123;name&#125;&#125;, &#123;&#123;event_date&#125;&#125;, &#123;&#123;registration_url&#125;&#125;. Termín píš vždy ako <strong>&#123;&#123;event_date&#125;&#125;</strong>, nie ručne ako „zajtra“ alebo „tento piatok“.</p>
+        <p class="date-warning" data-date-safety hidden></p>
         <div class="preview" data-preview>Ukážka sa zobrazí po napísaní správy.</div>
       </section>
 
@@ -753,11 +757,16 @@
       function updateSegmentPreview() {
         const text = expandEmojiShortcodes($("[data-message]").value);
         const channels = selectedChannels();
+        const eventDate = formatEventDate(state.event?.event_date || $("[data-event-date]").value || "");
+        $("[data-event-date-summary]").textContent = eventDate
+          ? `Termín použitý vo všetkých správach: ${eventDate}`
+          : "Vyber dátum mládeže.";
+        updateDateSafety();
         const templateOnly = channels.length === 1 && channels[0] === "whatsapp" && usesWhatsAppTemplate();
         if (templateOnly) {
           const templateName = $("[data-whatsapp-template-name]").value.trim() || "youth_invitation_sk";
           $("[data-segments]").textContent = "Schválená WhatsApp šablóna";
-          $("[data-preview]").textContent = `Meta šablóna: ${templateName}\n{{1}} = krstné meno príjemcu\n{{2}} = dátum vybranej mládeže`;
+          $("[data-preview]").textContent = `Meta šablóna: ${templateName}\n{{1}} = krstné meno príjemcu\n{{2}} = ${eventDate || "najprv vyber dátum mládeže"}`;
           updateEmailSubjectPreview();
           return;
         }
@@ -774,29 +783,42 @@
         updateEmailSubjectPreview();
       }
 
-      function bratislavaDayNumber(date) {
-        const parts = new Intl.DateTimeFormat("en-CA", {
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
-          timeZone: "Europe/Bratislava",
-        }).formatToParts(date);
-        const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
-        return Date.UTC(Number(values.year), Number(values.month) - 1, Number(values.day)) / 86_400_000;
-      }
-
-      function formatEventDate(value, sentAt = new Date()) {
+      function formatEventDate(value) {
         if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
         const [year, month, day] = value.split("-").map(Number);
         const eventDate = new Date(Date.UTC(year, month - 1, day, 12));
+        const weekday = new Intl.DateTimeFormat("sk-SK", {
+          weekday: "long",
+          timeZone: "Europe/Bratislava",
+        }).format(eventDate);
         const formattedDate = new Intl.DateTimeFormat("sk-SK", {
           day: "numeric",
           month: "long",
           year: "numeric",
           timeZone: "Europe/Bratislava",
         }).format(eventDate);
-        const isTomorrow = bratislavaDayNumber(eventDate) - bratislavaDayNumber(sentAt) === 1;
-        return isTomorrow ? `zajtra ${formattedDate}` : formattedDate;
+        return `v ${weekday} ${formattedDate} o 18:00`;
+      }
+
+      function findUnsafeRelativeDatePhrase(value) {
+        return value.match(/\b(?:dnes|zajtra|pozajtra|(?:tento|túto|budúci|budúcu|najbližší|najbližšiu|v|vo)\s+(?:pondelok|utorok|stredu|streda|štvrtok|piatok|sobotu|sobota|nedeľu|nedeľa|týždeň))\b/iu)?.[0] || null;
+      }
+
+      function unsafeRelativeDatePhrase() {
+        const channels = selectedChannels();
+        const whatsappTemplateOnly = channels.length === 1 && channels[0] === "whatsapp" && usesWhatsAppTemplate();
+        const messagePhrase = whatsappTemplateOnly ? null : findUnsafeRelativeDatePhrase($("[data-message]").value);
+        const subjectPhrase = channels.includes("email") ? findUnsafeRelativeDatePhrase($("[data-email-subject]").value) : null;
+        return messagePhrase || subjectPhrase;
+      }
+
+      function updateDateSafety() {
+        const warning = $("[data-date-safety]");
+        const phrase = unsafeRelativeDatePhrase();
+        warning.hidden = !phrase;
+        warning.textContent = phrase
+          ? `Pozor: „${phrase}“ sa môže stať nesprávnym. Nahraď ho premennou {{event_date}}.`
+          : "";
       }
 
       function renderPreviewTemplate(template) {
@@ -835,12 +857,15 @@
         }
         if (!selected.length) throw new Error("Vyber aspoň jedného príjemcu.");
         if (!channels.length) throw new Error("Vyber aspoň jeden kanál: SMS, WhatsApp alebo Email.");
+        if (!$("[data-event-date]").value) throw new Error("Vyber dátum mládeže.");
         if (channels.includes("sms") && !/^[A-Za-z0-9]{1,11}$/.test(sender)) throw new Error("Meno odosielateľa pre SMS musí mať 1-11 písmen alebo čísiel bez medzier.");
         if (channels.includes("email") && !subject) throw new Error("Doplň predmet emailu.");
         const needsFreeText = channels.some((channel) => channel !== "whatsapp") || (channels.includes("whatsapp") && whatsappMode === "text");
         if (needsFreeText && !message.trim()) throw new Error("Napíš text správy.");
         if (channels.includes("whatsapp") && whatsappMode === "template" && !/^[a-z0-9_]{1,512}$/.test(whatsappTemplateName)) throw new Error("Názov WhatsApp šablóny môže obsahovať iba malé písmená, čísla a podčiarkovníky.");
         if (channels.includes("whatsapp") && whatsappMode === "template" && !/^[a-z]{2,3}(?:_[A-Z]{2})?$/.test(whatsappTemplateLanguage)) throw new Error("Skontroluj jazyk WhatsApp šablóny, napríklad sk.");
+        const unsafePhrase = unsafeRelativeDatePhrase();
+        if (unsafePhrase) throw new Error(`Text „${unsafePhrase}“ sa môže pri inom dni odoslania stať nesprávnym. Nahraď ho premennou {{event_date}}.`);
         const scheduledFor = sendNow ? new Date().toISOString() : localScheduledIso();
         if (!sendNow && !scheduledFor) throw new Error("Vyber dátum a čas odoslania.");
         localStorage.setItem("smsSender", sender);
@@ -851,9 +876,11 @@
         const scheduleLine = sendNow ? "" : `\nČas: ${localDateTimeLabel(scheduledFor)}`;
         const smsLine = channels.includes("sms") ? `\nOdosielateľ SMS: ${sender}` : "";
         const emailLine = channels.includes("email") ? `\nPredmet emailu (ukážka): ${renderPreviewTemplate(subject)}` : "";
-        const whatsappLine = channels.includes("whatsapp") && whatsappMode === "template" ? `\nMeta šablóna: ${whatsappTemplateName} (${whatsappTemplateLanguage})` : "";
+        const safeEventDate = formatEventDate($("[data-event-date]").value);
+        const eventLine = `\nTermín v správe: ${safeEventDate}`;
+        const whatsappLine = channels.includes("whatsapp") && whatsappMode === "template" ? `\nMeta šablóna: ${whatsappTemplateName} (${whatsappTemplateLanguage})\nWhatsApp {{2}}: ${safeEventDate}` : "";
         const confirmationBody = channels.length === 1 && usesWhatsAppTemplate() ? "Premenné šablóny sa doplnia menom a dátumom mládeže." : message;
-        const ok = confirm(`Potvrdiť odoslanie?\n\nKanály: ${channelLabels.join(", ")}${smsLine}${emailLine}${whatsappLine}\n${recipientLine}${scheduleLine}\nRežim: ${sendNow ? "odoslať teraz" : "odoslať neskôr"}\n\n${confirmationBody}`);
+        const ok = confirm(`Potvrdiť odoslanie?\n\nKanály: ${channelLabels.join(", ")}${smsLine}${emailLine}${whatsappLine}${eventLine}\n${recipientLine}${scheduleLine}\nRežim: ${sendNow ? "odoslať teraz" : "odoslať neskôr"}\n\n${confirmationBody}`);
         if (!ok) return;
         const result = await api({
           action: "manual_send",
@@ -1014,6 +1041,7 @@
         $("[data-email-subject]").addEventListener("input", () => {
           saveConfig();
           updateEmailSubjectPreview();
+          updateDateSafety();
         });
         document.querySelectorAll("[data-channel]").forEach((input) => {
           input.addEventListener("change", () => {

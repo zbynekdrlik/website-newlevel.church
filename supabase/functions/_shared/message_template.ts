@@ -1,26 +1,15 @@
 import { buildRegistrationUrl } from "./registration_url.ts";
 
-function bratislavaDayNumber(date: Date) {
-  const parts = new Intl.DateTimeFormat("en-CA", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    timeZone: "Europe/Bratislava",
-  }).formatToParts(date);
-  const value = Object.fromEntries(
-    parts.map((part) => [part.type, part.value]),
-  );
-  return Date.UTC(
-    Number(value.year),
-    Number(value.month) - 1,
-    Number(value.day),
-  ) /
-    86_400_000;
+const RELATIVE_DATE_PATTERN =
+  /\b(?:dnes|zajtra|pozajtra|(?:tento|túto|budúci|budúcu|najbližší|najbližšiu|v|vo)\s+(?:pondelok|utorok|stredu|streda|štvrtok|piatok|sobotu|sobota|nedeľu|nedeľa|týždeň))\b/iu;
+
+export function findUnsafeRelativeDatePhrase(value: string) {
+  return value.match(RELATIVE_DATE_PATTERN)?.[0] ?? null;
 }
 
 export function formatEventDate(
   event: Record<string, unknown> | null,
-  sentAt: Date | string = new Date(),
+  _sentAt: Date | string = new Date(),
 ) {
   const eventDate = typeof event?.event_date === "string"
     ? event.event_date
@@ -34,17 +23,20 @@ export function formatEventDate(
     : new Date(rawDate);
   if (Number.isNaN(parsedDate.getTime())) return rawDate;
 
+  const weekday = new Intl.DateTimeFormat("sk-SK", {
+    weekday: "long",
+    timeZone: "Europe/Bratislava",
+  }).format(parsedDate);
   const formattedDate = new Intl.DateTimeFormat("sk-SK", {
     day: "numeric",
     month: "long",
     year: "numeric",
     timeZone: "Europe/Bratislava",
   }).format(parsedDate);
-  const parsedSentAt = sentAt instanceof Date ? sentAt : new Date(sentAt);
-  const isTomorrow = !Number.isNaN(parsedSentAt.getTime()) &&
-    bratislavaDayNumber(parsedDate) - bratislavaDayNumber(parsedSentAt) === 1;
+  const localTime = startsAt.match(/T(\d{2}):(\d{2})/)?.slice(1).join(":") ||
+    "18:00";
 
-  return isTomorrow ? `zajtra ${formattedDate}` : formattedDate;
+  return `v ${weekday} ${formattedDate} o ${localTime}`;
 }
 
 export function renderContactTemplate(
