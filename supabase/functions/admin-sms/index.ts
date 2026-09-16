@@ -156,10 +156,10 @@ function cleanWhatsAppTemplateLanguage(value: unknown) {
 
 function whatsappTemplateParameters(
   contact: AudienceContact,
-  event: Record<string, unknown>,
+  _event: Record<string, unknown>,
 ) {
   const firstName = contact.name?.trim().split(/\s+/)[0] || "priateľ";
-  return [firstName, formatEventDate(event)];
+  return [firstName, "v piatok"];
 }
 
 function bratislavaDate(value: Date | string) {

@@ -107,9 +107,9 @@ and Supabase service role key stay only in Supabase secrets.
 
 For campaign WhatsApp messages, use an approved Meta template. The admin defaults
 to `youth_invitation_sk` in language `sk`; template body parameter 1 is the
-recipient's first name and parameter 2 is the complete selected event date and
-time in Slovak. Keep the Meta template timing line as `🕕 {{2}}`; the server sends
-an absolute value such as `v piatok 18. septembra 2026 o 18:00`. Email, SMS, and
+recipient's first name and parameter 2 is always `v piatok`. The approved Meta
+template timing line is `🕕 {{2}} o 18:00`, producing `🕕 v piatok o 18:00`.
+Email, SMS, and
 WhatsApp free text must use `{{event_date}}` instead of relative wording such as
 `zajtra` or `tento piatok`; unsafe relative wording is rejected before queueing.
 Free-text WhatsApp messages are only for replies inside Meta's 24-hour

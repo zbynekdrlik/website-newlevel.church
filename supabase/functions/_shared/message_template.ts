@@ -7,21 +7,18 @@ export function findUnsafeRelativeDatePhrase(value: string) {
   return value.match(RELATIVE_DATE_PATTERN)?.[0] ?? null;
 }
 
-export function formatEventDate(
-  event: Record<string, unknown> | null,
-  _sentAt: Date | string = new Date(),
-) {
+function eventDateParts(event: Record<string, unknown> | null) {
   const eventDate = typeof event?.event_date === "string"
     ? event.event_date
     : "";
   const startsAt = typeof event?.starts_at === "string" ? event.starts_at : "";
   const rawDate = eventDate || startsAt;
-  if (!rawDate) return "";
+  if (!rawDate) return null;
 
   const parsedDate = /^\d{4}-\d{2}-\d{2}$/.test(rawDate)
     ? new Date(`${rawDate}T12:00:00+02:00`)
     : new Date(rawDate);
-  if (Number.isNaN(parsedDate.getTime())) return rawDate;
+  if (Number.isNaN(parsedDate.getTime())) return null;
 
   const weekday = new Intl.DateTimeFormat("sk-SK", {
     weekday: "long",
@@ -36,7 +33,22 @@ export function formatEventDate(
   const localTime = startsAt.match(/T(\d{2}):(\d{2})/)?.slice(1).join(":") ||
     "18:00";
 
-  return `v ${weekday} ${formattedDate} o ${localTime}`;
+  return { weekday, formattedDate, localTime };
+}
+
+export function formatEventDate(
+  event: Record<string, unknown> | null,
+  _sentAt: Date | string = new Date(),
+) {
+  const parts = eventDateParts(event);
+  if (!parts) {
+    return typeof event?.event_date === "string"
+      ? event.event_date
+      : typeof event?.starts_at === "string"
+      ? event.starts_at
+      : "";
+  }
+  return `v ${parts.weekday} ${parts.formattedDate} o ${parts.localTime}`;
 }
 
 export function renderContactTemplate(

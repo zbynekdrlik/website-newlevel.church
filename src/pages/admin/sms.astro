@@ -199,7 +199,7 @@
             <label>Jazyk šablóny<input data-whatsapp-template-language value="sk" maxlength="8" /></label>
           </div>
           <p class="hint" data-whatsapp-template-hint>
-            Použije sa schválená šablóna <strong data-whatsapp-template-preview>youth_invitation_sk</strong>. V Meta šablóne musí byť celý časový riadok <strong>🕕 &#123;&#123;2&#125;&#125;</strong>; premenná 2 dostane úplný dátum aj čas.
+            Použije sa schválená šablóna <strong data-whatsapp-template-preview>youth_invitation_sk</strong>. Meta šablóna má riadok <strong>🕕 &#123;&#123;2&#125;&#125; o 18:00</strong>; premenná 2 sa vždy odošle ako <strong>v piatok</strong>.
           </p>
           <p class="hint" data-whatsapp-text-hint hidden>
             Voľný text Meta povolí iba do 24 hodín od poslednej správy používateľa. Pre prvú správu a kampane použi schválenú šablónu.
@@ -766,7 +766,7 @@
         if (templateOnly) {
           const templateName = $("[data-whatsapp-template-name]").value.trim() || "youth_invitation_sk";
           $("[data-segments]").textContent = "Schválená WhatsApp šablóna";
-          $("[data-preview]").textContent = `Meta šablóna: ${templateName}\n{{1}} = krstné meno príjemcu\n{{2}} = ${eventDate || "najprv vyber dátum mládeže"}`;
+          $("[data-preview]").textContent = `Meta šablóna: ${templateName}\n{{1}} = krstné meno príjemcu\n{{2}} = v piatok\nVýsledok: 🕕 v piatok o 18:00`;
           updateEmailSubjectPreview();
           return;
         }
@@ -878,7 +878,7 @@
         const emailLine = channels.includes("email") ? `\nPredmet emailu (ukážka): ${renderPreviewTemplate(subject)}` : "";
         const safeEventDate = formatEventDate($("[data-event-date]").value);
         const eventLine = `\nTermín v správe: ${safeEventDate}`;
-        const whatsappLine = channels.includes("whatsapp") && whatsappMode === "template" ? `\nMeta šablóna: ${whatsappTemplateName} (${whatsappTemplateLanguage})\nWhatsApp {{2}}: ${safeEventDate}` : "";
+        const whatsappLine = channels.includes("whatsapp") && whatsappMode === "template" ? `\nMeta šablóna: ${whatsappTemplateName} (${whatsappTemplateLanguage})\nWhatsApp {{2}}: v piatok\nVýsledok WhatsApp: 🕕 v piatok o 18:00` : "";
         const confirmationBody = channels.length === 1 && usesWhatsAppTemplate() ? "Premenné šablóny sa doplnia menom a dátumom mládeže." : message;
         const ok = confirm(`Potvrdiť odoslanie?\n\nKanály: ${channelLabels.join(", ")}${smsLine}${emailLine}${whatsappLine}${eventLine}\n${recipientLine}${scheduleLine}\nRežim: ${sendNow ? "odoslať teraz" : "odoslať neskôr"}\n\n${confirmationBody}`);
         if (!ok) return;

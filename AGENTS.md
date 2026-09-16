@@ -12,7 +12,7 @@
 - Shared provider dispatch lives in `supabase/functions/_shared/message_queue.ts` and is imported by the admin, cron, and authenticated queue dispatcher functions.
 - Campaign WhatsApp messages must use an approved Meta template. The default is `youth_invitation_sk` with language `sk`; body parameter 1 is the contact's first name and parameter 2 is the localized event date.
 - Event timing sent from the messaging admin must use `{{event_date}}`. It renders as an absolute Slovak weekday, date, and time (for example `v piatok 18. septembra 2026 o 18:00`); relative wording such as `zajtra` or `tento piatok` is rejected because it can become stale.
-- The Meta template must keep the complete timing line dynamic as `🕕 {{2}}`; do not place relative date wording outside parameter 2.
+- The approved Meta template has the timing line `🕕 {{2}} o 18:00`. Parameter 2 is always sent as `v piatok`, producing `🕕 v piatok o 18:00`.
 - WhatsApp free text is only appropriate inside the 24-hour customer-service window.
 - Provider credentials and the service-role key belong only in Supabase secrets, never browser code.
 - Party registrations are handled by `register-party`; it sends Discord notifications directly with the `DISCORD_PARTY_WEBHOOK_URL` Supabase secret. Do not reintroduce n8n into this path.

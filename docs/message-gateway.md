@@ -36,10 +36,9 @@ API key a device ID su iba v Supabase secrets.
 
 Kampan alebo prva sprava mimo 24-hodinoveho okna musi pouzit schvalenu Meta
 sablonu. Admin predvolene pouziva `youth_invitation_sk` (`sk`): prvy parameter
-je krstne meno kontaktu a druhy parameter je uplny datum a cas vybranej mladeze.
-Casovy riadok Meta sablony musi byt cely dynamicky: `🕕 {{2}}`. Server posiela
-absolutny text, napriklad `v piatok 18. septembra 2026 o 18:00`, aby zostal
-spravny bez ohladu na den odoslania. V messaging admine musia email, SMS a
+je krstne meno kontaktu a druhy parameter je vzdy `v piatok`. Casovy riadok
+schvalenej Meta sablony `🕕 {{2}} o 18:00` preto vzdy zobrazi
+`🕕 v piatok o 18:00`. V messaging admine musia email, SMS a
 WhatsApp volny text pouzivat `{{event_date}}`; relativne formulacie ako `zajtra`
 alebo `tento piatok` admin server odmietne. Volny text je urceny iba na odpoved
 do 24 hodin od poslednej spravy pouzivatela.
