@@ -1,6 +1,4 @@
 ---
-import { existsSync, readdirSync } from 'node:fs';
-import { join } from 'node:path';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import hero from '../content/homepage/hero.json';
 import aboutPreview from '../content/homepage/about-preview.json';
@@ -8,47 +6,32 @@ import values from '../content/homepage/values.json';
 import youtube from '../content/homepage/youtube.json';
 import joinUs from '../content/homepage/join-us.json';
 import contact from '../content/settings/contact.json';
+import general from '../content/settings/general.json';
+import '../styles/home.css';
 
-const heroBackgroundDirectory = 'images/uploads/shared/drive-download-20260803T134920Z-1-001';
-const heroBackgroundPath = join(process.cwd(), 'public', heroBackgroundDirectory);
-const heroBackgrounds = existsSync(heroBackgroundPath)
-  ? readdirSync(heroBackgroundPath)
-      .filter((file) => /\.(jpe?g|png|webp|avif)$/i.test(file))
-      .sort()
-      .map((file) => `/${heroBackgroundDirectory}/${file}`)
-  : [];
-const heroBackgroundFallback = heroBackgrounds[0] ?? hero.backgroundImage;
-const heroVideoPreviewImage = hero.videoPreviewImage ?? `/${heroBackgroundDirectory}/_MG_7324.jpg`;
+const heroBackgrounds = hero.backgroundImages?.length
+  ? hero.backgroundImages
+  : [{
+      image: hero.backgroundImageWebp ?? hero.backgroundImage,
+      desktopPosition: 'center center',
+      mobilePosition: 'center center',
+    }];
+const heroBackgroundFallback = heroBackgrounds[0];
+const heroVideoPreviewImage = hero.videoPreviewImage ?? hero.imageWebp ?? hero.image;
 const heroVideoPreviewAlt = hero.videoPreviewAlt ?? hero.imageAlt;
-
-const iconPaths: Record<string, string> = {
-  heart: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />',
-  book: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />',
-  music: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />',
-};
-
-const bgColorMap: Record<string, string> = {
-  'primary-light': 'bg-[var(--color-primary-light)]',
-  'accent-light': 'bg-[var(--color-accent-light)]',
-  'background-alt': 'bg-[var(--color-background-alt)]',
-};
-
-const iconCircleMap: Record<string, string> = {
-  'primary-light': 'bg-[var(--color-primary)]',
-  'accent-light': 'bg-[var(--color-accent)]',
-  'background-alt': 'bg-[var(--color-text-light)]',
-};
+const latestVideosUrl = `https://www.youtube.com/playlist?list=${youtube.uploadsPlaylistId}`;
+const latestVideosEmbedUrl = `https://www.youtube-nocookie.com/embed/videoseries?list=${youtube.uploadsPlaylistId}&rel=0&hl=sk`;
 ---
 
-<BaseLayout title="Domov | New Level Church" description={hero.subtitle} currentPage="">
-  <!-- Hero Section -->
-  <section class="relative overflow-hidden bg-stone-950 text-white" data-hero-backgrounds={JSON.stringify(heroBackgrounds)}>
-    <div class="absolute inset-0" aria-hidden="true">
+<BaseLayout title="Domov | New Level Church" description={hero.subtitle} currentPage="" bodyClass="home-editorial">
+  <section class="editorial-hero" data-hero-backgrounds={JSON.stringify(heroBackgrounds)}>
+    <div class="editorial-hero__media" aria-hidden="true">
       <img
-        src={heroBackgroundFallback}
+        src={heroBackgroundFallback.image}
         alt=""
-        class="absolute inset-0 h-full w-full object-cover object-center opacity-100 transition-opacity duration-1000 ease-in-out"
+        class="hero-background is-current"
         data-hero-bg-current
+        style={`--hero-position: ${heroBackgroundFallback.desktopPosition}; --hero-mobile-position: ${heroBackgroundFallback.mobilePosition};`}
         width="5472"
         height="3648"
         fetchpriority="high"
@@ -57,71 +40,189 @@ const iconCircleMap: Record<string, string> = {
       <img
         src=""
         alt=""
-        class="absolute inset-0 h-full w-full object-cover object-center opacity-0 transition-opacity duration-1000 ease-in-out"
+        class="hero-background is-next"
         data-hero-bg-next
+        style={`--hero-position: ${heroBackgroundFallback.desktopPosition}; --hero-mobile-position: ${heroBackgroundFallback.mobilePosition};`}
         width="5472"
         height="3648"
         decoding="async"
       />
     </div>
-    <div class="absolute inset-0 bg-gradient-to-r from-black/85 via-black/60 to-black/35"></div>
-    <div class="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-black/20"></div>
-    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-20 lg:py-24">
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-        <!-- Text Content -->
-        <div class="text-center lg:text-left">
-          <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6 drop-shadow-lg">
-            {hero.title} <span class="text-[var(--color-primary)]">{hero.titleAccent}</span> {hero.titleSuffix}
-          </h1>
-          <p class="text-lg md:text-xl text-white/90 mb-8 max-w-xl mx-auto lg:mx-0 drop-shadow">
-            {hero.subtitle}
-          </p>
-          <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-            <a href={hero.ctaPrimary.url} class="inline-flex items-center justify-center px-8 py-4 bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-white font-semibold rounded-full transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
-              {hero.ctaPrimary.text}
-            </a>
-            <a href={hero.ctaSecondary.url} target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center px-8 py-4 bg-white/95 hover:bg-white text-[var(--color-text)] font-semibold rounded-full transition-all duration-200 shadow-md hover:shadow-lg border border-white/40">
-              <svg class="w-5 h-5 mr-2 text-[var(--color-primary)]" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"></path>
-              </svg>
-              {hero.ctaSecondary.text}
-            </a>
-          </div>
-        </div>
-        <!-- Video Preview -->
-        <div class="relative">
-          <div class="absolute -inset-5 rounded-[2rem] bg-gradient-to-br from-[var(--color-primary)]/25 via-white/5 to-[var(--color-accent)]/35 blur-2xl"></div>
-          <a href={hero.ctaSecondary.url} target="_blank" rel="noopener noreferrer" class="group relative block overflow-hidden rounded-[1.6rem] bg-stone-950 shadow-2xl ring-1 ring-white/20">
-            <img
-              src={heroVideoPreviewImage}
-              alt={heroVideoPreviewAlt}
-              class="aspect-[16/10] w-full object-cover transition-transform duration-500 group-hover:scale-[1.035]"
-              width="1920"
-              height="1280"
-              fetchpriority="high"
-              decoding="async"
-            />
-            <span class="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent"></span>
-            <span class="absolute inset-0 flex items-center justify-center bg-black/10 transition-colors duration-200 group-hover:bg-black/20">
-              <span class="flex h-20 w-20 items-center justify-center rounded-full bg-[var(--color-primary)] shadow-xl transition-transform duration-200 group-hover:scale-110">
-                <svg class="ml-1 h-8 w-8 text-white" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M8 5v14l11-7z"></path>
-                </svg>
-              </span>
-            </span>
+    <div class="editorial-hero__veil"></div>
+
+    <div class="editorial-shell editorial-hero__content">
+      <div class="editorial-seal" aria-hidden="true">
+        <span>NL</span>
+        <small>CHURCH</small>
+      </div>
+      <p class="editorial-kicker editorial-kicker--light">// SPIŠSKÁ NOVÁ VES · NEDEĽA 10:00</p>
+      <h1 class="editorial-display editorial-hero__title">
+        <span>{hero.title}</span>
+        <strong>{hero.titleAccent}</strong>
+        <span class="editorial-accent--blue">{hero.titleSuffix}.</span>
+      </h1>
+      <p class="editorial-hero__lead">{hero.subtitle}</p>
+      <div class="editorial-actions">
+        <a href={hero.ctaPrimary.url} class="editorial-button editorial-button--primary">
+          {hero.ctaPrimary.text}<span aria-hidden="true">→</span>
+        </a>
+        <a href={latestVideosUrl} target="_blank" rel="noopener noreferrer" class="editorial-button editorial-button--ghost">
+          {hero.ctaSecondary.text}<span aria-hidden="true">▶</span>
+        </a>
+      </div>
+
+      <div class="editorial-photo-stack" aria-label="Momentky z New Level Church">
+        <figure class="editorial-polaroid editorial-polaroid--left">
+          <img src={heroBackgrounds[2]?.image ?? heroBackgroundFallback.image} alt="Chvály v New Level Church" width="5472" height="3648" />
+        </figure>
+        <a href={latestVideosUrl} target="_blank" rel="noopener noreferrer" class="editorial-polaroid editorial-polaroid--center" aria-label={heroVideoPreviewAlt}>
+          <img src={heroVideoPreviewImage} alt={heroVideoPreviewAlt} width="1920" height="1280" />
+          <span class="editorial-polaroid__play" aria-hidden="true">▶</span>
+        </a>
+        <figure class="editorial-polaroid editorial-polaroid--right">
+          <picture>
+            <source srcset={joinUs.imageWebp} type="image/webp" />
+            <img src={joinUs.image} alt={joinUs.imageAlt} width="1200" height="800" />
+          </picture>
+        </figure>
+      </div>
+    </div>
+    <div class="editorial-jagged editorial-jagged--white" aria-hidden="true"></div>
+  </section>
+
+  <section class="editorial-section editorial-section--white editorial-about">
+    <div class="editorial-shell editorial-about__grid">
+      <div>
+        <p class="editorial-kicker">// {aboutPreview.badge}</p>
+        <h2 class="editorial-display editorial-section__title">MIESTO, KAM <span class="editorial-accent--blue">PATRÍTE.</span></h2>
+        <p class="editorial-copy editorial-about__copy">{aboutPreview.text}</p>
+        <div class="editorial-actions editorial-actions--left">
+          <a href={aboutPreview.ctaPrimary.url} class="editorial-button editorial-button--dark">
+            {aboutPreview.ctaPrimary.text}<span aria-hidden="true">→</span>
+          </a>
+          <a href={aboutPreview.ctaSecondary.url} class="editorial-text-link">
+            {aboutPreview.ctaSecondary.text}<span aria-hidden="true">↗</span>
           </a>
         </div>
+      </div>
+      <aside class="editorial-note" aria-label="Príspevok New Level Church">
+        <div class="editorial-note__header">
+          <span class="editorial-note__avatar" aria-hidden="true">
+            <picture>
+              <source srcset="/images/logo.webp" type="image/webp" />
+              <img src="/images/logo.png" alt="" width="299" height="200" />
+            </picture>
+          </span>
+          <span class="editorial-note__identity">
+            <strong>New Level Church <span class="editorial-note__verified" aria-label="Overený profil">✓</span></strong>
+            <small>@newlevelchurch · Spišská Nová Ves</small>
+          </span>
+          <span class="editorial-note__menu" aria-hidden="true">•••</span>
+        </div>
+        <p>{joinUs.subtitle}</p>
+        <div class="editorial-note__footer">
+          <span>NEDEĽA · 10:00</span>
+          <a href={general.social.instagram} target="_blank" rel="noopener noreferrer">SLEDOVAŤ <span aria-hidden="true">↗</span></a>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="editorial-section editorial-section--black editorial-values">
+    <div class="editorial-jagged editorial-jagged--black editorial-jagged--top" aria-hidden="true"></div>
+    <div class="editorial-shell">
+      <div class="editorial-heading-row">
+        <div>
+          <p class="editorial-kicker editorial-kicker--red">// ČOMU VERÍME</p>
+          <h2 class="editorial-display editorial-section__title editorial-section__title--light">NAŠE <span class="editorial-accent--blue">HODNOTY.</span></h2>
+        </div>
+        <p class="editorial-copy editorial-copy--light">{values.subtitle}</p>
+      </div>
+      <div class="editorial-values__grid">
+        {values.items.map((item: { title: string; description: string }, index: number) => (
+          <article class="editorial-value">
+            <span class="editorial-value__number">0{index + 1}</span>
+            <h3>{item.title}</h3>
+            <p>{item.description}</p>
+          </article>
+        ))}
       </div>
     </div>
   </section>
 
-  <script>
-    const heroSection = document.querySelector<HTMLElement>('[data-hero-backgrounds]');
-    const currentBackground = heroSection?.querySelector<HTMLImageElement>('[data-hero-bg-current]');
-    const nextBackground = heroSection?.querySelector<HTMLImageElement>('[data-hero-bg-next]');
+  <section class="editorial-section editorial-section--white editorial-watch">
+    <div class="editorial-jagged editorial-jagged--white editorial-jagged--top" aria-hidden="true"></div>
+    <div class="editorial-shell editorial-watch__grid">
+      <div>
+        <p class="editorial-kicker">// KÁZNE · CHVÁLY · KOMUNITA</p>
+        <h2 class="editorial-display editorial-section__title">SLEDUJTE <span>ONLINE.</span></h2>
+        <p class="editorial-copy">{youtube.subtitle}</p>
+        <a href={youtube.url} target="_blank" rel="noopener noreferrer" class="editorial-button editorial-button--primary">
+          {youtube.ctaText}<span aria-hidden="true">↗</span>
+        </a>
+      </div>
+      <div class="editorial-video">
+        <iframe
+          src={latestVideosEmbedUrl}
+          title="Najnovšie videá New Level Church"
+          loading="lazy"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          referrerpolicy="strict-origin-when-cross-origin"
+          allowfullscreen
+        ></iframe>
+      </div>
+    </div>
+  </section>
+
+  <section class="editorial-section editorial-section--black editorial-visit">
+    <div class="editorial-jagged editorial-jagged--black editorial-jagged--top" aria-hidden="true"></div>
+    <div class="editorial-shell">
+      <div class="editorial-heading-row editorial-heading-row--visit">
+        <div>
+          <p class="editorial-kicker editorial-kicker--red">// PRÍĎTE MEDZI NÁS</p>
+          <h2 class="editorial-display editorial-section__title editorial-section__title--light">TENTO <span class="editorial-accent--blue">TÝŽDEŇ.</span></h2>
+        </div>
+        <a href={joinUs.ctaUrl} class="editorial-button editorial-button--ghost">
+          {joinUs.ctaText}<span aria-hidden="true">↗</span>
+        </a>
+      </div>
+
+      <div class="editorial-schedule">
+        {contact.serviceTimes.map((time: { day: string; time: string }, index: number) => (
+          <article class="editorial-schedule__item">
+            <span>0{index + 1}</span>
+            <strong>{time.time}</strong>
+            <h3>{time.day}</h3>
+            <p>Spoločné stretnutie v New Level Church</p>
+          </article>
+        ))}
+        <article class="editorial-schedule__item editorial-schedule__item--address">
+          <span>03</span>
+          <strong>SNV</strong>
+          <h3>{contact.address}</h3>
+          <p>{contact.city}</p>
+        </article>
+      </div>
+
+      <div class="editorial-visit__footer">
+        <p>{joinUs.subtitle}</p>
+        <figure class="editorial-visit__photo">
+          <picture>
+            <source srcset={joinUs.imageWebp} type="image/webp" />
+            <img src={joinUs.image} alt={joinUs.imageAlt} loading="lazy" width="1200" height="800" />
+          </picture>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <script is:inline>
+    const heroSection = document.querySelector('[data-hero-backgrounds]');
+    const currentBackground = heroSection?.querySelector('[data-hero-bg-current]');
+    const nextBackground = heroSection?.querySelector('[data-hero-bg-next]');
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    function shuffleImages(images: string[]) {
+    function shuffleImages(images) {
       const shuffled = [...images];
 
       for (let i = shuffled.length - 1; i > 0; i -= 1) {
@@ -132,223 +233,62 @@ const iconCircleMap: Record<string, string> = {
       return shuffled;
     }
 
-    function readLastHeroImage() {
-      try {
-        return window.localStorage.getItem('newlevel:lastHeroBackground');
-      } catch {
-        return null;
-      }
-    }
-
-    function saveLastHeroImage(image: string) {
-      try {
-        window.localStorage.setItem('newlevel:lastHeroBackground', image);
-      } catch {
-        return;
-      }
-    }
-
-    function pickFreshImage(images: string[], lastImage: string | null) {
-      const candidates = images.filter((image) => image !== lastImage);
-      const pool = candidates.length > 0 ? candidates : images;
-
-      return pool[Math.floor(Math.random() * pool.length)];
+    function applyBackground(image, background) {
+      image.style.setProperty('--hero-position', background.desktopPosition);
+      image.style.setProperty('--hero-mobile-position', background.mobilePosition);
     }
 
     if (heroSection && currentBackground && nextBackground) {
-      const backgrounds = JSON.parse(heroSection.dataset.heroBackgrounds ?? '[]') as string[];
+      const backgrounds = JSON.parse(heroSection.dataset.heroBackgrounds ?? '[]');
 
       if (backgrounds.length > 1) {
-        let activeImage = pickFreshImage(backgrounds, readLastHeroImage());
-        let queue = shuffleImages(backgrounds.filter((image) => image !== activeImage));
+        let activeImage = backgrounds[0];
+        let queue = shuffleImages(backgrounds.slice(1));
 
-        currentBackground.src = activeImage;
-        saveLastHeroImage(activeImage);
+        window.setInterval(() => {
+          if (queue.length === 0) {
+            queue = shuffleImages(backgrounds.filter(({ image }) => image !== activeImage.image));
+          }
 
-        if (!prefersReducedMotion) {
-          window.setInterval(() => {
-            if (queue.length === 0) {
-              queue = shuffleImages(backgrounds.filter((image) => image !== activeImage));
-            }
+          const upcomingImage = queue.shift();
 
-            const upcomingImage = queue.shift();
+          if (!upcomingImage) {
+            return;
+          }
 
-            if (!upcomingImage) {
+          nextBackground.onload = () => {
+            nextBackground.onload = null;
+
+            if (prefersReducedMotion) {
+              currentBackground.src = upcomingImage.image;
+              applyBackground(currentBackground, upcomingImage);
+              activeImage = upcomingImage;
               return;
             }
 
-            nextBackground.onload = () => {
-              nextBackground.onload = null;
-              nextBackground.classList.remove('opacity-0');
-              nextBackground.classList.add('opacity-100');
-              currentBackground.classList.remove('opacity-100');
-              currentBackground.classList.add('opacity-0');
+            nextBackground.classList.remove('is-next');
+            nextBackground.classList.add('is-current');
+            currentBackground.classList.remove('is-current');
+            currentBackground.classList.add('is-next');
 
-              window.setTimeout(() => {
-                currentBackground.src = upcomingImage;
-                currentBackground.classList.remove('opacity-0');
-                currentBackground.classList.add('opacity-100');
-                nextBackground.classList.remove('opacity-100');
-                nextBackground.classList.add('opacity-0');
-                activeImage = upcomingImage;
-                saveLastHeroImage(activeImage);
-              }, 1000);
-            };
-            nextBackground.src = upcomingImage;
+            window.setTimeout(() => {
+              currentBackground.src = upcomingImage.image;
+              applyBackground(currentBackground, upcomingImage);
+              currentBackground.classList.remove('is-next');
+              currentBackground.classList.add('is-current');
+              nextBackground.classList.remove('is-current');
+              nextBackground.classList.add('is-next');
+              activeImage = upcomingImage;
+            }, 1000);
+          };
+          applyBackground(nextBackground, upcomingImage);
+          nextBackground.src = upcomingImage.image;
 
-            if (nextBackground.complete) {
-              nextBackground.onload?.(new Event('load'));
-            }
-          }, 9000);
-        }
+          if (nextBackground.complete) {
+            nextBackground.onload?.(new Event('load'));
+          }
+        }, 7000);
       }
     }
   </script>
-
-  <!-- About Preview Section -->
-  <section class="py-16 md:py-24 bg-[var(--color-background)]">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="max-w-3xl mx-auto text-center">
-        <span class="inline-block px-4 py-2 bg-[var(--color-primary-light)] text-[var(--color-primary)] rounded-full text-sm font-medium mb-6">
-          {aboutPreview.badge}
-        </span>
-        <h2 class="text-3xl md:text-4xl font-bold text-[var(--color-text)] mb-6">
-          {aboutPreview.title}
-        </h2>
-        <p class="text-lg text-[var(--color-text-light)] mb-8">
-          {aboutPreview.text}
-        </p>
-        <div class="flex flex-wrap justify-center gap-4">
-          <a href={aboutPreview.ctaPrimary.url} class="inline-flex items-center px-6 py-3 bg-[var(--color-text)] hover:opacity-90 text-white font-semibold rounded-full transition-colors duration-200">
-            {aboutPreview.ctaPrimary.text}
-          </a>
-          <a href={aboutPreview.ctaSecondary.url} class="inline-flex items-center px-6 py-3 bg-white hover:bg-[var(--color-background-alt)] text-[var(--color-text-light)] font-semibold rounded-full border border-[var(--color-text-muted)] transition-colors duration-200">
-            {aboutPreview.ctaSecondary.text}
-          </a>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Values Section -->
-  <section class="py-16 md:py-24 bg-[var(--color-background)]">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-12">
-        <h2 class="text-3xl md:text-4xl font-bold text-[var(--color-text)] mb-4">
-          {values.title}
-        </h2>
-        <p class="text-lg text-[var(--color-text-light)] max-w-2xl mx-auto">
-          {values.subtitle}
-        </p>
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {values.items.map((item: { icon: string; bgColor: string; title: string; description: string }) => (
-          <div class={`${bgColorMap[item.bgColor]} rounded-2xl p-8 text-center hover:shadow-lg transition-shadow duration-200`}>
-            <div class={`w-16 h-16 ${iconCircleMap[item.bgColor]} rounded-full flex items-center justify-center mx-auto mb-6`}>
-              <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <Fragment set:html={iconPaths[item.icon]} />
-              </svg>
-            </div>
-            <h3 class="text-xl font-bold text-[var(--color-text)] mb-3">{item.title}</h3>
-            <p class="text-[var(--color-text-light)]">{item.description}</p>
-          </div>
-        ))}
-      </div>
-    </div>
-  </section>
-
-  <!-- YouTube Section -->
-  <section class="py-16 md:py-24 bg-[var(--color-background)]">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-12">
-        <h2 class="text-3xl md:text-4xl font-bold text-[var(--color-text)] mb-4">
-          {youtube.title}
-        </h2>
-        <p class="text-lg text-[var(--color-text-light)] max-w-2xl mx-auto">
-          {youtube.subtitle}
-        </p>
-      </div>
-      <div class="max-w-4xl mx-auto">
-        <div class="aspect-video bg-[var(--color-background-alt)] rounded-2xl overflow-hidden shadow-xl">
-          <a href={youtube.url} target="_blank" rel="noopener noreferrer" class="relative block w-full h-full group">
-            <picture><source srcset={youtube.imageWebp} type="image/webp"><img src={youtube.image} alt={youtube.imageAlt} class="w-full h-full object-cover" loading="lazy" width="1280" height="853"></picture>
-            <div class="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors duration-200 flex items-center justify-center">
-              <div class="text-center">
-                <div class="w-20 h-20 bg-[var(--color-primary)] rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-200">
-                  <svg class="w-10 h-10 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M8 5v14l11-7z"></path>
-                  </svg>
-                </div>
-                <p class="text-white text-xl font-semibold">{youtube.ctaText}</p>
-              </div>
-            </div>
-          </a>
-        </div>
-        <div class="mt-8 text-center">
-          <a href={youtube.url} target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-6 py-3 bg-[var(--color-primary)] hover:opacity-90 text-white font-semibold rounded-full transition-colors duration-200">
-            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"></path>
-            </svg>
-            {youtube.ctaText}
-          </a>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Join Us Section -->
-  <section class="py-16 md:py-24 bg-gradient-to-br from-[var(--color-accent)] to-[var(--color-accent-dark)] text-white">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-        <div>
-          <h2 class="text-3xl md:text-4xl font-bold mb-6">
-            {joinUs.title}
-          </h2>
-          <p class="text-blue-100 text-lg mb-8">
-            {joinUs.subtitle}
-          </p>
-          <div class="space-y-4">
-            <div class="flex items-start space-x-4">
-              <div class="w-12 h-12 bg-[var(--color-primary)] rounded-full flex items-center justify-center flex-shrink-0">
-                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-              </div>
-              <div>
-                <h3 class="text-xl font-semibold">Bohoslužby</h3>
-                <p class="text-blue-100">
-                  {contact.serviceTimes.map((time: { day: string; time: string }, i: number) => (
-                    <span>
-                      {time.day} {time.time}{i < contact.serviceTimes.length - 1 ? ' |  ' : ''}
-                    </span>
-                  ))}
-                </p>
-              </div>
-            </div>
-            <div class="flex items-start space-x-4">
-              <div class="w-12 h-12 bg-[var(--color-primary)] rounded-full flex items-center justify-center flex-shrink-0">
-                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                </svg>
-              </div>
-              <div>
-                <h3 class="text-xl font-semibold">Adresa</h3>
-                <p class="text-blue-100">{contact.address}, {contact.city}</p>
-              </div>
-            </div>
-          </div>
-          <a href={joinUs.ctaUrl} class="inline-flex items-center mt-8 px-8 py-4 bg-[var(--color-primary)] hover:opacity-90 text-white font-semibold rounded-full transition-colors duration-200">
-            {joinUs.ctaText}
-            <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
-            </svg>
-          </a>
-        </div>
-        <div class="hidden lg:block">
-          <picture><source srcset={joinUs.imageWebp} type="image/webp"><img src={joinUs.image} alt={joinUs.imageAlt} class="rounded-2xl shadow-2xl" loading="lazy" width="1200" height="800"></picture>
-        </div>
-      </div>
-    </div>
-  </section>
 </BaseLayout>
