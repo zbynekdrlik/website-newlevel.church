@@ -167,6 +167,38 @@ collections:
               widget: image,
               required: false,
             }
+          - name: backgroundImages
+            label: "Fotky v pozad\u00ed"
+            widget: list
+            summary: "{{fields.image}}"
+            fields:
+              - { name: image, label: "Fotka", widget: image }
+              - {
+                  name: desktopPosition,
+                  label: "Orezanie na po\u010d\u00edta\u010di",
+                  widget: string,
+                  default: "center center",
+                  hint: "CSS poz\u00edcia, napr. center 48%",
+                }
+              - {
+                  name: mobilePosition,
+                  label: "Orezanie na mobile",
+                  widget: string,
+                  default: "center center",
+                  hint: "CSS poz\u00edcia, napr. 55% center",
+                }
+          - {
+              name: videoPreviewImage,
+              label: "N\u00e1h\u013ead videa",
+              widget: image,
+              required: false,
+            }
+          - {
+              name: videoPreviewAlt,
+              label: "Alt text n\u00e1h\u013eadu videa",
+              widget: string,
+              required: false,
+            }
           - { name: imageAlt, label: "Alt text obr\u00e1zka", widget: string }
 
       - name: about-preview
@@ -228,6 +260,17 @@ collections:
           - { name: imageAlt, label: "Alt text", widget: string }
           - { name: ctaText, label: "Text tla\u010didla", widget: string }
           - { name: url, label: "YouTube URL", widget: string }
+          - {
+              name: channelId,
+              label: "YouTube Channel ID",
+              widget: string,
+            }
+          - {
+              name: uploadsPlaylistId,
+              label: "Playlist najnov\u0161\u00edch vide\u00ed",
+              widget: string,
+              hint: "Automatick\u00fd uploads playlist kan\u00e1la; zvy\u010dajne za\u010d\u00edna UU.",
+            }
 
       - name: join-us
         label: "Pridajte sa"

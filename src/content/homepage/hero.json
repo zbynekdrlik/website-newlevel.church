@@ -12,6 +12,28 @@
   "imageWebp": "/images/uploads/_mg_9841.webp",
   "backgroundImage": "/images/uploads/home-hero-worship.jpg",
   "backgroundImageWebp": "/images/uploads/home-hero-worship.webp",
+  "backgroundImages": [
+    {
+      "image": "/images/uploads/shared/drive-download-20260803T134920Z-1-001/_MG_7326.jpg",
+      "desktopPosition": "center 54%",
+      "mobilePosition": "55% center"
+    },
+    {
+      "image": "/images/uploads/chvaly.jpg",
+      "desktopPosition": "center 46%",
+      "mobilePosition": "50% center"
+    },
+    {
+      "image": "/images/uploads/stretnutie.jpg",
+      "desktopPosition": "center 48%",
+      "mobilePosition": "52% center"
+    },
+    {
+      "image": "/images/uploads/podujatie.jpg",
+      "desktopPosition": "center 52%",
+      "mobilePosition": "54% center"
+    }
+  ],
   "videoPreviewImage": "/images/uploads/shared/drive-download-20260803T134920Z-1-001/_MG_7324.jpg",
   "videoPreviewAlt": "Chvály na pódiu v New Level Church",
   "imageAlt": "Church community gathering"
