@@ -24,6 +24,7 @@
 - The private roster UI is `src/pages/staff/riad.astro`; all roster data and mutations go through `supabase/functions/dishwasher-roster/index.ts` using the `DISHWASHER_STAFF_KEY` secret. The static page must never receive the service-role key.
 - Roster tables use the `invitation.dishwasher_*` prefix. Only `pending` and `confirmed` assignments occupy a shift position; declined/replaced rows are retained as history.
 - Automatic assignment fills Thursday and Sunday with two active, available people, prioritizing the lowest one-year assignment count and then the oldest last assignment.
+- Members can be added individually or imported from a CSV with `meno`/`name`, `email`, and optional `discord_id` columns. Imports update an existing member when the normalized email matches.
 - Discord confirmations use an application bot and signed component interactions, not webhook reactions. They require `DISCORD_DISHWASHER_BOT_TOKEN`, `DISCORD_DISHWASHER_PUBLIC_KEY`, and `DISCORD_DISHWASHER_CHANNEL_ID`. A member's Discord user ID must match the account clicking their confirmation button.
 - Deployment and Discord application setup are documented in `docs/dishwasher-roster.md`.
 

@@ -109,6 +109,19 @@
       label { display: grid; gap: 6px; color: var(--muted); font-size: 12px; font-weight: 800; }
       .form-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
       .people-list { display: grid; gap: 4px; margin-top: 24px; border-top: 1px solid var(--line); }
+      .import-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 22px; padding-bottom: 20px; border-bottom: 1px solid var(--line); }
+      .import-copy strong, .import-copy small { display: block; }
+      .import-copy small { margin-top: 4px; color: var(--muted); }
+      .file-button { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: 9px; padding: 10px 14px; color: var(--ink); cursor: pointer; font-size: 14px; font-weight: 700; }
+      .file-button:hover { border-color: #aaa9a1; background: rgba(255,255,255,.65); }
+      .file-button input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+      .integration { margin-bottom: 22px; padding: 15px 16px; border-radius: 11px; background: var(--amber-soft); color: #664612; }
+      .integration.is-ready { background: var(--green-soft); color: var(--green); }
+      .integration strong { display: block; }
+      .integration p { margin-top: 4px; font-size: 13px; line-height: 1.45; }
+      .integration details { margin-top: 10px; }
+      .integration summary { cursor: pointer; font-size: 13px; font-weight: 800; }
+      .integration ol { margin: 9px 0 0; padding-left: 20px; font-size: 13px; line-height: 1.5; }
       .person { gap: 12px; padding: 13px 2px; border-bottom: 1px solid var(--line); }
       .avatar { display: grid; flex: 0 0 38px; height: 38px; place-items: center; border-radius: 50%; background: #e9e6dc; font-weight: 800; }
       .person-main { min-width: 0; flex: 1; }
@@ -195,12 +208,17 @@
         <button class="icon-button" type="button" data-close aria-label="Zavrieť">×</button>
       </div>
       <div class="modal-body">
+        <div class="integration" data-discord-status></div>
+        <div class="import-row">
+          <div class="import-copy"><strong>Nahrať zoznam ľudí</strong><small>CSV so stĺpcami meno a email; Discord ID je voliteľné.</small></div>
+          <label class="file-button">Vybrať CSV<input type="file" accept=".csv,text/csv" data-import-file /></label>
+        </div>
         <form data-person-form>
           <input type="hidden" data-person-id />
           <div class="form-grid">
             <label>Meno<input required maxlength="120" placeholder="Jana Nováková" data-person-name /></label>
             <label>Email<input type="email" maxlength="254" placeholder="jana@example.com" data-person-email /></label>
-            <label>Discord user ID<input inputmode="numeric" maxlength="22" placeholder="123…" data-person-discord /></label>
+            <label>Discord ID (prepojenie)<input inputmode="numeric" maxlength="22" placeholder="123…" data-person-discord /></label>
             <label>Stav<select data-person-active><option value="true">Aktívny</option><option value="false">Neaktívny</option></select></label>
           </div>
           <div class="form-actions">
@@ -217,7 +235,7 @@
     <script>
       const ENDPOINT = "https://kbpuhcuiljbwgxgiauku.supabase.co/functions/v1/dishwasher-roster";
       const ACCESS_KEY = "dishwasherStaffKey";
-      const state = { key: localStorage.getItem(ACCESS_KEY) || "", month: "", members: [], shifts: [], assignments: [], availability: [], busy: false };
+      const state = { key: localStorage.getItem(ACCESS_KEY) || "", month: "", members: [], shifts: [], assignments: [], availability: [], integrations: { discordConfigured: false }, busy: false };
       const $ = (selector) => document.querySelector(selector);
       const escapeHtml = (value) => String(value ?? "").replace(/[&<>'"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[character]);
 
@@ -262,7 +280,7 @@
         });
         const data = await response.json().catch(() => ({ error: "Server vrátil nečitateľnú odpoveď" }));
         if (!response.ok || !data.success) throw new Error(data.error || `Operácia zlyhala (${response.status})`);
-        if (data.members) Object.assign(state, { members: data.members, shifts: data.shifts, assignments: data.assignments, availability: data.availability });
+        if (data.members) Object.assign(state, { members: data.members, shifts: data.shifts, assignments: data.assignments, availability: data.availability, integrations: data.integrations || state.integrations });
         return data;
       }
 
@@ -318,6 +336,11 @@
       }
 
       function renderPeople() {
+        const discordStatus = $("[data-discord-status]");
+        discordStatus.classList.toggle("is-ready", state.integrations.discordConfigured);
+        discordStatus.innerHTML = state.integrations.discordConfigured
+          ? `<strong>Discord bot je pripojený ✓</strong><p>Po doplnení Discord ID ku každému človeku môže rozpis prijímať potvrdenia.</p>`
+          : `<strong>Discord bot ešte nie je pripojený</strong><p>Mená a rozpis fungujú už teraz. Na potvrdenia v Discorde treba dokončiť bot pripojenie.</p><details><summary>Čo bude potrebné</summary><ol><li>Vytvoriť Discord aplikáciu a bota.</li><li>Pridať bota na váš server.</li><li>Nastaviť bot token, public key a ID cieľového kanála.</li><li>Ku každému menu doplniť jeho Discord ID.</li></ol></details>`;
         const list = $("[data-people-list]");
         if (!state.members.length) {
           list.innerHTML = `<div class="empty"><h3>Zatiaľ tu nikto nie je</h3><p>Pridaj prvého človeka cez formulár vyššie.</p></div>`;
@@ -422,6 +445,51 @@
         } catch (error) { notify(error.message, true); } finally { setBusy(false); }
       }
 
+      function parseCsvLine(line, delimiter) {
+        const cells = [];
+        let value = "";
+        let quoted = false;
+        for (let index = 0; index < line.length; index += 1) {
+          const character = line[index];
+          if (character === '"') {
+            if (quoted && line[index + 1] === '"') { value += '"'; index += 1; }
+            else quoted = !quoted;
+          } else if (character === delimiter && !quoted) {
+            cells.push(value.trim());
+            value = "";
+          } else value += character;
+        }
+        cells.push(value.trim());
+        return cells;
+      }
+
+      async function importPeople(event) {
+        const file = event.currentTarget.files?.[0];
+        event.currentTarget.value = "";
+        if (!file) return;
+        if (file.size > 1024 * 1024) return notify("CSV súbor je príliš veľký.", true);
+        setBusy(true);
+        try {
+          const text = (await file.text()).replace(/^\uFEFF/, "");
+          const lines = text.split(/\r?\n/).filter((line) => line.trim());
+          if (lines.length < 2) throw new Error("CSV musí obsahovať hlavičku a aspoň jeden riadok.");
+          const delimiter = (lines[0].match(/;/g) || []).length > (lines[0].match(/,/g) || []).length ? ";" : ",";
+          const normalize = (value) => value.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[\s-]+/g, "_");
+          const headers = parseCsvLine(lines[0], delimiter).map(normalize);
+          const nameIndex = headers.findIndex((header) => ["meno", "name", "cele_meno", "full_name"].includes(header));
+          const emailIndex = headers.findIndex((header) => ["email", "e_mail"].includes(header));
+          const discordIndex = headers.findIndex((header) => ["discord", "discord_id", "discord_user_id"].includes(header));
+          if (nameIndex < 0 || emailIndex < 0) throw new Error("CSV musí mať stĺpce meno a email.");
+          const members = lines.slice(1).map((line) => {
+            const cells = parseCsvLine(line, delimiter);
+            return { name: cells[nameIndex] || "", email: cells[emailIndex] || "", discordUserId: discordIndex >= 0 ? cells[discordIndex] || "" : "" };
+          });
+          const result = await api("import_members", { members });
+          render();
+          notify(`Import hotový: ${result.created} pridaných, ${result.updated} aktualizovaných${result.skipped ? `, ${result.skipped} preskočených` : ""}.`);
+        } catch (error) { notify(error.message, true); } finally { setBusy(false); }
+      }
+
       async function changeMonth(offset) {
         const date = new Date(`${state.month}-12T12:00:00`);
         date.setMonth(date.getMonth() + offset);
@@ -439,6 +507,7 @@
       $("[data-close]").addEventListener("click", () => $("[data-people-dialog]").close());
       $("[data-person-cancel]").addEventListener("click", resetPersonForm);
       $("[data-person-form]").addEventListener("submit", savePerson);
+      $("[data-import-file]").addEventListener("change", importPeople);
       $("[data-logout]").addEventListener("click", () => { localStorage.removeItem(ACCESS_KEY); state.key = ""; location.reload(); });
       if (state.key) load();
       else $("[data-key]").focus();

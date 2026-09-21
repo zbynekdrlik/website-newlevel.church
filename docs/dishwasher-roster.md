@@ -43,3 +43,10 @@ https://kbpuhcuiljbwgxgiauku.supabase.co/functions/v1/dishwasher-roster/discord
 
 Discord checks the endpoint signature before accepting it. Keep the bot token,
 public key, and staff key out of browser code and Git.
+
+## Importing people
+
+The People dialog accepts UTF-8 CSV files with comma or semicolon separators.
+Required headers are `meno` (or `name`) and `email`; `discord_id` is optional.
+Rows with an email already in the roster update that person instead of creating
+a duplicate.

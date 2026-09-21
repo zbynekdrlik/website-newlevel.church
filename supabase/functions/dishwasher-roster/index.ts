@@ -123,6 +123,13 @@ async function loadState(
     shifts,
     availability: availabilityResult.data ?? [],
     assignments,
+    integrations: {
+      discordConfigured: Boolean(
+        Deno.env.get("DISCORD_DISHWASHER_BOT_TOKEN")?.trim() &&
+          Deno.env.get("DISCORD_DISHWASHER_PUBLIC_KEY")?.trim() &&
+          Deno.env.get("DISCORD_DISHWASHER_CHANNEL_ID")?.trim(),
+      ),
+    },
   };
 }
 
@@ -613,6 +620,74 @@ Deno.serve(async (req) => {
       return json(req, {
         success: true,
         member: result.data,
+        ...(await loadState(admin, bounds)),
+      });
+    }
+
+    if (action === "import_members") {
+      const entries = Array.isArray(parsed.data.members)
+        ? parsed.data.members.slice(0, 250)
+        : [];
+      if (!entries.length) {
+        return json(
+          req,
+          { success: false, error: "Súbor neobsahuje žiadnych ľudí" },
+          400,
+        );
+      }
+
+      let created = 0;
+      let updated = 0;
+      const seenEmails = new Set<string>();
+      for (const rawEntry of entries) {
+        if (!rawEntry || typeof rawEntry !== "object") continue;
+        const entry = rawEntry as Record<string, unknown>;
+        const name = cleanText(entry.name, 120);
+        const email = cleanText(entry.email, 254)?.toLowerCase() ?? null;
+        const discordUserIdValue = cleanText(entry.discordUserId, 22);
+        if (
+          !name || !email || !validEmail(email) ||
+          !validDiscordUserId(discordUserIdValue) || seenEmails.has(email)
+        ) {
+          continue;
+        }
+        seenEmails.add(email);
+
+        const existing = await admin.schema("invitation").from(
+          "dishwasher_members",
+        ).select("id").eq("email", email).maybeSingle();
+        if (existing.error) throw existing.error;
+        const values = {
+          name,
+          email,
+          discord_user_id: discordUserIdValue,
+          active: true,
+        };
+        const writeResult = existing.data
+          ? await admin.schema("invitation").from("dishwasher_members")
+            .update(values).eq("id", existing.data.id)
+          : await admin.schema("invitation").from("dishwasher_members")
+            .insert(values);
+        if (writeResult.error) throw writeResult.error;
+        if (existing.data) updated += 1;
+        else created += 1;
+      }
+
+      if (!created && !updated) {
+        return json(
+          req,
+          {
+            success: false,
+            error: "Nenašiel sa platný riadok s menom a emailom",
+          },
+          400,
+        );
+      }
+      return json(req, {
+        success: true,
+        created,
+        updated,
+        skipped: entries.length - created - updated,
         ...(await loadState(admin, bounds)),
       });
     }
