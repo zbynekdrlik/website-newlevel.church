@@ -451,8 +451,8 @@
   font-family: 'Barlow Condensed', sans-serif;
   font-size: clamp(3.4rem, 6vw, 5.8rem);
   font-weight: 900;
-  letter-spacing: -0.055em;
-  line-height: 0.75;
+  letter-spacing: -0.015em;
+  line-height: 0.82;
   text-transform: uppercase;
 }
 
