@@ -409,6 +409,9 @@ verify_jwt = true
 [functions.dispatch-message-cron]
 verify_jwt = false
 
+[functions.dishwasher-roster]
+verify_jwt = false
+
 [functions.test-textbee-sms]
 verify_jwt = true
 

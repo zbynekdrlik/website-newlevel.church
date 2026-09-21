@@ -8,7 +8,15 @@ export default defineConfig({
   output: 'static',
   site: 'https://newlevel.church',
   trailingSlash: 'ignore',
-  integrations: [sitemap(), react()],
+  integrations: [
+    sitemap({
+      filter: (page) => {
+        const pathname = new URL(page).pathname;
+        return !pathname.startsWith('/admin') && !pathname.startsWith('/staff');
+      }
+    }),
+    react()
+  ],
   vite: {
     plugins: [tailwindcss()]
   }

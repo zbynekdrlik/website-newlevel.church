@@ -1,0 +1,447 @@
+---
+---
+
+<!doctype html>
+<html lang="sk">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="theme-color" content="#f5f3ed" />
+    <title>Služba riadu | New Level Staff</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #20231f;
+        --muted: #6d716a;
+        --paper: #f5f3ed;
+        --surface: #fffefa;
+        --line: #deddd6;
+        --brand: #dd0e18;
+        --green: #26734d;
+        --green-soft: #e4f2e8;
+        --amber: #946219;
+        --amber-soft: #f8edd5;
+        --red-soft: #fae6e5;
+        font-family: "DM Sans", system-ui, sans-serif;
+      }
+
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--paper); color: var(--ink); }
+      button, input, select { font: inherit; }
+      button { color: inherit; }
+      [hidden] { display: none !important; }
+
+      .shell { width: min(1240px, calc(100% - 32px)); margin: 0 auto; padding: 30px 0 64px; }
+      .topbar, .monthbar, .section-head, .person, .assignment, .modal-head, .access-row { display: flex; align-items: center; }
+      .topbar, .section-head, .modal-head { justify-content: space-between; gap: 20px; }
+      .brand { display: flex; align-items: center; gap: 12px; font: 800 14px/1 "Manrope", sans-serif; letter-spacing: -.01em; }
+      .brand-mark { display: grid; width: 36px; height: 36px; place-items: center; border-radius: 50%; background: var(--ink); color: white; }
+      .top-actions { display: flex; gap: 8px; }
+      .hero { padding: 76px 0 38px; }
+      .eyebrow { margin: 0 0 12px; color: var(--brand); font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+      h1, h2, h3, p { margin: 0; }
+      h1 { max-width: 720px; font: 800 clamp(42px, 7vw, 76px)/.98 "Manrope", sans-serif; letter-spacing: -.055em; }
+      .lede { max-width: 600px; margin-top: 20px; color: var(--muted); font-size: 17px; line-height: 1.55; }
+
+      button { border: 1px solid var(--line); border-radius: 9px; background: transparent; padding: 10px 14px; cursor: pointer; font-weight: 700; transition: .15s ease; }
+      button:hover { border-color: #aaa9a1; background: rgba(255,255,255,.65); }
+      button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid rgba(221,14,24,.18); outline-offset: 2px; }
+      button:disabled { cursor: wait; opacity: .5; }
+      .primary { border-color: var(--ink); background: var(--ink); color: white; }
+      .primary:hover { border-color: #353a34; background: #353a34; }
+      .quiet { border-color: transparent; }
+      .icon-button { width: 42px; height: 42px; padding: 0; font-size: 20px; }
+      .danger { color: #a20d15; }
+
+      .monthbar { position: sticky; top: 12px; z-index: 4; justify-content: space-between; gap: 16px; margin-bottom: 24px; padding: 10px 12px; border: 1px solid rgba(222,221,214,.9); border-radius: 13px; background: rgba(255,254,250,.9); backdrop-filter: blur(14px); }
+      .month-picker { display: flex; align-items: center; gap: 5px; }
+      .month-label { min-width: 168px; text-align: center; font: 800 16px/1 "Manrope", sans-serif; }
+      .month-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+
+      .schedule { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+      .shift { min-width: 0; padding: 21px; border: 1px solid var(--line); border-radius: 15px; background: var(--surface); }
+      .shift-date { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding-bottom: 17px; border-bottom: 1px solid var(--line); }
+      .shift-date h3 { font: 800 20px/1.15 "Manrope", sans-serif; letter-spacing: -.025em; }
+      .shift-date time { color: var(--muted); font-weight: 600; }
+      .published { color: var(--green); font-size: 12px; font-weight: 800; }
+      .assignments { display: grid; gap: 10px; padding-top: 16px; }
+      .assignment { gap: 12px; min-height: 56px; }
+      .position { display: grid; flex: 0 0 32px; height: 32px; place-items: center; border-radius: 50%; background: #eeece5; color: var(--muted); font-size: 12px; font-weight: 800; }
+      .assignment select { min-width: 0; flex: 1; }
+      .status { flex: 0 0 auto; padding: 5px 8px; border-radius: 999px; background: var(--amber-soft); color: var(--amber); font-size: 11px; font-weight: 800; }
+      .status.confirmed { background: var(--green-soft); color: var(--green); }
+      .status.empty { background: var(--red-soft); color: #9a3032; }
+
+      select, input { width: 100%; border: 1px solid var(--line); border-radius: 9px; background: white; color: var(--ink); padding: 10px 11px; }
+      select { cursor: pointer; }
+
+      .availability-section { margin-top: 52px; }
+      .section-head { align-items: end; margin-bottom: 18px; }
+      h2 { font: 800 clamp(26px, 4vw, 38px)/1 "Manrope", sans-serif; letter-spacing: -.04em; }
+      .section-copy { margin-top: 8px; color: var(--muted); }
+      .legend { display: flex; gap: 16px; color: var(--muted); font-size: 12px; font-weight: 700; }
+      .dot::before { display: inline-block; width: 8px; height: 8px; margin-right: 6px; border-radius: 50%; background: var(--green); content: ""; }
+      .dot.no::before { background: var(--brand); }
+      .availability-wrap { overflow: auto; border-block: 1px solid var(--line); background: rgba(255,254,250,.45); }
+      .availability { width: 100%; border-collapse: collapse; font-size: 13px; }
+      .availability th, .availability td { min-width: 76px; padding: 11px 8px; border-bottom: 1px solid var(--line); text-align: center; }
+      .availability th { color: var(--muted); font-size: 11px; font-weight: 800; }
+      .availability th:first-child, .availability td:first-child { position: sticky; left: 0; z-index: 2; min-width: 180px; background: var(--paper); text-align: left; }
+      .availability tbody tr:last-child td { border-bottom: 0; }
+      .availability-toggle { width: 34px; height: 34px; padding: 0; border-radius: 50%; border-color: transparent; background: var(--green-soft); color: var(--green); }
+      .availability-toggle.is-no { background: var(--red-soft); color: #aa2b31; }
+
+      .empty { grid-column: 1 / -1; padding: 54px 24px; border-block: 1px solid var(--line); text-align: center; }
+      .empty h3 { font: 800 22px/1.2 "Manrope", sans-serif; }
+      .empty p { margin: 9px auto 18px; color: var(--muted); }
+      .notice { position: fixed; right: 22px; bottom: 22px; z-index: 10; max-width: min(420px, calc(100% - 44px)); padding: 13px 16px; border-radius: 10px; background: var(--ink); color: white; box-shadow: 0 14px 40px rgba(24,26,23,.22); font-weight: 700; }
+      .notice.error { background: #a9151d; }
+
+      dialog { width: min(680px, calc(100% - 28px)); max-height: min(760px, calc(100vh - 40px)); border: 0; border-radius: 17px; background: var(--surface); color: var(--ink); padding: 0; box-shadow: 0 24px 80px rgba(25,27,24,.25); }
+      dialog::backdrop { background: rgba(31,34,30,.48); backdrop-filter: blur(3px); }
+      .modal-head { position: sticky; top: 0; z-index: 2; padding: 20px 22px; border-bottom: 1px solid var(--line); background: var(--surface); }
+      .modal-body { padding: 22px; overflow: auto; }
+      .form-grid { display: grid; grid-template-columns: 1.2fr 1.5fr 1fr .8fr; gap: 10px; }
+      label { display: grid; gap: 6px; color: var(--muted); font-size: 12px; font-weight: 800; }
+      .form-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+      .people-list { display: grid; gap: 4px; margin-top: 24px; border-top: 1px solid var(--line); }
+      .person { gap: 12px; padding: 13px 2px; border-bottom: 1px solid var(--line); }
+      .avatar { display: grid; flex: 0 0 38px; height: 38px; place-items: center; border-radius: 50%; background: #e9e6dc; font-weight: 800; }
+      .person-main { min-width: 0; flex: 1; }
+      .person-main strong, .person-main small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .person-main small { margin-top: 3px; color: var(--muted); }
+      .access-card { max-width: 490px; margin: 13vh auto 0; padding: 28px; border: 1px solid var(--line); border-radius: 17px; background: var(--surface); }
+      .access-card h2 { margin-top: 8px; }
+      .access-card p { margin: 12px 0 20px; color: var(--muted); line-height: 1.5; }
+      .access-row { gap: 8px; }
+      .access-row input { flex: 1; }
+
+      @media (max-width: 760px) {
+        .shell { width: min(100% - 22px, 1240px); padding-top: 18px; }
+        .hero { padding: 54px 4px 30px; }
+        .topbar .quiet span { display: none; }
+        .monthbar { top: 6px; align-items: stretch; flex-direction: column; }
+        .month-picker { justify-content: space-between; }
+        .month-actions { display: grid; grid-template-columns: 1fr 1fr; }
+        .schedule { grid-template-columns: 1fr; }
+        .shift { padding: 17px; }
+        .assignment { align-items: stretch; flex-wrap: wrap; }
+        .assignment select { flex-basis: calc(100% - 48px); }
+        .status { margin-left: 44px; }
+        .section-head { align-items: flex-start; flex-direction: column; }
+        .form-grid { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shell" data-app hidden>
+      <header class="topbar">
+        <div class="brand"><span class="brand-mark">NL</span> New Level Staff</div>
+        <div class="top-actions">
+          <button class="quiet" type="button" data-people>Ľudia</button>
+          <button class="quiet danger" type="button" data-logout>Odhlásiť <span>prístup</span></button>
+        </div>
+      </header>
+
+      <section class="hero">
+        <p class="eyebrow">Spolu sa staráme</p>
+        <h1>Služba umývania riadu</h1>
+        <p class="lede">Každý štvrtok a nedeľu slúžia dvaja ľudia. Rozpis sa skladá férovo podľa toho, kto slúžil najmenej a najdávnejšie.</p>
+      </section>
+
+      <nav class="monthbar" aria-label="Ovládanie rozpisu">
+        <div class="month-picker">
+          <button class="icon-button" type="button" data-prev aria-label="Predchádzajúci mesiac">←</button>
+          <span class="month-label" data-month-label></span>
+          <button class="icon-button" type="button" data-next aria-label="Nasledujúci mesiac">→</button>
+        </div>
+        <div class="month-actions">
+          <button type="button" data-generate>Vytvoriť / doplniť rozpis</button>
+          <button class="primary" type="button" data-publish>Poslať na Discord</button>
+        </div>
+      </nav>
+
+      <section class="schedule" data-schedule aria-live="polite"></section>
+
+      <section class="availability-section">
+        <div class="section-head">
+          <div>
+            <h2>Dostupnosť</h2>
+            <p class="section-copy">Kliknutím zmeníš, kto môže v konkrétny deň slúžiť.</p>
+          </div>
+          <div class="legend"><span class="dot">Môže</span><span class="dot no">Nemôže</span></div>
+        </div>
+        <div class="availability-wrap" data-availability></div>
+      </section>
+    </main>
+
+    <section class="access-card" data-access>
+      <p class="eyebrow">Súkromná sekcia</p>
+      <h2>Služba riadu</h2>
+      <p>Zadaj spoločný staff prístupový kľúč. Rozpis ani kontaktné údaje nie sú verejne dostupné.</p>
+      <form class="access-row" data-login-form>
+        <input type="password" autocomplete="current-password" placeholder="Prístupový kľúč" data-key />
+        <button class="primary" type="submit">Otvoriť</button>
+      </form>
+    </section>
+
+    <dialog data-people-dialog>
+      <div class="modal-head">
+        <div><p class="eyebrow">Nastavenia</p><h2>Ľudia</h2></div>
+        <button class="icon-button" type="button" data-close aria-label="Zavrieť">×</button>
+      </div>
+      <div class="modal-body">
+        <form data-person-form>
+          <input type="hidden" data-person-id />
+          <div class="form-grid">
+            <label>Meno<input required maxlength="120" placeholder="Jana Nováková" data-person-name /></label>
+            <label>Email<input type="email" maxlength="254" placeholder="jana@example.com" data-person-email /></label>
+            <label>Discord user ID<input inputmode="numeric" maxlength="22" placeholder="123…" data-person-discord /></label>
+            <label>Stav<select data-person-active><option value="true">Aktívny</option><option value="false">Neaktívny</option></select></label>
+          </div>
+          <div class="form-actions">
+            <button type="button" data-person-cancel hidden>Zrušiť úpravu</button>
+            <button class="primary" type="submit">Uložiť človeka</button>
+          </div>
+        </form>
+        <div class="people-list" data-people-list></div>
+      </div>
+    </dialog>
+
+    <div class="notice" data-notice hidden></div>
+
+    <script>
+      const ENDPOINT = "https://kbpuhcuiljbwgxgiauku.supabase.co/functions/v1/dishwasher-roster";
+      const ACCESS_KEY = "dishwasherStaffKey";
+      const state = { key: localStorage.getItem(ACCESS_KEY) || "", month: "", members: [], shifts: [], assignments: [], availability: [], busy: false };
+      const $ = (selector) => document.querySelector(selector);
+      const escapeHtml = (value) => String(value ?? "").replace(/[&<>'"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[character]);
+
+      function initialMonth() {
+        const now = new Date();
+        if (now.getDate() > 14) now.setMonth(now.getMonth() + 1);
+        return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+      }
+
+      function monthLabel() {
+        return new Intl.DateTimeFormat("sk-SK", { month: "long", year: "numeric" }).format(new Date(`${state.month}-12T12:00:00`));
+      }
+
+      function dateParts(date) {
+        const parsed = new Date(`${date}T12:00:00`);
+        return {
+          weekday: new Intl.DateTimeFormat("sk-SK", { weekday: "long" }).format(parsed),
+          date: new Intl.DateTimeFormat("sk-SK", { day: "numeric", month: "long" }).format(parsed),
+          short: new Intl.DateTimeFormat("sk-SK", { day: "numeric", month: "numeric" }).format(parsed),
+        };
+      }
+
+      function notify(message, error = false) {
+        const element = $("[data-notice]");
+        element.textContent = message;
+        element.classList.toggle("error", error);
+        element.hidden = false;
+        clearTimeout(notify.timeout);
+        notify.timeout = setTimeout(() => { element.hidden = true; }, 4400);
+      }
+
+      function setBusy(value) {
+        state.busy = value;
+        document.querySelectorAll("button, select").forEach((element) => { element.disabled = value; });
+      }
+
+      async function api(action, values = {}) {
+        const response = await fetch(ENDPOINT, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "x-staff-key": state.key },
+          body: JSON.stringify({ action, month: state.month, ...values }),
+        });
+        const data = await response.json().catch(() => ({ error: "Server vrátil nečitateľnú odpoveď" }));
+        if (!response.ok || !data.success) throw new Error(data.error || `Operácia zlyhala (${response.status})`);
+        if (data.members) Object.assign(state, { members: data.members, shifts: data.shifts, assignments: data.assignments, availability: data.availability });
+        return data;
+      }
+
+      function memberOptions(selectedId, shiftId, shiftDate) {
+        const unavailable = new Set(state.availability.filter((row) => row.service_date === shiftDate && row.available === false).map((row) => row.member_id));
+        const assignedElsewhere = new Set(state.assignments.filter((item) => item.shift_id === shiftId && item.member_id !== selectedId).map((item) => item.member_id));
+        const options = state.members.filter((member) => member.active).map((member) => {
+          const suffix = unavailable.has(member.id) ? " · nemôže" : "";
+          const disabled = member.id !== selectedId && (unavailable.has(member.id) || assignedElsewhere.has(member.id));
+          return `<option value="${member.id}" ${member.id === selectedId ? "selected" : ""} ${disabled ? "disabled" : ""}>${escapeHtml(member.name + suffix)}</option>`;
+        }).join("");
+        return `<option value="">Voľné miesto</option>${options}`;
+      }
+
+      function renderSchedule() {
+        $("[data-month-label]").textContent = monthLabel();
+        const container = $("[data-schedule]");
+        if (!state.shifts.length) {
+          container.innerHTML = `<div class="empty"><h3>Rozpis ešte nie je vytvorený</h3><p>Pridaj ľudí a nechaj systém férovo obsadiť všetky štvrtky a nedele.</p><button class="primary" type="button" data-empty-generate>Vytvoriť rozpis</button></div>`;
+          $("[data-empty-generate]")?.addEventListener("click", generate);
+          return;
+        }
+        container.innerHTML = state.shifts.map((shift) => {
+          const date = dateParts(shift.service_date);
+          const rows = [1, 2].map((position) => {
+            const assignment = state.assignments.find((item) => item.shift_id === shift.id && item.position === position);
+            const statusClass = assignment?.status === "confirmed" ? "confirmed" : assignment ? "" : "empty";
+            const statusText = assignment?.status === "confirmed" ? "potvrdené" : assignment ? "čaká" : "chýba";
+            return `<div class="assignment"><span class="position">${position}</span><select aria-label="Človek na pozícii ${position}" data-assignment data-shift="${shift.id}" data-position="${position}">${memberOptions(assignment?.member_id || "", shift.id, shift.service_date)}</select><span class="status ${statusClass}">${statusText}</span></div>`;
+          }).join("");
+          return `<article class="shift"><header class="shift-date"><div><h3>${escapeHtml(date.weekday)}</h3><time datetime="${shift.service_date}">${escapeHtml(date.date)}</time></div>${shift.published_at ? '<span class="published">Discord ✓</span>' : ""}</header><div class="assignments">${rows}</div></article>`;
+        }).join("");
+        document.querySelectorAll("[data-assignment]").forEach((select) => select.addEventListener("change", assignMember));
+      }
+
+      function renderAvailability() {
+        const container = $("[data-availability]");
+        if (!state.members.filter((member) => member.active).length || !state.shifts.length) {
+          container.innerHTML = `<div class="empty"><p>Dostupnosť sa zobrazí po pridaní ľudí a vytvorení rozpisu.</p></div>`;
+          return;
+        }
+        const header = state.shifts.map((shift) => `<th title="${escapeHtml(dateParts(shift.service_date).weekday)}">${escapeHtml(dateParts(shift.service_date).short)}</th>`).join("");
+        const rows = state.members.filter((member) => member.active).map((member) => {
+          const cells = state.shifts.map((shift) => {
+            const record = state.availability.find((item) => item.member_id === member.id && item.service_date === shift.service_date);
+            const available = record?.available !== false;
+            return `<td><button type="button" class="availability-toggle ${available ? "" : "is-no"}" data-availability-toggle data-member="${member.id}" data-date="${shift.service_date}" data-available="${available}" aria-label="${available ? "Môže" : "Nemôže"}: ${escapeHtml(member.name)}, ${shift.service_date}" title="${available ? "Môže — klikni pre zmenu" : "Nemôže — klikni pre zmenu"}">${available ? "✓" : "×"}</button></td>`;
+          }).join("");
+          return `<tr><td><strong>${escapeHtml(member.name)}</strong></td>${cells}</tr>`;
+        }).join("");
+        container.innerHTML = `<table class="availability"><thead><tr><th>Človek</th>${header}</tr></thead><tbody>${rows}</tbody></table>`;
+        document.querySelectorAll("[data-availability-toggle]").forEach((button) => button.addEventListener("click", toggleAvailability));
+      }
+
+      function renderPeople() {
+        const list = $("[data-people-list]");
+        if (!state.members.length) {
+          list.innerHTML = `<div class="empty"><h3>Zatiaľ tu nikto nie je</h3><p>Pridaj prvého človeka cez formulár vyššie.</p></div>`;
+          return;
+        }
+        list.innerHTML = state.members.map((member) => `<div class="person"><span class="avatar">${escapeHtml(member.name.slice(0, 1).toUpperCase())}</span><div class="person-main"><strong>${escapeHtml(member.name)}${member.active ? "" : " · neaktívny"}</strong><small>${escapeHtml(member.email || "bez emailu")} · Discord ${escapeHtml(member.discord_user_id || "nedoplnený")}</small></div><button type="button" data-edit-person="${member.id}">Upraviť</button></div>`).join("");
+        document.querySelectorAll("[data-edit-person]").forEach((button) => button.addEventListener("click", () => editPerson(button.dataset.editPerson)));
+      }
+
+      function render() {
+        renderSchedule();
+        renderAvailability();
+        renderPeople();
+      }
+
+      async function load() {
+        setBusy(true);
+        try {
+          await api("get_state");
+          $("[data-access]").hidden = true;
+          $("[data-app]").hidden = false;
+          localStorage.setItem(ACCESS_KEY, state.key);
+          render();
+        } catch (error) {
+          localStorage.removeItem(ACCESS_KEY);
+          $("[data-app]").hidden = true;
+          $("[data-access]").hidden = false;
+          notify(error.message, true);
+        } finally { setBusy(false); }
+      }
+
+      async function generate() {
+        setBusy(true);
+        try {
+          const data = await api("generate_month");
+          render();
+          notify(data.unfilled ? `Rozpis je doplnený, ale ${data.unfilled} miest ostalo voľných.` : "Rozpis je pripravený a férovo rozdelený.", Boolean(data.unfilled));
+        } catch (error) { notify(error.message, true); } finally { setBusy(false); }
+      }
+
+      async function publish() {
+        if (!state.shifts.length) return notify("Najprv vytvor rozpis.", true);
+        setBusy(true);
+        try {
+          const data = await api("publish_month");
+          render();
+          notify(`${data.published} termínov bolo poslaných na Discord.`);
+        } catch (error) { notify(error.message, true); } finally { setBusy(false); }
+      }
+
+      async function assignMember(event) {
+        const select = event.currentTarget;
+        if (!select.value) {
+          render();
+          return notify("Voľné miesto doplní systém cez tlačidlo Vytvoriť / doplniť.", true);
+        }
+        setBusy(true);
+        try {
+          await api("assign_member", { shiftId: select.dataset.shift, position: Number(select.dataset.position), memberId: select.value });
+          render();
+          notify("Pridelenie je upravené.");
+        } catch (error) { notify(error.message, true); render(); } finally { setBusy(false); }
+      }
+
+      async function toggleAvailability(event) {
+        const button = event.currentTarget;
+        const available = button.dataset.available !== "true";
+        setBusy(true);
+        try {
+          await api("set_availability", { memberId: button.dataset.member, serviceDate: button.dataset.date, available });
+          render();
+          notify(available ? "Dostupnosť je potvrdená." : "Nedostupnosť je uložená a prípadná náhrada doplnená.");
+        } catch (error) { notify(error.message, true); } finally { setBusy(false); }
+      }
+
+      function editPerson(id) {
+        const member = state.members.find((item) => item.id === id);
+        if (!member) return;
+        $("[data-person-id]").value = member.id;
+        $("[data-person-name]").value = member.name;
+        $("[data-person-email]").value = member.email || "";
+        $("[data-person-discord]").value = member.discord_user_id || "";
+        $("[data-person-active]").value = String(member.active);
+        $("[data-person-cancel]").hidden = false;
+        $("[data-person-name]").focus();
+      }
+
+      function resetPersonForm() {
+        $("[data-person-form]").reset();
+        $("[data-person-id]").value = "";
+        $("[data-person-cancel]").hidden = true;
+      }
+
+      async function savePerson(event) {
+        event.preventDefault();
+        setBusy(true);
+        try {
+          await api("save_member", { id: $("[data-person-id]").value || undefined, name: $("[data-person-name]").value, email: $("[data-person-email]").value, discordUserId: $("[data-person-discord]").value, active: $("[data-person-active]").value === "true" });
+          resetPersonForm();
+          render();
+          notify("Človek je uložený.");
+        } catch (error) { notify(error.message, true); } finally { setBusy(false); }
+      }
+
+      async function changeMonth(offset) {
+        const date = new Date(`${state.month}-12T12:00:00`);
+        date.setMonth(date.getMonth() + offset);
+        state.month = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+        await load();
+      }
+
+      state.month = initialMonth();
+      $("[data-login-form]").addEventListener("submit", (event) => { event.preventDefault(); state.key = $("[data-key]").value.trim(); load(); });
+      $("[data-prev]").addEventListener("click", () => changeMonth(-1));
+      $("[data-next]").addEventListener("click", () => changeMonth(1));
+      $("[data-generate]").addEventListener("click", generate);
+      $("[data-publish]").addEventListener("click", publish);
+      $("[data-people]").addEventListener("click", () => { renderPeople(); $("[data-people-dialog]").showModal(); });
+      $("[data-close]").addEventListener("click", () => $("[data-people-dialog]").close());
+      $("[data-person-cancel]").addEventListener("click", resetPersonForm);
+      $("[data-person-form]").addEventListener("submit", savePerson);
+      $("[data-logout]").addEventListener("click", () => { localStorage.removeItem(ACCESS_KEY); state.key = ""; location.reload(); });
+      if (state.key) load();
+      else $("[data-key]").focus();
+    </script>
+  </body>
+</html>

@@ -19,6 +19,14 @@
 - The public Party food counter reads `GET register-party` so `invitation.party_registrations` remains the source of truth; Cloudflare KV is only a legacy availability fallback.
 - Before enabling or repairing the cron, inspect overdue queued rows: all due rows can be delivered immediately once the cron becomes healthy.
 
+## Staff dishwasher roster
+
+- The private roster UI is `src/pages/staff/riad.astro`; all roster data and mutations go through `supabase/functions/dishwasher-roster/index.ts` using the `DISHWASHER_STAFF_KEY` secret. The static page must never receive the service-role key.
+- Roster tables use the `invitation.dishwasher_*` prefix. Only `pending` and `confirmed` assignments occupy a shift position; declined/replaced rows are retained as history.
+- Automatic assignment fills Thursday and Sunday with two active, available people, prioritizing the lowest one-year assignment count and then the oldest last assignment.
+- Discord confirmations use an application bot and signed component interactions, not webhook reactions. They require `DISCORD_DISHWASHER_BOT_TOKEN`, `DISCORD_DISHWASHER_PUBLIC_KEY`, and `DISCORD_DISHWASHER_CHANNEL_ID`. A member's Discord user ID must match the account clicking their confirmation button.
+- Deployment and Discord application setup are documented in `docs/dishwasher-roster.md`.
+
 ## Commands
 
 ```bash
