@@ -290,9 +290,15 @@
         const options = state.members.filter((member) => member.active).map((member) => {
           const suffix = unavailable.has(member.id) ? " · nemôže" : "";
           const disabled = member.id !== selectedId && (unavailable.has(member.id) || assignedElsewhere.has(member.id));
-          return `<option value="${member.id}" ${member.id === selectedId ? "selected" : ""} ${disabled ? "disabled" : ""}>${escapeHtml(member.name + suffix)}</option>`;
+          return `<option value="${member.id}" ${member.id === selectedId ? "selected" : ""} ${disabled ? "disabled" : ""}>${escapeHtml(memberDisplayName(member) + suffix)}</option>`;
         }).join("");
         return `<option value="">Voľné miesto</option>${options}`;
+      }
+
+      function memberDisplayName(member) {
+        const duplicates = state.members.filter((item) => item.name === member.name).sort((left, right) => left.id.localeCompare(right.id));
+        if (duplicates.length < 2) return member.name;
+        return `${member.name} (${duplicates.findIndex((item) => item.id === member.id) + 1})`;
       }
 
       function renderSchedule() {
@@ -329,7 +335,7 @@
             const available = record?.available !== false;
             return `<td><button type="button" class="availability-toggle ${available ? "" : "is-no"}" data-availability-toggle data-member="${member.id}" data-date="${shift.service_date}" data-available="${available}" aria-label="${available ? "Môže" : "Nemôže"}: ${escapeHtml(member.name)}, ${shift.service_date}" title="${available ? "Môže — klikni pre zmenu" : "Nemôže — klikni pre zmenu"}">${available ? "✓" : "×"}</button></td>`;
           }).join("");
-          return `<tr><td><strong>${escapeHtml(member.name)}</strong></td>${cells}</tr>`;
+          return `<tr><td><strong>${escapeHtml(memberDisplayName(member))}</strong></td>${cells}</tr>`;
         }).join("");
         container.innerHTML = `<table class="availability"><thead><tr><th>Človek</th>${header}</tr></thead><tbody>${rows}</tbody></table>`;
         document.querySelectorAll("[data-availability-toggle]").forEach((button) => button.addEventListener("click", toggleAvailability));
@@ -346,7 +352,7 @@
           list.innerHTML = `<div class="empty"><h3>Zatiaľ tu nikto nie je</h3><p>Pridaj prvého človeka cez formulár vyššie.</p></div>`;
           return;
         }
-        list.innerHTML = state.members.map((member) => `<div class="person"><span class="avatar">${escapeHtml(member.name.slice(0, 1).toUpperCase())}</span><div class="person-main"><strong>${escapeHtml(member.name)}${member.active ? "" : " · neaktívny"}</strong><small>${escapeHtml(member.email || "bez emailu")} · Discord ${escapeHtml(member.discord_user_id || "nedoplnený")}</small></div><button type="button" data-edit-person="${member.id}">Upraviť</button></div>`).join("");
+        list.innerHTML = state.members.map((member) => `<div class="person"><span class="avatar">${escapeHtml(member.name.slice(0, 1).toUpperCase())}</span><div class="person-main"><strong>${escapeHtml(memberDisplayName(member))}${member.active ? "" : " · neaktívny"}</strong><small>${escapeHtml(member.email || "bez emailu")} · Discord ${escapeHtml(member.discord_user_id || "nedoplnený")}</small></div><button type="button" data-edit-person="${member.id}">Upraviť</button></div>`).join("");
         document.querySelectorAll("[data-edit-person]").forEach((button) => button.addEventListener("click", () => editPerson(button.dataset.editPerson)));
       }
 
