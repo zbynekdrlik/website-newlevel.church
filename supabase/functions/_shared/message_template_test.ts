@@ -41,7 +41,7 @@ Deno.test("formats an event date naturally in Slovak", () => {
     "2026-08-30T12:00:00+02:00",
   );
 
-  assertEquals(message, "Stretneme sa v piatok 4. septembra 2026 o 18:00.");
+  assertEquals(message, "Stretneme sa v piatok 4. septembra o 18:00.");
 });
 
 Deno.test("formats the date from starts_at when event_date is unavailable", () => {
@@ -52,7 +52,7 @@ Deno.test("formats the date from starts_at when event_date is unavailable", () =
     "2026-08-30T12:00:00+02:00",
   );
 
-  assertEquals(message, "Stretneme sa v piatok 4. septembra 2026 o 18:30.");
+  assertEquals(message, "Stretneme sa v piatok 4. septembra o 18:30.");
 });
 
 Deno.test("keeps the absolute date when sent the day before the event", () => {
@@ -63,7 +63,7 @@ Deno.test("keeps the absolute date when sent the day before the event", () => {
     "2026-09-03T18:30:00+02:00",
   );
 
-  assertEquals(message, "Stretneme sa v piatok 4. septembra 2026 o 18:00.");
+  assertEquals(message, "Stretneme sa v piatok 4. septembra o 18:00.");
 });
 
 Deno.test("detects relative date wording that can become stale", () => {

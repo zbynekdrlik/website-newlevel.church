@@ -794,7 +794,6 @@
         const formattedDate = new Intl.DateTimeFormat("sk-SK", {
           day: "numeric",
           month: "long",
-          year: "numeric",
           timeZone: "Europe/Bratislava",
         }).format(eventDate);
         return `v ${weekday} ${formattedDate} o 18:00`;

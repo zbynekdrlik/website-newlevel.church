@@ -27,7 +27,6 @@ function eventDateParts(event: Record<string, unknown> | null) {
   const formattedDate = new Intl.DateTimeFormat("sk-SK", {
     day: "numeric",
     month: "long",
-    year: "numeric",
     timeZone: "Europe/Bratislava",
   }).format(parsedDate);
   const localTime = startsAt.match(/T(\d{2}):(\d{2})/)?.slice(1).join(":") ||
