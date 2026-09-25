@@ -74,7 +74,7 @@
       .all { margin-top: 62px; }
       .month { margin-top: 26px; }
       .month-title { padding-bottom: 10px; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 12px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
-      .row { display: grid; grid-template-columns: minmax(140px, .75fr) 1fr 1fr; gap: 14px; align-items: center; padding: 15px 2px; border-bottom: 1px solid var(--line); }
+      .row { display: grid; grid-template-columns: minmax(170px, .75fr) 1fr; gap: 14px; align-items: center; padding: 15px 2px; border-bottom: 1px solid var(--line); }
       .row-date strong, .row-date span { display: block; }
       .row-date span { margin-top: 2px; color: var(--muted); font-size: 13px; }
       .row-person { display: flex; align-items: center; gap: 8px; min-width: 0; }
@@ -128,7 +128,7 @@
 
       <section aria-labelledby="next-heading">
         <h2 id="next-heading">Najbližšie služby</h2>
-        <p class="section-copy">Tu vidíš svoje dve najbližšie služby. Dve zelené fajky znamenajú, že je všetko potvrdené.</p>
+        <p class="section-copy">Tu vidíš svoje dve najbližšie služby. Zelená fajka znamená, že je služba potvrdená.</p>
         <div class="next-list" data-next-list></div>
       </section>
 
@@ -198,9 +198,9 @@
       function renderNextCard(shift) {
         const date = dateParts(shift.serviceDate);
         const mine = shift.people.find((person) => person?.isMine);
-        const ready = shift.confirmedCount === 2;
+        const ready = shift.confirmedCount === 1;
         const actions = mine ? `<div class="actions">${mine.status === "confirmed" ? `<button type="button" disabled>✓ Tvoja účasť je potvrdená</button>` : `<button class="primary" type="button" data-answer="confirm" data-assignment="${mine.assignmentId}">Môžem prísť</button>`}<button class="decline" type="button" data-answer="decline" data-assignment="${mine.assignmentId}">${mine.status === "confirmed" ? "Predsa nemôžem" : "Nemôžem prísť"}</button></div>` : "";
-        return `<article class="next-card ${ready ? "is-ready" : ""}"><header class="next-head"><div class="next-date"><strong>${escapeHtml(date.weekday)}</strong><span>${escapeHtml(date.long)}</span></div><span class="state-pill ${ready ? "ready" : ""}">${ready ? "✓ Všetko potvrdené" : `${shift.confirmedCount}/2 potvrdené`}</span></header><div class="people">${shift.people.map((person) => personRow(person)).join("")}</div>${actions}</article>`;
+        return `<article class="next-card ${ready ? "is-ready" : ""}"><header class="next-head"><div class="next-date"><strong>${escapeHtml(date.weekday)}</strong><span>${escapeHtml(date.long)}</span></div><span class="state-pill ${ready ? "ready" : ""}">${ready ? "✓ Potvrdené" : "Čaká na potvrdenie"}</span></header><div class="people">${shift.people.map((person) => personRow(person)).join("")}</div>${actions}</article>`;
       }
 
       function render() {

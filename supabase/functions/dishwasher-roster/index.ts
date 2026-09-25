@@ -40,6 +40,7 @@ type DiscordWebhookConfig = {
 type NotificationKind = "monthly_schedule" | "shift_reminder";
 
 const ACTIVE_STATUSES = ["pending", "confirmed"];
+const SHIFT_POSITIONS = [1] as const;
 const MEMBER_PORTAL_URL = "https://newlevel.church/riad";
 
 function bytesToBase64Url(bytes: Uint8Array) {
@@ -307,7 +308,9 @@ async function fillOpenPositions(
 ) {
   const state = await loadState(admin, bounds);
   const members = (state.members as Member[]).filter((member) => member.active);
-  if (!members.length) return { added: 0, unfilled: state.shifts.length * 2 };
+  if (!members.length) {
+    return { added: 0, unfilled: state.shifts.length * SHIFT_POSITIONS.length };
+  }
 
   const unavailable = new Set(
     state.availability.filter((row: any) => row.available === false)
@@ -320,7 +323,7 @@ async function fillOpenPositions(
 
   for (const shift of state.shifts as Shift[]) {
     if (shift.service_date < fromDate) continue;
-    for (const position of [1, 2]) {
+    for (const position of SHIFT_POSITIONS) {
       if (
         activeAssignments.some((assignment) =>
           assignment.shift_id === shift.id && assignment.position === position
@@ -446,10 +449,11 @@ async function discordShiftPayload(
   const byId = new Map(members.map((member) => [member.id, member]));
   const active = assignments.filter((assignment) =>
     assignment.shift_id === shift.id &&
+    assignment.position === SHIFT_POSITIONS[0] &&
     ACTIVE_STATUSES.includes(assignment.status)
   );
   const links = await portalLinks(active, members);
-  const fields = [1, 2].map((position) => {
+  const fields = SHIFT_POSITIONS.map((position) => {
     const assignment = active.find((item) => item.position === position);
     const member = assignment ? byId.get(assignment.member_id) : null;
     const status = assignment?.status === "confirmed"
@@ -458,7 +462,7 @@ async function discordShiftPayload(
       ? interactive ? "⏳ čaká na potvrdenie" : "📌 pridelené"
       : "⚠️ voľné miesto";
     return {
-      name: `Miesto ${position}`,
+      name: "Služobník",
       value: member
         ? `**${member.name}**\n${status}\n[Pozrieť môj rozpis](${
           links.get(member.id)
@@ -604,6 +608,7 @@ async function monthlySchedulePayload(
 ) {
   const byId = new Map(members.map((member) => [member.id, member]));
   const active = assignments.filter((assignment) =>
+    assignment.position === SHIFT_POSITIONS[0] &&
     ACTIVE_STATUSES.includes(assignment.status)
   );
   const links = await portalLinks(active, members);
@@ -615,7 +620,7 @@ async function monthlySchedulePayload(
     ),
   ];
   const lines = shifts.map((shift) => {
-    const names = [1, 2].map((position) => {
+    const names = SHIFT_POSITIONS.map((position) => {
       const assignment = active.find((item) =>
         item.shift_id === shift.id && item.position === position
       );
@@ -665,6 +670,7 @@ async function shiftReminderPayload(
   const byId = new Map(members.map((member) => [member.id, member]));
   const active = assignments.filter((assignment) =>
     assignment.shift_id === shift.id &&
+    assignment.position === SHIFT_POSITIONS[0] &&
     ACTIVE_STATUSES.includes(assignment.status)
   );
   const links = await portalLinks(active, members);
@@ -675,7 +681,7 @@ async function shiftReminderPayload(
       ).filter(Boolean) as string[],
     ),
   ];
-  const names = [1, 2].map((position) => {
+  const names = SHIFT_POSITIONS.map((position) => {
     const assignment = active.find((item) => item.position === position);
     if (!assignment) return "*voľné miesto*";
     const member = byId.get(assignment.member_id);
@@ -696,7 +702,7 @@ async function shiftReminderPayload(
     content: [
       "🔔 **Zajtrajšia služba riadu**",
       `**${slovakShortDate(shift.service_date)}**`,
-      names.join(" a "),
+      names.join(""),
       "",
       "Prosím potvrď, či môžeš slúžiť.",
     ].join("\n"),
@@ -775,14 +781,6 @@ async function handleRosterCron(req: Request, admin: any) {
   if (!requireCron(req)) {
     return json(req, { success: false, error: "Forbidden" }, 403);
   }
-  const webhook = discordWebhookConfig();
-  if (!webhook) {
-    return json(
-      req,
-      { success: false, error: "Discord webhook nie je nakonfigurovaný" },
-      500,
-    );
-  }
   const parsed = await readJsonBody(req);
   if (!parsed.ok) {
     return json(req, { success: false, error: parsed.error }, 400);
@@ -792,6 +790,29 @@ async function handleRosterCron(req: Request, admin: any) {
     parsed.data.replaceLatestMonthly === true;
   const forcedMonth = monthBounds(parsed.data.month)?.month ?? null;
   const now = bratislavaNowParts();
+  if (parsed.data.generateOnly === true) {
+    if (!forcedMonth) {
+      return json(req, { success: false, error: "Neplatný mesiac" }, 400);
+    }
+    const bounds = monthBounds(forcedMonth)!;
+    await ensureShifts(admin, bounds);
+    const fromDate = now.date > bounds.start ? now.date : bounds.start;
+    const result = await fillOpenPositions(admin, bounds, fromDate);
+    return json(req, {
+      success: true,
+      localDate: now.date,
+      month: forcedMonth,
+      ...result,
+    });
+  }
+  const webhook = discordWebhookConfig();
+  if (!webhook) {
+    return json(
+      req,
+      { success: false, error: "Discord webhook nie je nakonfigurovaný" },
+      500,
+    );
+  }
   if (!forceMonthly && now.hour !== 9) {
     return json(req, { success: true, skipped: "outside_notification_hour" });
   }
@@ -1173,7 +1194,9 @@ async function loadMemberPortalState(admin: any, memberId: string) {
     ).select("id,shift_id,member_id,position,status,source").in(
       "shift_id",
       shifts.map((shift) => shift.id),
-    ).in("status", ACTIVE_STATUSES).order("position");
+    ).eq("position", SHIFT_POSITIONS[0]).in("status", ACTIVE_STATUSES).order(
+      "position",
+    );
     if (assignmentsResult.error) throw assignmentsResult.error;
     assignments = assignmentsResult.data ?? [];
   }
@@ -1191,7 +1214,7 @@ async function loadMemberPortalState(admin: any, memberId: string) {
   }
 
   const schedule = shifts.map((shift) => {
-    const people = [1, 2].map((position) => {
+    const people = SHIFT_POSITIONS.map((position) => {
       const assignment = assignments.find((item) =>
         item.shift_id === shift.id && item.position === position
       );
@@ -1610,7 +1633,7 @@ Deno.serve(async (req) => {
       const shiftId = cleanText(parsed.data.shiftId, 36);
       const memberId = cleanText(parsed.data.memberId, 36);
       const position = Number(parsed.data.position);
-      if (!shiftId || !memberId || ![1, 2].includes(position)) {
+      if (!shiftId || !memberId || position !== SHIFT_POSITIONS[0]) {
         return json(req, { success: false, error: "Neplatné pridelenie" }, 400);
       }
       const oldResult = await admin.schema("invitation").from(

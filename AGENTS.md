@@ -46,8 +46,8 @@
 - Roster tables use the `invitation.dishwasher_*` prefix. Only `pending` and
   `confirmed` assignments occupy a shift position; declined/replaced rows are
   retained as history.
-- Automatic assignment fills Thursday and Sunday with two active, available
-  people, prioritizing the lowest one-year assignment count and then the oldest
+- Automatic assignment fills Thursday and Sunday with one active, available
+  person, prioritizing the lowest one-year assignment count and then the oldest
   last assignment.
 - Members can be added individually or imported from a CSV with `meno`/`name`,
   `email`, and optional `discord_id` columns. Imports update an existing member
@@ -65,9 +65,9 @@
   names/statuses only. Declining fills the vacated position and replaces the
   latest relevant Discord webhook messages.
 - The database calls `/dishwasher-roster/cron` hourly; at 09:00
-  Europe/Bratislava it posts the full schedule on day 1 and a two-person
-  reminder one day before each shift. `invitation.dishwasher_notification_runs`
-  prevents duplicate posts.
+  Europe/Bratislava it posts the full schedule on day 1 and a reminder for the
+  assigned person one day before each shift.
+  `invitation.dishwasher_notification_runs` prevents duplicate posts.
 - Deployment and Discord application setup are documented in
   `docs/dishwasher-roster.md`.
 

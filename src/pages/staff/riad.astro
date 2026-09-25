@@ -163,7 +163,7 @@
       <section class="hero">
         <p class="eyebrow">Spolu sa staráme</p>
         <h1>Služba umývania riadu</h1>
-        <p class="lede">Každý štvrtok a nedeľu slúžia dvaja ľudia. Rozpis sa skladá férovo podľa toho, kto slúžil najmenej a najdávnejšie.</p>
+        <p class="lede">Každý štvrtok a nedeľu slúži jeden človek. Rozpis sa skladá férovo podľa toho, kto slúžil najmenej a najdávnejšie.</p>
       </section>
 
       <nav class="monthbar" aria-label="Ovládanie rozpisu">
@@ -311,7 +311,7 @@
         }
         container.innerHTML = state.shifts.map((shift) => {
           const date = dateParts(shift.service_date);
-          const rows = [1, 2].map((position) => {
+          const rows = [1].map((position) => {
             const assignment = state.assignments.find((item) => item.shift_id === shift.id && item.position === position);
             const statusClass = assignment?.status === "confirmed" ? "confirmed" : assignment ? "" : "empty";
             const statusText = assignment?.status === "confirmed" ? "potvrdené" : assignment ? "čaká" : "chýba";

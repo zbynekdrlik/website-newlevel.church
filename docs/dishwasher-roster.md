@@ -38,8 +38,8 @@ it immediately if it is pasted into chat, an issue, or a repository.
 The database cron calls `/dishwasher-roster/cron` hourly. At 09:00 in
 `Europe/Bratislava` the function sends a complete schedule on the first day of
 the month and, on other days, a reminder when a shift exists the following day.
-Reminder messages mention only the two assigned members when their
-`discord_user_id` values are present. Delivery claims are stored in
+Reminder messages mention only the assigned member when their `discord_user_id`
+is present. Delivery claims are stored in
 `invitation.dishwasher_notification_runs` so retries cannot duplicate a monthly
 schedule or shift reminder.
 
