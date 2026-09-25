@@ -476,9 +476,12 @@ function monthlySchedulePayload(
       const assignment = active.find((item) =>
         item.shift_id === shift.id && item.position === position
       );
-      return assignment
-        ? byId.get(assignment.member_id)?.name ?? "Neznámy človek"
-        : "voľné miesto";
+      if (!assignment) return "*voľné miesto*";
+      const member = byId.get(assignment.member_id);
+      if (!member) return "*neznámy človek*";
+      return member.discord_user_id
+        ? `<@${member.discord_user_id}>`
+        : `**${member.name}**`;
     });
     return `**${slovakShortDate(shift.service_date)}** — ${names.join(", ")}`;
   });
@@ -488,14 +491,12 @@ function monthlySchedulePayload(
     timeZone: "Europe/Bratislava",
   }).format(new Date(`${month}-12T12:00:00Z`));
   return {
-    content: mentionIds.map((id) => `<@${id}>`).join(" ") || undefined,
-    allowed_mentions: { users: mentionIds },
-    embeds: [{
-      title: `🍽️ Rozpis služby riadu · ${monthName}`,
-      description: lines.join("\n") || "Tento mesiac zatiaľ nemá služby.",
-      color: 0x26734d,
-      footer: { text: "Mesačný rozpis · New Level" },
-    }],
+    content: [
+      `🍽️ **Rozpis služby riadu · ${monthName}**`,
+      "",
+      lines.join("\n") || "Tento mesiac zatiaľ nemá služby.",
+    ].join("\n"),
+    allowed_mentions: { parse: [], users: mentionIds },
   };
 }
 
@@ -518,23 +519,22 @@ function shiftReminderPayload(
   ];
   const names = [1, 2].map((position) => {
     const assignment = active.find((item) => item.position === position);
-    return assignment
-      ? byId.get(assignment.member_id)?.name ?? "Neznámy človek"
-      : "voľné miesto";
+    if (!assignment) return "*voľné miesto*";
+    const member = byId.get(assignment.member_id);
+    if (!member) return "*neznámy človek*";
+    return member.discord_user_id
+      ? `<@${member.discord_user_id}>`
+      : `**${member.name}**`;
   });
   return {
-    content: mentionIds.map((id) => `<@${id}>`).join(" ") || undefined,
-    allowed_mentions: { users: mentionIds },
-    embeds: [{
-      title: "🔔 Zajtrajšia služba riadu",
-      description: `**${slovakShortDate(shift.service_date)}**\n${
-        names.join(" a ")
-      }`,
-      color: 0xdd0e18,
-      footer: {
-        text: "Ak nemôžeš prísť, napíš prosím čo najskôr do tohto vlákna.",
-      },
-    }],
+    content: [
+      "🔔 **Zajtrajšia služba riadu**",
+      `**${slovakShortDate(shift.service_date)}**`,
+      names.join(" a "),
+      "",
+      "Ak nemôžeš prísť, napíš prosím čo najskôr do tohto vlákna.",
+    ].join("\n"),
+    allowed_mentions: { parse: [], users: mentionIds },
   };
 }
 
