@@ -108,7 +108,7 @@
       .form-grid { display: grid; grid-template-columns: 1.2fr 1.5fr 1fr .8fr; gap: 10px; }
       label { display: grid; gap: 6px; color: var(--muted); font-size: 12px; font-weight: 800; }
       .form-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
-      .people-list { display: grid; gap: 4px; margin-top: 24px; border-top: 1px solid var(--line); }
+      .people-list { display: grid; margin-top: 24px; border-top: 1px solid var(--line); }
       .import-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 22px; padding-bottom: 20px; border-bottom: 1px solid var(--line); }
       .import-copy strong, .import-copy small { display: block; }
       .import-copy small { margin-top: 4px; color: var(--muted); }
@@ -122,11 +122,18 @@
       .integration details { margin-top: 10px; }
       .integration summary { cursor: pointer; font-size: 13px; font-weight: 800; }
       .integration ol { margin: 9px 0 0; padding-left: 20px; font-size: 13px; line-height: 1.5; }
-      .person { gap: 12px; padding: 13px 2px; border-bottom: 1px solid var(--line); }
-      .avatar { display: grid; flex: 0 0 38px; height: 38px; place-items: center; border-radius: 50%; background: #e9e6dc; font-weight: 800; }
+      .person { gap: 14px; padding: 15px 2px; border-bottom: 1px solid var(--line); transition: opacity .15s ease; }
+      .person.is-inactive { opacity: .62; }
+      .avatar { display: grid; flex: 0 0 42px; height: 42px; place-items: center; border-radius: 50%; background: #e9e6dc; color: #4f534d; font: 800 14px/1 "Manrope", sans-serif; }
       .person-main { min-width: 0; flex: 1; }
-      .person-main strong, .person-main small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-      .person-main small { margin-top: 3px; color: var(--muted); }
+      .person-heading { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; }
+      .person-heading strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 800 15px/1.25 "Manrope", sans-serif; }
+      .person-status { flex: 0 0 auto; padding: 3px 7px; border-radius: 999px; background: var(--green-soft); color: var(--green); font-size: 10px; font-weight: 800; letter-spacing: .03em; text-transform: uppercase; }
+      .person-status.is-inactive { background: #ebeae4; color: var(--muted); }
+      .person-meta { display: flex; flex-wrap: wrap; gap: 5px 14px; margin-top: 6px; color: var(--muted); font-size: 12px; }
+      .person-meta span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .person-meta .is-missing { color: var(--amber); }
+      .person-edit { flex: 0 0 auto; padding: 8px 11px; font-size: 13px; }
       .access-card { max-width: 490px; margin: 13vh auto 0; padding: 28px; border: 1px solid var(--line); border-radius: 17px; background: var(--surface); }
       .access-card h2 { margin-top: 8px; }
       .access-card p { margin: 12px 0 20px; color: var(--muted); line-height: 1.5; }
@@ -147,6 +154,9 @@
         .status { margin-left: 44px; }
         .section-head { align-items: flex-start; flex-direction: column; }
         .form-grid { grid-template-columns: 1fr; }
+        .person { align-items: flex-start; gap: 11px; }
+        .person-meta { align-items: flex-start; flex-direction: column; gap: 3px; }
+        .person-edit { padding-inline: 9px; }
       }
     </style>
   </head>
@@ -354,7 +364,24 @@
           list.innerHTML = `<div class="empty"><h3>Zatiaľ tu nikto nie je</h3><p>Pridaj prvého človeka cez formulár vyššie.</p></div>`;
           return;
         }
-        list.innerHTML = state.members.map((member) => `<div class="person"><span class="avatar">${escapeHtml(member.name.slice(0, 1).toUpperCase())}</span><div class="person-main"><strong>${escapeHtml(memberDisplayName(member))}${member.active ? "" : " · neaktívny"}</strong><small>${escapeHtml(member.email || "bez emailu")} · Discord ${escapeHtml(member.discord_user_id || "nedoplnený")}</small></div><button type="button" data-edit-person="${member.id}">Upraviť</button></div>`).join("");
+        list.innerHTML = state.members.map((member) => {
+          const hasEmail = Boolean(member.email);
+          const hasDiscord = Boolean(member.discord_user_id);
+          return `<div class="person ${member.active ? "" : "is-inactive"}">
+            <span class="avatar" aria-hidden="true">${escapeHtml(member.name.slice(0, 1).toUpperCase())}</span>
+            <div class="person-main">
+              <div class="person-heading">
+                <strong>${escapeHtml(memberDisplayName(member))}</strong>
+                <span class="person-status ${member.active ? "" : "is-inactive"}">${member.active ? "Aktívny" : "Neaktívny"}</span>
+              </div>
+              <div class="person-meta">
+                <span class="${hasEmail ? "" : "is-missing"}">${hasEmail ? escapeHtml(member.email) : "Email nedoplnený"}</span>
+                <span class="${hasDiscord ? "" : "is-missing"}">${hasDiscord ? "Discord prepojený" : "Discord nedoplnený"}</span>
+              </div>
+            </div>
+            <button class="person-edit" type="button" data-edit-person="${member.id}" aria-label="Upraviť ${escapeHtml(memberDisplayName(member))}">Upraviť</button>
+          </div>`;
+        }).join("");
         document.querySelectorAll("[data-edit-person]").forEach((button) => button.addEventListener("click", () => editPerson(button.dataset.editPerson)));
       }
 
