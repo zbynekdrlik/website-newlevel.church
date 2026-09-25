@@ -612,14 +612,20 @@ async function handleRosterCron(req: Request, admin: any) {
       500,
     );
   }
+  const parsed = await readJsonBody(req);
+  if (!parsed.ok) {
+    return json(req, { success: false, error: parsed.error }, 400);
+  }
+  const forceMonthly = parsed.data.forceMonthly === true;
+  const forcedMonth = monthBounds(parsed.data.month)?.month ?? null;
   const now = bratislavaNowParts();
-  if (now.hour !== 9) {
+  if (!forceMonthly && now.hour !== 9) {
     return json(req, { success: true, skipped: "outside_notification_hour" });
   }
 
   const sent: NotificationKind[] = [];
-  if (now.day === 1) {
-    const month = now.date.slice(0, 7);
+  if (forceMonthly || now.day === 1) {
+    const month = forcedMonth ?? now.date.slice(0, 7);
     const bounds = monthBounds(month)!;
     await ensureShifts(admin, bounds);
     await fillOpenPositions(admin, bounds);
@@ -627,7 +633,9 @@ async function handleRosterCron(req: Request, admin: any) {
     const sentMonthly = await sendClaimedNotification(
       admin,
       webhook,
-      `monthly:${month}`,
+      forceMonthly
+        ? `monthly-test:${month}:${crypto.randomUUID()}`
+        : `monthly:${month}`,
       "monthly_schedule",
       bounds.start,
       monthlySchedulePayload(
@@ -638,6 +646,10 @@ async function handleRosterCron(req: Request, admin: any) {
       ),
     );
     if (sentMonthly) sent.push("monthly_schedule");
+  }
+
+  if (forceMonthly) {
+    return json(req, { success: true, localDate: now.date, sent });
   }
 
   const tomorrow = addCalendarDays(now.date, 1);
