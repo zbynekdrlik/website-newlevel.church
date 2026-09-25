@@ -209,6 +209,7 @@ async function assignmentHistory(
 async function fillOpenPositions(
   admin: any,
   bounds: NonNullable<ReturnType<typeof monthBounds>>,
+  fromDate = bounds.start,
 ) {
   const state = await loadState(admin, bounds);
   const members = (state.members as Member[]).filter((member) => member.active);
@@ -224,6 +225,7 @@ async function fillOpenPositions(
   let unfilled = 0;
 
   for (const shift of state.shifts as Shift[]) {
+    if (shift.service_date < fromDate) continue;
     for (const position of [1, 2]) {
       if (
         activeAssignments.some((assignment) =>
@@ -640,6 +642,8 @@ async function handleRosterCron(req: Request, admin: any) {
 
   const tomorrow = addCalendarDays(now.date, 1);
   const bounds = monthBounds(tomorrow.slice(0, 7))!;
+  await ensureShifts(admin, bounds);
+  await fillOpenPositions(admin, bounds, tomorrow);
   const state = await loadState(admin, bounds);
   const shift = (state.shifts as Shift[]).find((item) =>
     item.service_date === tomorrow
