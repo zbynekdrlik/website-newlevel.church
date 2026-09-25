@@ -37,6 +37,8 @@ type DiscordWebhookConfig = {
   threadId: string;
 };
 
+type NotificationKind = "monthly_schedule" | "shift_reminder";
+
 const ACTIVE_STATUSES = ["pending", "confirmed"];
 
 function timingSafeEqual(leftValue: string, rightValue: string) {
@@ -49,6 +51,12 @@ function timingSafeEqual(leftValue: string, rightValue: string) {
     difference |= left[index] ^ right[index];
   }
   return difference === 0;
+}
+
+function requireCron(req: Request) {
+  const expected = Deno.env.get("CRON_SECRET")?.trim() ?? "";
+  const supplied = req.headers.get("x-cron-secret")?.trim() ?? "";
+  return Boolean(expected && supplied && timingSafeEqual(expected, supplied));
 }
 
 function requireStaff(req: Request) {
@@ -280,6 +288,41 @@ function slovakDate(value: string) {
   return formatted.charAt(0).toUpperCase() + formatted.slice(1);
 }
 
+function slovakShortDate(value: string) {
+  const date = new Date(`${value}T12:00:00Z`);
+  const formatted = new Intl.DateTimeFormat("sk-SK", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    timeZone: "Europe/Bratislava",
+  }).format(date);
+  return formatted.charAt(0).toUpperCase() + formatted.slice(1);
+}
+
+function bratislavaNowParts(now = new Date()) {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Bratislava",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(now);
+  const value = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((part) => part.type === type)?.value ?? "";
+  return {
+    date: `${value("year")}-${value("month")}-${value("day")}`,
+    day: Number(value("day")),
+    hour: Number(value("hour")),
+  };
+}
+
+function addCalendarDays(value: string, days: number) {
+  const date = new Date(`${value}T12:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + days);
+  return date.toISOString().slice(0, 10);
+}
+
 function discordShiftPayload(
   shift: Shift,
   assignments: Assignment[],
@@ -407,6 +450,217 @@ async function discordWebhookRequest(
     throw new Error(`Discord webhook zlyhal (${response.status})`);
   }
   return await response.json().catch(() => ({}));
+}
+
+function monthlySchedulePayload(
+  month: string,
+  shifts: Shift[],
+  assignments: Assignment[],
+  members: Member[],
+) {
+  const byId = new Map(members.map((member) => [member.id, member]));
+  const active = assignments.filter((assignment) =>
+    ACTIVE_STATUSES.includes(assignment.status)
+  );
+  const mentionIds = [
+    ...new Set(
+      active.map((assignment) =>
+        byId.get(assignment.member_id)?.discord_user_id
+      ).filter(Boolean) as string[],
+    ),
+  ];
+  const lines = shifts.map((shift) => {
+    const names = [1, 2].map((position) => {
+      const assignment = active.find((item) =>
+        item.shift_id === shift.id && item.position === position
+      );
+      return assignment
+        ? byId.get(assignment.member_id)?.name ?? "Neznámy človek"
+        : "voľné miesto";
+    });
+    return `**${slovakShortDate(shift.service_date)}** — ${names.join(", ")}`;
+  });
+  const monthName = new Intl.DateTimeFormat("sk-SK", {
+    month: "long",
+    year: "numeric",
+    timeZone: "Europe/Bratislava",
+  }).format(new Date(`${month}-12T12:00:00Z`));
+  return {
+    content: mentionIds.map((id) => `<@${id}>`).join(" ") || undefined,
+    allowed_mentions: { users: mentionIds },
+    embeds: [{
+      title: `🍽️ Rozpis služby riadu · ${monthName}`,
+      description: lines.join("\n") || "Tento mesiac zatiaľ nemá služby.",
+      color: 0x26734d,
+      footer: { text: "Mesačný rozpis · New Level" },
+    }],
+  };
+}
+
+function shiftReminderPayload(
+  shift: Shift,
+  assignments: Assignment[],
+  members: Member[],
+) {
+  const byId = new Map(members.map((member) => [member.id, member]));
+  const active = assignments.filter((assignment) =>
+    assignment.shift_id === shift.id &&
+    ACTIVE_STATUSES.includes(assignment.status)
+  );
+  const mentionIds = [
+    ...new Set(
+      active.map((assignment) =>
+        byId.get(assignment.member_id)?.discord_user_id
+      ).filter(Boolean) as string[],
+    ),
+  ];
+  const names = [1, 2].map((position) => {
+    const assignment = active.find((item) => item.position === position);
+    return assignment
+      ? byId.get(assignment.member_id)?.name ?? "Neznámy človek"
+      : "voľné miesto";
+  });
+  return {
+    content: mentionIds.map((id) => `<@${id}>`).join(" ") || undefined,
+    allowed_mentions: { users: mentionIds },
+    embeds: [{
+      title: "🔔 Zajtrajšia služba riadu",
+      description: `**${slovakShortDate(shift.service_date)}**\n${
+        names.join(" a ")
+      }`,
+      color: 0xdd0e18,
+      footer: {
+        text: "Ak nemôžeš prísť, napíš prosím čo najskôr do tohto vlákna.",
+      },
+    }],
+  };
+}
+
+async function claimNotification(
+  admin: any,
+  key: string,
+  kind: NotificationKind,
+  targetDate: string,
+) {
+  const result = await admin.schema("invitation").from(
+    "dishwasher_notification_runs",
+  ).insert({
+    notification_key: key,
+    kind,
+    target_date: targetDate,
+  });
+  if (result.error?.code === "23505") return false;
+  if (result.error) throw result.error;
+  return true;
+}
+
+async function releaseNotification(admin: any, key: string) {
+  await admin.schema("invitation").from("dishwasher_notification_runs")
+    .delete().eq("notification_key", key).is("sent_at", null);
+}
+
+async function markNotificationSent(
+  admin: any,
+  key: string,
+  messageId: string | null,
+) {
+  const result = await admin.schema("invitation").from(
+    "dishwasher_notification_runs",
+  ).update({
+    discord_message_id: messageId,
+    sent_at: new Date().toISOString(),
+  }).eq("notification_key", key);
+  if (result.error) throw result.error;
+}
+
+async function sendClaimedNotification(
+  admin: any,
+  webhook: DiscordWebhookConfig,
+  key: string,
+  kind: NotificationKind,
+  targetDate: string,
+  payload: Record<string, unknown>,
+) {
+  if (!(await claimNotification(admin, key, kind, targetDate))) return false;
+  try {
+    const message = await discordWebhookRequest(webhook, "", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+    await markNotificationSent(admin, key, message.id ?? null);
+    return true;
+  } catch (error) {
+    await releaseNotification(admin, key);
+    throw error;
+  }
+}
+
+async function handleRosterCron(req: Request, admin: any) {
+  if (req.method !== "POST") {
+    return json(req, { success: false, error: "Method not allowed" }, 405);
+  }
+  if (!requireCron(req)) {
+    return json(req, { success: false, error: "Forbidden" }, 403);
+  }
+  const webhook = discordWebhookConfig();
+  if (!webhook) {
+    return json(
+      req,
+      { success: false, error: "Discord webhook nie je nakonfigurovaný" },
+      500,
+    );
+  }
+  const now = bratislavaNowParts();
+  if (now.hour !== 9) {
+    return json(req, { success: true, skipped: "outside_notification_hour" });
+  }
+
+  const sent: NotificationKind[] = [];
+  if (now.day === 1) {
+    const month = now.date.slice(0, 7);
+    const bounds = monthBounds(month)!;
+    await ensureShifts(admin, bounds);
+    await fillOpenPositions(admin, bounds);
+    const state = await loadState(admin, bounds);
+    const sentMonthly = await sendClaimedNotification(
+      admin,
+      webhook,
+      `monthly:${month}`,
+      "monthly_schedule",
+      bounds.start,
+      monthlySchedulePayload(
+        month,
+        state.shifts,
+        state.assignments,
+        state.members,
+      ),
+    );
+    if (sentMonthly) sent.push("monthly_schedule");
+  }
+
+  const tomorrow = addCalendarDays(now.date, 1);
+  const bounds = monthBounds(tomorrow.slice(0, 7))!;
+  const state = await loadState(admin, bounds);
+  const shift = (state.shifts as Shift[]).find((item) =>
+    item.service_date === tomorrow
+  );
+  if (shift) {
+    const sentReminder = await sendClaimedNotification(
+      admin,
+      webhook,
+      `reminder:${tomorrow}`,
+      "shift_reminder",
+      tomorrow,
+      shiftReminderPayload(
+        shift,
+        state.assignments,
+        state.members,
+      ),
+    );
+    if (sentReminder) sent.push("shift_reminder");
+  }
+
+  return json(req, { success: true, localDate: now.date, sent });
 }
 
 async function syncDiscordShift(admin: any, shiftId: string) {
@@ -609,6 +863,18 @@ Deno.serve(async (req) => {
           flags: 64,
         },
       });
+    }
+  }
+  if (new URL(req.url).pathname.endsWith("/cron")) {
+    try {
+      return await handleRosterCron(req, admin);
+    } catch (error) {
+      console.error("Dishwasher roster cron failed", error);
+      return json(
+        req,
+        { success: false, error: "Automatické upozornenie zlyhalo" },
+        500,
+      );
     }
   }
   if (req.method === "OPTIONS") {

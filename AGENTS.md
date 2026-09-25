@@ -27,6 +27,7 @@
 - Members can be added individually or imported from a CSV with `meno`/`name`, `email`, and optional `discord_id` columns. Imports update an existing member when the normalized email matches.
 - Discord confirmations use an application bot and signed component interactions, not webhook reactions. They require `DISCORD_DISHWASHER_BOT_TOKEN`, `DISCORD_DISHWASHER_PUBLIC_KEY`, and `DISCORD_DISHWASHER_CHANNEL_ID`. A member's Discord user ID must match the account clicking their confirmation button.
 - One-way notifications can instead target only a Discord thread using `DISCORD_DISHWASHER_WEBHOOK_URL` plus `DISCORD_DISHWASHER_THREAD_ID`; webhook mode intentionally omits confirmation buttons.
+- The database calls `/dishwasher-roster/cron` hourly; at 09:00 Europe/Bratislava it posts the full schedule on day 1 and a two-person reminder one day before each shift. `invitation.dishwasher_notification_runs` prevents duplicate posts.
 - Deployment and Discord application setup are documented in `docs/dishwasher-roster.md`.
 
 ## Commands
