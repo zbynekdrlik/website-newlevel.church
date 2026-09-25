@@ -21,6 +21,22 @@ supabase secrets set DISHWASHER_STAFF_KEY='<random secret>'
 
 ## Discord application
 
+For one-way notifications to a specific Discord thread, create a webhook in
+the thread's parent text channel and set both values below. The thread ID keeps
+all roster messages out of the parent channel:
+
+```bash
+supabase secrets set \
+  DISCORD_DISHWASHER_WEBHOOK_URL='<webhook URL>' \
+  DISCORD_DISHWASHER_THREAD_ID='<thread channel ID>'
+```
+
+The webhook URL is a credential. Store it only as a Supabase secret and rotate
+it immediately if it is pasted into chat, an issue, or a repository.
+
+The application bot setup below is only needed for interactive confirmation
+and decline buttons.
+
 Create a Discord application and bot in the Discord Developer Portal. Invite
 the bot to the server with `View Channels`, `Send Messages`, `Embed Links`, and
 `Read Message History` permissions. Enable Developer Mode in Discord and copy

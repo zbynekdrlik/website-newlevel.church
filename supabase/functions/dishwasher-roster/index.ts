@@ -32,6 +32,11 @@ type Assignment = {
   source: "automatic" | "manual" | "discord";
 };
 
+type DiscordWebhookConfig = {
+  url: string;
+  threadId: string;
+};
+
 const ACTIVE_STATUSES = ["pending", "confirmed"];
 
 function timingSafeEqual(leftValue: string, rightValue: string) {
@@ -118,17 +123,25 @@ async function loadState(
     assignments = assignmentResult.data ?? [];
   }
 
+  const botConfigured = Boolean(
+    Deno.env.get("DISCORD_DISHWASHER_BOT_TOKEN")?.trim() &&
+      Deno.env.get("DISCORD_DISHWASHER_PUBLIC_KEY")?.trim() &&
+      Deno.env.get("DISCORD_DISHWASHER_CHANNEL_ID")?.trim(),
+  );
+  const webhookConfigured = Boolean(discordWebhookConfig());
+
   return {
     members: membersResult.data ?? [],
     shifts,
     availability: availabilityResult.data ?? [],
     assignments,
     integrations: {
-      discordConfigured: Boolean(
-        Deno.env.get("DISCORD_DISHWASHER_BOT_TOKEN")?.trim() &&
-          Deno.env.get("DISCORD_DISHWASHER_PUBLIC_KEY")?.trim() &&
-          Deno.env.get("DISCORD_DISHWASHER_CHANNEL_ID")?.trim(),
-      ),
+      discordConfigured: botConfigured || webhookConfigured,
+      discordMode: webhookConfigured
+        ? "webhook"
+        : botConfigured
+        ? "bot"
+        : "none",
     },
   };
 }
@@ -271,6 +284,7 @@ function discordShiftPayload(
   shift: Shift,
   assignments: Assignment[],
   members: Member[],
+  interactive = true,
 ) {
   const byId = new Map(members.map((member) => [member.id, member]));
   const active = assignments.filter((assignment) =>
@@ -283,7 +297,7 @@ function discordShiftPayload(
     const status = assignment?.status === "confirmed"
       ? "✅ potvrdené"
       : assignment
-      ? "⏳ čaká na potvrdenie"
+      ? interactive ? "⏳ čaká na potvrdenie" : "📌 pridelené"
       : "⚠️ voľné miesto";
     return {
       name: `Miesto ${position}`,
@@ -330,12 +344,33 @@ function discordShiftPayload(
         ? 0xf0b429
         : 0x2eae6b,
       fields,
-      footer: { text: "Pridelený človek potvrdí svoju možnosť nižšie." },
+      footer: {
+        text: interactive
+          ? "Pridelený človek potvrdí svoju možnosť nižšie."
+          : "Automatické upozornenie z rozpisu služby riadu.",
+      },
     }],
-    components: buttons.length
-      ? [{ type: 1, components: buttons.slice(0, 5) }]
-      : [],
+    ...(interactive && buttons.length
+      ? { components: [{ type: 1, components: buttons.slice(0, 5) }] }
+      : {}),
   };
+}
+
+function discordWebhookConfig(): DiscordWebhookConfig | null {
+  const url = Deno.env.get("DISCORD_DISHWASHER_WEBHOOK_URL")?.trim() ?? "";
+  const threadId = Deno.env.get("DISCORD_DISHWASHER_THREAD_ID")?.trim() ?? "";
+  if (!/^\d{15,22}$/.test(threadId)) return null;
+  try {
+    const parsed = new URL(url);
+    if (
+      parsed.protocol !== "https:" ||
+      !["discord.com", "discordapp.com"].includes(parsed.hostname) ||
+      !/^\/api\/webhooks\/\d{15,22}\/[A-Za-z0-9._-]+\/?$/.test(parsed.pathname)
+    ) return null;
+    return { url: parsed.toString().replace(/\/$/, ""), threadId };
+  } catch {
+    return null;
+  }
 }
 
 async function discordRequest(path: string, init: RequestInit) {
@@ -350,6 +385,27 @@ async function discordRequest(path: string, init: RequestInit) {
     },
   });
   if (!response.ok) throw new Error(`Discord API zlyhalo (${response.status})`);
+  return await response.json().catch(() => ({}));
+}
+
+async function discordWebhookRequest(
+  config: DiscordWebhookConfig,
+  path: string,
+  init: RequestInit,
+) {
+  const url = new URL(`${config.url}${path}`);
+  url.searchParams.set("thread_id", config.threadId);
+  if (init.method === "POST") url.searchParams.set("wait", "true");
+  const response = await fetch(url, {
+    ...init,
+    headers: {
+      "Content-Type": "application/json",
+      ...(init.headers ?? {}),
+    },
+  });
+  if (!response.ok) {
+    throw new Error(`Discord webhook zlyhal (${response.status})`);
+  }
   return await response.json().catch(() => ({}));
 }
 
@@ -369,6 +425,26 @@ async function syncDiscordShift(admin: any, shiftId: string) {
   if (assignmentsResult.error || membersResult.error) {
     throw assignmentsResult.error || membersResult.error;
   }
+  const webhook = discordWebhookConfig();
+  if (webhook && shift.discord_channel_id === webhook.threadId) {
+    await discordWebhookRequest(
+      webhook,
+      `/messages/${shift.discord_message_id}`,
+      {
+        method: "PATCH",
+        body: JSON.stringify(
+          discordShiftPayload(
+            shift,
+            assignmentsResult.data,
+            membersResult.data,
+            false,
+          ),
+        ),
+      },
+    );
+    return;
+  }
+
   await discordRequest(
     `/channels/${shift.discord_channel_id}/messages/${shift.discord_message_id}`,
     {
@@ -763,12 +839,17 @@ Deno.serve(async (req) => {
     }
 
     if (action === "publish_month") {
-      const channelId = cleanText(parsed.data.channelId, 22) ??
+      const webhook = discordWebhookConfig();
+      const botChannelId = cleanText(parsed.data.channelId, 22) ??
         Deno.env.get("DISCORD_DISHWASHER_CHANNEL_ID")?.trim() ?? "";
-      if (!/^\d{15,22}$/.test(channelId)) {
+      const botConfigured = Boolean(
+        Deno.env.get("DISCORD_DISHWASHER_BOT_TOKEN")?.trim() &&
+          /^\d{15,22}$/.test(botChannelId),
+      );
+      if (!webhook && !botConfigured) {
         return json(
           req,
-          { success: false, error: "Chýba Discord channel ID" },
+          { success: false, error: "Discord nie je nakonfigurovaný" },
           400,
         );
       }
@@ -777,9 +858,26 @@ Deno.serve(async (req) => {
       const assignments = state.assignments as Assignment[];
       let published = 0;
       for (const shift of state.shifts as Shift[]) {
-        const payload = discordShiftPayload(shift, assignments, members);
+        const channelId = webhook?.threadId ?? botChannelId;
+        const payload = discordShiftPayload(
+          shift,
+          assignments,
+          members,
+          !webhook,
+        );
         let messageId = shift.discord_message_id;
-        if (messageId && shift.discord_channel_id === channelId) {
+        if (webhook && messageId && shift.discord_channel_id === channelId) {
+          await discordWebhookRequest(webhook, `/messages/${messageId}`, {
+            method: "PATCH",
+            body: JSON.stringify(payload),
+          });
+        } else if (webhook) {
+          const message = await discordWebhookRequest(webhook, "", {
+            method: "POST",
+            body: JSON.stringify(payload),
+          });
+          messageId = message.id;
+        } else if (messageId && shift.discord_channel_id === channelId) {
           await discordRequest(`/channels/${channelId}/messages/${messageId}`, {
             method: "PATCH",
             body: JSON.stringify(payload),

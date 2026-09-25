@@ -235,7 +235,7 @@
     <script>
       const ENDPOINT = "https://kbpuhcuiljbwgxgiauku.supabase.co/functions/v1/dishwasher-roster";
       const ACCESS_KEY = "dishwasherStaffKey";
-      const state = { key: localStorage.getItem(ACCESS_KEY) || "", month: "", members: [], shifts: [], assignments: [], availability: [], integrations: { discordConfigured: false }, busy: false };
+      const state = { key: localStorage.getItem(ACCESS_KEY) || "", month: "", members: [], shifts: [], assignments: [], availability: [], integrations: { discordConfigured: false, discordMode: "none" }, busy: false };
       const $ = (selector) => document.querySelector(selector);
       const escapeHtml = (value) => String(value ?? "").replace(/[&<>'"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[character]);
 
@@ -344,7 +344,9 @@
       function renderPeople() {
         const discordStatus = $("[data-discord-status]");
         discordStatus.classList.toggle("is-ready", state.integrations.discordConfigured);
-        discordStatus.innerHTML = state.integrations.discordConfigured
+        discordStatus.innerHTML = state.integrations.discordMode === "webhook"
+          ? `<strong>Discord vlákno je pripojené ✓</strong><p>Rozpis môže posielať jednosmerné upozornenia priamo do vybraného vlákna.</p>`
+          : state.integrations.discordConfigured
           ? `<strong>Discord bot je pripojený ✓</strong><p>Po doplnení Discord ID ku každému človeku môže rozpis prijímať potvrdenia.</p>`
           : `<strong>Discord bot ešte nie je pripojený</strong><p>Mená a rozpis fungujú už teraz. Na potvrdenia v Discorde treba dokončiť bot pripojenie.</p><details><summary>Čo bude potrebné</summary><ol><li>Vytvoriť Discord aplikáciu a bota.</li><li>Pridať bota na váš server.</li><li>Nastaviť bot token, public key a ID cieľového kanála.</li><li>Ku každému menu doplniť jeho Discord ID.</li></ol></details>`;
         const list = $("[data-people-list]");
