@@ -705,6 +705,8 @@ async function shiftReminderPayload(
       names.join(""),
       "",
       "Prosím potvrď, či môžeš slúžiť.",
+      "✅ **Fajka hore znamená: môžem slúžiť.**",
+      "Ak nemôžeš, otvor nižšie **môj rozpis** a označ „Nemôžem prísť“. Systém automaticky vyberie iného človeka a pošle novú správu.",
     ].join("\n"),
     allowed_mentions: { parse: [], users: mentionIds },
     embeds: [{
