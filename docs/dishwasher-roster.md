@@ -21,14 +21,15 @@ supabase secrets set DISHWASHER_STAFF_KEY='<random secret>'
 
 ## Discord application
 
-For one-way notifications to a specific Discord thread, create a webhook in
-the thread's parent text channel and set both values below. The thread ID keeps
-all roster messages out of the parent channel:
+For one-way notifications to a specific Discord thread, create a webhook in the
+thread's parent text channel and set both values below. The thread ID keeps all
+roster messages out of the parent channel:
 
 ```bash
 supabase secrets set \
   DISCORD_DISHWASHER_WEBHOOK_URL='<webhook URL>' \
-  DISCORD_DISHWASHER_THREAD_ID='<thread channel ID>'
+  DISCORD_DISHWASHER_THREAD_ID='<thread channel ID>' \
+  DISHWASHER_MEMBER_LINK_SECRET='<at least 32 random characters>'
 ```
 
 The webhook URL is a credential. Store it only as a Supabase secret and rotate
@@ -36,17 +37,27 @@ it immediately if it is pasted into chat, an issue, or a repository.
 
 The database cron calls `/dishwasher-roster/cron` hourly. At 09:00 in
 `Europe/Bratislava` the function sends a complete schedule on the first day of
-the month and, on other days, a reminder when a shift exists the following
-day. Reminder messages mention only the two assigned members when their
+the month and, on other days, a reminder when a shift exists the following day.
+Reminder messages mention only the two assigned members when their
 `discord_user_id` values are present. Delivery claims are stored in
-`invitation.dishwasher_notification_runs` so retries cannot duplicate a
-monthly schedule or shift reminder.
+`invitation.dishwasher_notification_runs` so retries cannot duplicate a monthly
+schedule or shift reminder.
 
-The application bot setup below is only needed for interactive confirmation
-and decline buttons.
+## Personal member page
 
-Create a Discord application and bot in the Discord Developer Portal. Invite
-the bot to the server with `View Channels`, `Send Messages`, `Embed Links`, and
+Discord notifications contain a signed link for every assigned member. The link
+opens `/riad`, where the member sees their next two services and the full future
+roster. Confirming changes the assignment to `confirmed`. Declining marks the
+member unavailable for that date, selects a replacement with the normal fairness
+algorithm, and replaces the latest affected webhook messages. The signed token
+contains no contact data, and the public response never exposes email addresses
+or Discord IDs.
+
+The application bot setup below is only needed for interactive confirmation and
+decline buttons.
+
+Create a Discord application and bot in the Discord Developer Portal. Invite the
+bot to the server with `View Channels`, `Send Messages`, `Embed Links`, and
 `Read Message History` permissions. Enable Developer Mode in Discord and copy
 the target channel ID plus every roster member's user ID.
 

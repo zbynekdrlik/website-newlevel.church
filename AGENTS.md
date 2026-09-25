@@ -3,32 +3,73 @@
 ## Product and stack
 
 - Static Astro 5 site deployed to Cloudflare Pages as `newlevel-church`.
-- Supabase project `kbpuhcuiljbwgxgiauku` provides the `invitation` schema and Deno Edge Functions.
-- The messaging admin is `src/pages/admin/sms.astro`; its API is `supabase/functions/admin-sms/index.ts`.
+- Supabase project `kbpuhcuiljbwgxgiauku` provides the `invitation` schema and
+  Deno Edge Functions.
+- The messaging admin is `src/pages/admin/sms.astro`; its API is
+  `supabase/functions/admin-sms/index.ts`.
 
 ## Messaging architecture
 
-- Outbound SMS, WhatsApp, and email rows are stored in `invitation.message_queue`.
-- Shared provider dispatch lives in `supabase/functions/_shared/message_queue.ts` and is imported by the admin, cron, and authenticated queue dispatcher functions.
-- Campaign WhatsApp messages must use an approved Meta template. The default is `youth_invitation_sk` with language `sk`; body parameter 1 is the contact's first name and parameter 2 is the localized event date.
-- Event timing sent from the messaging admin must use `{{event_date}}`. It renders as a Slovak weekday, date without a year, and time (for example `v piatok 18. septembra o 18:00`); relative wording such as `zajtra` or `tento piatok` is rejected because it can become stale.
-- The approved Meta template has the timing line `🕕 {{2}} o 18:00`. Parameter 2 is always sent as `v piatok`, producing `🕕 v piatok o 18:00`.
-- WhatsApp free text is only appropriate inside the 24-hour customer-service window.
-- Provider credentials and the service-role key belong only in Supabase secrets, never browser code.
-- Party registrations are handled by `register-party`; it sends Discord notifications directly with the `DISCORD_PARTY_WEBHOOK_URL` Supabase secret. Do not reintroduce n8n into this path.
-- The public Party food counter reads `GET register-party` so `invitation.party_registrations` remains the source of truth; Cloudflare KV is only a legacy availability fallback.
-- Before enabling or repairing the cron, inspect overdue queued rows: all due rows can be delivered immediately once the cron becomes healthy.
+- Outbound SMS, WhatsApp, and email rows are stored in
+  `invitation.message_queue`.
+- Shared provider dispatch lives in
+  `supabase/functions/_shared/message_queue.ts` and is imported by the admin,
+  cron, and authenticated queue dispatcher functions.
+- Campaign WhatsApp messages must use an approved Meta template. The default is
+  `youth_invitation_sk` with language `sk`; body parameter 1 is the contact's
+  first name and parameter 2 is the localized event date.
+- Event timing sent from the messaging admin must use `{{event_date}}`. It
+  renders as a Slovak weekday, date without a year, and time (for example
+  `v piatok 18. septembra o 18:00`); relative wording such as `zajtra` or
+  `tento piatok` is rejected because it can become stale.
+- The approved Meta template has the timing line `🕕 {{2}} o 18:00`. Parameter 2
+  is always sent as `v piatok`, producing `🕕 v piatok o 18:00`.
+- WhatsApp free text is only appropriate inside the 24-hour customer-service
+  window.
+- Provider credentials and the service-role key belong only in Supabase secrets,
+  never browser code.
+- Party registrations are handled by `register-party`; it sends Discord
+  notifications directly with the `DISCORD_PARTY_WEBHOOK_URL` Supabase secret.
+  Do not reintroduce n8n into this path.
+- The public Party food counter reads `GET register-party` so
+  `invitation.party_registrations` remains the source of truth; Cloudflare KV is
+  only a legacy availability fallback.
+- Before enabling or repairing the cron, inspect overdue queued rows: all due
+  rows can be delivered immediately once the cron becomes healthy.
 
 ## Staff dishwasher roster
 
-- The private roster UI is `src/pages/staff/riad.astro`; all roster data and mutations go through `supabase/functions/dishwasher-roster/index.ts` using the `DISHWASHER_STAFF_KEY` secret. The static page must never receive the service-role key.
-- Roster tables use the `invitation.dishwasher_*` prefix. Only `pending` and `confirmed` assignments occupy a shift position; declined/replaced rows are retained as history.
-- Automatic assignment fills Thursday and Sunday with two active, available people, prioritizing the lowest one-year assignment count and then the oldest last assignment.
-- Members can be added individually or imported from a CSV with `meno`/`name`, `email`, and optional `discord_id` columns. Imports update an existing member when the normalized email matches.
-- Discord confirmations use an application bot and signed component interactions, not webhook reactions. They require `DISCORD_DISHWASHER_BOT_TOKEN`, `DISCORD_DISHWASHER_PUBLIC_KEY`, and `DISCORD_DISHWASHER_CHANNEL_ID`. A member's Discord user ID must match the account clicking their confirmation button.
-- One-way notifications can instead target only a Discord thread using `DISCORD_DISHWASHER_WEBHOOK_URL` plus `DISCORD_DISHWASHER_THREAD_ID`; webhook mode intentionally omits confirmation buttons.
-- The database calls `/dishwasher-roster/cron` hourly; at 09:00 Europe/Bratislava it posts the full schedule on day 1 and a two-person reminder one day before each shift. `invitation.dishwasher_notification_runs` prevents duplicate posts.
-- Deployment and Discord application setup are documented in `docs/dishwasher-roster.md`.
+- The private roster UI is `src/pages/staff/riad.astro`; all roster data and
+  mutations go through `supabase/functions/dishwasher-roster/index.ts` using the
+  `DISHWASHER_STAFF_KEY` secret. The static page must never receive the
+  service-role key.
+- Roster tables use the `invitation.dishwasher_*` prefix. Only `pending` and
+  `confirmed` assignments occupy a shift position; declined/replaced rows are
+  retained as history.
+- Automatic assignment fills Thursday and Sunday with two active, available
+  people, prioritizing the lowest one-year assignment count and then the oldest
+  last assignment.
+- Members can be added individually or imported from a CSV with `meno`/`name`,
+  `email`, and optional `discord_id` columns. Imports update an existing member
+  when the normalized email matches.
+- Discord confirmations use an application bot and signed component
+  interactions, not webhook reactions. They require
+  `DISCORD_DISHWASHER_BOT_TOKEN`, `DISCORD_DISHWASHER_PUBLIC_KEY`, and
+  `DISCORD_DISHWASHER_CHANNEL_ID`. A member's Discord user ID must match the
+  account clicking their confirmation button.
+- One-way notifications can instead target only a Discord thread using
+  `DISCORD_DISHWASHER_WEBHOOK_URL` plus `DISCORD_DISHWASHER_THREAD_ID`; webhook
+  mode intentionally omits confirmation buttons.
+- Members confirm or decline through signed personal links at `/riad`; links use
+  `DISHWASHER_MEMBER_LINK_SECRET`, and the public endpoint returns
+  names/statuses only. Declining fills the vacated position and replaces the
+  latest relevant Discord webhook messages.
+- The database calls `/dishwasher-roster/cron` hourly; at 09:00
+  Europe/Bratislava it posts the full schedule on day 1 and a two-person
+  reminder one day before each shift. `invitation.dishwasher_notification_runs`
+  prevents duplicate posts.
+- Deployment and Discord application setup are documented in
+  `docs/dishwasher-roster.md`.
 
 ## Commands
 
@@ -41,4 +82,5 @@ supabase db push --linked
 ./deploy.sh
 ```
 
-Deploy only changed Edge Functions. Functions that validate their own admin or cron header are deployed with `--no-verify-jwt`.
+Deploy only changed Edge Functions. Functions that validate their own admin or
+cron header are deployed with `--no-verify-jwt`.

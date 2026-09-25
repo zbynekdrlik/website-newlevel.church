@@ -1,0 +1,264 @@
+---
+---
+
+<!doctype html>
+<html lang="sk">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="referrer" content="no-referrer" />
+    <meta name="theme-color" content="#f5f3ed" />
+    <title>Môj rozpis služby riadu | New Level</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #20231f;
+        --muted: #6d716a;
+        --paper: #f5f3ed;
+        --surface: #fffefa;
+        --line: #deddd6;
+        --brand: #dd0e18;
+        --green: #26734d;
+        --green-soft: #e4f2e8;
+        --amber: #946219;
+        --amber-soft: #f8edd5;
+        --red-soft: #fae6e5;
+        font-family: "DM Sans", system-ui, sans-serif;
+      }
+
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--paper); color: var(--ink); }
+      button { font: inherit; }
+      [hidden] { display: none !important; }
+      .shell { width: min(900px, calc(100% - 28px)); margin: 0 auto; padding: 24px 0 64px; }
+      .topbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+      .brand { display: flex; align-items: center; gap: 11px; font: 800 14px/1 "Manrope", sans-serif; }
+      .brand-mark { display: grid; width: 36px; height: 36px; place-items: center; border-radius: 50%; background: var(--ink); color: white; }
+      .personal { color: var(--muted); font-size: 13px; font-weight: 700; }
+      .hero { padding: 70px 0 34px; }
+      .eyebrow { margin: 0 0 12px; color: var(--brand); font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+      h1, h2, h3, p { margin: 0; }
+      h1 { max-width: 720px; font: 800 clamp(40px, 8vw, 70px)/1 "Manrope", sans-serif; letter-spacing: -.055em; }
+      .lede { max-width: 610px; margin-top: 18px; color: var(--muted); font-size: 17px; line-height: 1.55; }
+      h2 { font: 800 clamp(25px, 4vw, 36px)/1.08 "Manrope", sans-serif; letter-spacing: -.04em; }
+      .section-copy { margin-top: 8px; color: var(--muted); line-height: 1.5; }
+
+      .next-list { display: grid; gap: 14px; margin-top: 22px; }
+      .next-card { padding: 24px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); }
+      .next-card:first-child { padding: clamp(24px, 5vw, 38px); border-color: #c7c5bb; }
+      .next-card.is-ready { border-color: #add2b9; background: linear-gradient(135deg, var(--surface), #f1f8f2); }
+      .next-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; }
+      .next-date strong, .next-date span { display: block; }
+      .next-date strong { font: 800 clamp(23px, 4vw, 32px)/1.1 "Manrope", sans-serif; letter-spacing: -.03em; }
+      .next-date span { margin-top: 5px; color: var(--muted); font-weight: 600; }
+      .state-pill { flex: 0 0 auto; border-radius: 999px; padding: 7px 10px; background: var(--amber-soft); color: var(--amber); font-size: 12px; font-weight: 800; }
+      .state-pill.ready { background: var(--green-soft); color: var(--green); }
+      .people { display: grid; gap: 9px; margin-top: 24px; }
+      .person { display: flex; align-items: center; gap: 10px; min-height: 34px; }
+      .check { display: grid; flex: 0 0 25px; height: 25px; place-items: center; border-radius: 50%; background: #ece9e1; color: var(--muted); font-size: 13px; font-weight: 900; }
+      .check.confirmed { background: var(--green-soft); color: var(--green); }
+      .person.mine strong::after { margin-left: 7px; color: var(--brand); content: "ty"; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; }
+      .actions { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 24px; padding-top: 19px; border-top: 1px solid var(--line); }
+      button { border: 1px solid var(--line); border-radius: 9px; background: transparent; color: var(--ink); padding: 11px 15px; cursor: pointer; font-weight: 800; }
+      button:hover { border-color: #aaa9a1; background: rgba(255,255,255,.7); }
+      button:focus-visible { outline: 3px solid rgba(221,14,24,.18); outline-offset: 2px; }
+      button:disabled { cursor: wait; opacity: .55; }
+      .primary { border-color: var(--green); background: var(--green); color: white; }
+      .primary:hover { border-color: #1f6040; background: #1f6040; }
+      .decline { color: #a20d15; }
+
+      .all { margin-top: 62px; }
+      .month { margin-top: 26px; }
+      .month-title { padding-bottom: 10px; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 12px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+      .row { display: grid; grid-template-columns: minmax(140px, .75fr) 1fr 1fr; gap: 14px; align-items: center; padding: 15px 2px; border-bottom: 1px solid var(--line); }
+      .row-date strong, .row-date span { display: block; }
+      .row-date span { margin-top: 2px; color: var(--muted); font-size: 13px; }
+      .row-person { display: flex; align-items: center; gap: 8px; min-width: 0; }
+      .row-person span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .row-person .check { flex-basis: 22px; height: 22px; font-size: 11px; }
+      .empty { margin-top: 22px; padding: 36px 24px; border-block: 1px solid var(--line); color: var(--muted); text-align: center; }
+      .loading, .error-card { width: min(540px, calc(100% - 28px)); margin: 16vh auto 0; padding: 28px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); text-align: center; }
+      .loading p, .error-card p { margin-top: 10px; color: var(--muted); line-height: 1.5; }
+      .spinner { width: 34px; height: 34px; margin: 0 auto 18px; border: 3px solid var(--line); border-top-color: var(--brand); border-radius: 50%; animation: spin .8s linear infinite; }
+      .notice { position: fixed; right: 20px; bottom: 20px; z-index: 10; max-width: min(430px, calc(100% - 40px)); border-radius: 10px; padding: 13px 16px; background: var(--ink); color: white; box-shadow: 0 14px 40px rgba(24,26,23,.22); font-weight: 700; }
+      .notice.error { background: #a9151d; }
+      @keyframes spin { to { transform: rotate(360deg); } }
+
+      @media (max-width: 620px) {
+        .shell { width: min(100% - 22px, 900px); padding-top: 17px; }
+        .hero { padding: 52px 2px 30px; }
+        .personal { display: none; }
+        .next-card { padding: 19px; }
+        .next-card:first-child { padding: 22px 19px; }
+        .next-head { display: grid; }
+        .state-pill { width: fit-content; }
+        .row { grid-template-columns: 1fr; gap: 9px; padding: 17px 2px; }
+        .row-person { padding-left: 4px; }
+      }
+    </style>
+  </head>
+  <body>
+    <section class="loading" data-loading>
+      <div class="spinner" aria-hidden="true"></div>
+      <h2>Načítavam tvoj rozpis</h2>
+      <p>Chvíľku počkaj, kontrolujeme aktuálne služby.</p>
+    </section>
+
+    <section class="error-card" data-error hidden>
+      <p class="eyebrow">Osobný rozpis</p>
+      <h2>Odkaz sa nepodarilo otvoriť</h2>
+      <p data-error-message>Otvor svoj osobný odkaz priamo zo správy na Discorde.</p>
+    </section>
+
+    <main class="shell" data-app hidden>
+      <header class="topbar">
+        <div class="brand"><span class="brand-mark">NL</span> New Level</div>
+        <span class="personal">Osobný rozpis služby</span>
+      </header>
+
+      <section class="hero">
+        <p class="eyebrow">Tvoja služba</p>
+        <h1 data-greeting>Môj rozpis</h1>
+        <p class="lede">Potvrď, že môžeš prísť. Ak nemôžeš, systém hneď nájde náhradu a aktualizuje správu na Discorde.</p>
+      </section>
+
+      <section aria-labelledby="next-heading">
+        <h2 id="next-heading">Najbližšie služby</h2>
+        <p class="section-copy">Tu vidíš svoje dve najbližšie služby. Dve zelené fajky znamenajú, že je všetko potvrdené.</p>
+        <div class="next-list" data-next-list></div>
+      </section>
+
+      <section class="all" aria-labelledby="all-heading">
+        <h2 id="all-heading">Celý rozpis</h2>
+        <p class="section-copy">Aktuálne naplánované služby pre celý tím.</p>
+        <div data-full-schedule></div>
+      </section>
+    </main>
+
+    <div class="notice" data-notice hidden></div>
+
+    <script>
+      const ENDPOINT = "https://kbpuhcuiljbwgxgiauku.supabase.co/functions/v1/dishwasher-roster/member";
+      const TOKEN_KEY = "dishwasherMemberPortalToken";
+      const queryToken = new URLSearchParams(location.search).get("t") || "";
+      const state = { token: queryToken || localStorage.getItem(TOKEN_KEY) || "", member: null, schedule: [], busy: false };
+      const $ = (selector) => document.querySelector(selector);
+      const escapeHtml = (value) => String(value ?? "").replace(/[&<>'"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[character]);
+
+      if (queryToken) {
+        localStorage.setItem(TOKEN_KEY, queryToken);
+        history.replaceState(null, "", location.pathname);
+      }
+
+      function dateParts(value) {
+        const date = new Date(`${value}T12:00:00`);
+        return {
+          weekday: new Intl.DateTimeFormat("sk-SK", { weekday: "long" }).format(date),
+          long: new Intl.DateTimeFormat("sk-SK", { day: "numeric", month: "long" }).format(date),
+          month: new Intl.DateTimeFormat("sk-SK", { month: "long", year: "numeric" }).format(date),
+        };
+      }
+
+      function notify(message, error = false) {
+        const element = $("[data-notice]");
+        element.textContent = message;
+        element.classList.toggle("error", error);
+        element.hidden = false;
+        clearTimeout(notify.timeout);
+        notify.timeout = setTimeout(() => { element.hidden = true; }, 5200);
+      }
+
+      function setBusy(value) {
+        state.busy = value;
+        document.querySelectorAll("button").forEach((button) => { button.disabled = value; });
+      }
+
+      async function api(action, values = {}) {
+        const response = await fetch(ENDPOINT, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action, token: state.token, ...values }),
+        });
+        const data = await response.json().catch(() => ({ error: "Server vrátil nečitateľnú odpoveď" }));
+        if (!response.ok || !data.success) throw new Error(data.error || `Operácia zlyhala (${response.status})`);
+        if (data.member) Object.assign(state, { member: data.member, schedule: data.schedule || [] });
+        return data;
+      }
+
+      function personRow(person, compact = false) {
+        if (!person) return `<div class="${compact ? "row-person" : "person"}"><span class="check">–</span><span>Voľné miesto</span></div>`;
+        const confirmed = person.status === "confirmed";
+        return `<div class="${compact ? "row-person" : "person"} ${person.isMine ? "mine" : ""}"><span class="check ${confirmed ? "confirmed" : ""}">${confirmed ? "✓" : "○"}</span><span>${escapeHtml(person.name)}</span></div>`;
+      }
+
+      function renderNextCard(shift) {
+        const date = dateParts(shift.serviceDate);
+        const mine = shift.people.find((person) => person?.isMine);
+        const ready = shift.confirmedCount === 2;
+        const actions = mine ? `<div class="actions">${mine.status === "confirmed" ? `<button type="button" disabled>✓ Tvoja účasť je potvrdená</button>` : `<button class="primary" type="button" data-answer="confirm" data-assignment="${mine.assignmentId}">Môžem prísť</button>`}<button class="decline" type="button" data-answer="decline" data-assignment="${mine.assignmentId}">${mine.status === "confirmed" ? "Predsa nemôžem" : "Nemôžem prísť"}</button></div>` : "";
+        return `<article class="next-card ${ready ? "is-ready" : ""}"><header class="next-head"><div class="next-date"><strong>${escapeHtml(date.weekday)}</strong><span>${escapeHtml(date.long)}</span></div><span class="state-pill ${ready ? "ready" : ""}">${ready ? "✓ Všetko potvrdené" : `${shift.confirmedCount}/2 potvrdené`}</span></header><div class="people">${shift.people.map((person) => personRow(person)).join("")}</div>${actions}</article>`;
+      }
+
+      function render() {
+        $("[data-greeting]").textContent = `Ahoj, ${state.member.name}`;
+        const mine = state.schedule.filter((shift) => shift.people.some((person) => person?.isMine)).slice(0, 2);
+        $("[data-next-list]").innerHTML = mine.length
+          ? mine.map(renderNextCard).join("")
+          : `<div class="empty">Momentálne nemáš naplánovanú žiadnu ďalšiu službu.</div>`;
+
+        const months = new Map();
+        for (const shift of state.schedule) {
+          const key = shift.serviceDate.slice(0, 7);
+          if (!months.has(key)) months.set(key, []);
+          months.get(key).push(shift);
+        }
+        $("[data-full-schedule]").innerHTML = months.size
+          ? [...months.entries()].map(([, shifts]) => `<section class="month"><h3 class="month-title">${escapeHtml(dateParts(shifts[0].serviceDate).month)}</h3>${shifts.map((shift) => { const date = dateParts(shift.serviceDate); return `<div class="row"><div class="row-date"><strong>${escapeHtml(date.weekday)}</strong><span>${escapeHtml(date.long)}</span></div>${shift.people.map((person) => personRow(person, true)).join("")}</div>`; }).join("")}</section>`).join("")
+          : `<div class="empty">Rozpis zatiaľ neobsahuje žiadne budúce služby.</div>`;
+
+        document.querySelectorAll("[data-answer]").forEach((button) => button.addEventListener("click", respond));
+      }
+
+      async function respond(event) {
+        const button = event.currentTarget;
+        const answer = button.dataset.answer;
+        if (answer === "decline" && !confirm("Naozaj v tento deň nemôžeš slúžiť? Systém hneď vyberie náhradu.")) return;
+        setBusy(true);
+        try {
+          const data = await api("respond_assignment", { assignmentId: button.dataset.assignment, answer });
+          render();
+          let message = data.message || (answer === "confirm" ? "Služba je potvrdená." : "Nedostupnosť je uložená.");
+          if (answer === "decline" && data.discordUpdated === false) message += " Rozpis je zmenený, ale Discord sa nepodarilo obnoviť.";
+          notify(message, data.discordUpdated === false);
+        } catch (error) {
+          notify(error.message, true);
+        } finally { setBusy(false); }
+      }
+
+      async function load() {
+        if (!state.token) {
+          $("[data-loading]").hidden = true;
+          $("[data-error]").hidden = false;
+          return;
+        }
+        try {
+          await api("get_portal_state");
+          render();
+          $("[data-loading]").hidden = true;
+          $("[data-app]").hidden = false;
+        } catch (error) {
+          localStorage.removeItem(TOKEN_KEY);
+          $("[data-loading]").hidden = true;
+          $("[data-error-message]").textContent = error.message;
+          $("[data-error]").hidden = false;
+        }
+      }
+
+      load();
+    </script>
+  </body>
+</html>

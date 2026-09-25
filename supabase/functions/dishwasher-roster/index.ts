@@ -29,7 +29,7 @@ type Assignment = {
   member_id: string;
   position: number;
   status: "pending" | "confirmed" | "declined" | "replaced";
-  source: "automatic" | "manual" | "discord";
+  source: "automatic" | "manual" | "discord" | "portal";
 };
 
 type DiscordWebhookConfig = {
@@ -40,6 +40,100 @@ type DiscordWebhookConfig = {
 type NotificationKind = "monthly_schedule" | "shift_reminder";
 
 const ACTIVE_STATUSES = ["pending", "confirmed"];
+const MEMBER_PORTAL_URL = "https://newlevel.church/riad";
+
+function bytesToBase64Url(bytes: Uint8Array) {
+  let binary = "";
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(
+    /=+$/,
+    "",
+  );
+}
+
+function base64UrlToBytes(value: string) {
+  if (!/^[A-Za-z0-9_-]+$/.test(value)) return null;
+  try {
+    const padded = value.replace(/-/g, "+").replace(/_/g, "/")
+      .padEnd(Math.ceil(value.length / 4) * 4, "=");
+    return Uint8Array.from(
+      atob(padded),
+      (character) => character.charCodeAt(0),
+    );
+  } catch {
+    return null;
+  }
+}
+
+function uuidToBytes(value: string) {
+  const hex = value.replace(/-/g, "");
+  if (!/^[0-9a-f]{32}$/i.test(hex)) return null;
+  return Uint8Array.from(hex.match(/.{2}/g)!, (byte) => parseInt(byte, 16));
+}
+
+function bytesToUuid(bytes: Uint8Array) {
+  if (bytes.length !== 16) return null;
+  const hex = [...bytes].map((byte) => byte.toString(16).padStart(2, "0")).join(
+    "",
+  );
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${
+    hex.slice(16, 20)
+  }-${hex.slice(20)}`;
+}
+
+async function memberTokenSignature(memberId: string) {
+  const secret = Deno.env.get("DISHWASHER_MEMBER_LINK_SECRET")?.trim() ?? "";
+  if (secret.length < 32) {
+    throw new Error("Osobné odkazy nie sú nakonfigurované");
+  }
+  const key = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+  const signature = await crypto.subtle.sign(
+    "HMAC",
+    key,
+    new TextEncoder().encode(memberId),
+  );
+  return new Uint8Array(signature).slice(0, 18);
+}
+
+async function memberPortalToken(memberId: string) {
+  const idBytes = uuidToBytes(memberId);
+  if (!idBytes) throw new Error("Neplatný identifikátor človeka");
+  const signature = await memberTokenSignature(memberId);
+  return `${bytesToBase64Url(idBytes)}.${bytesToBase64Url(signature)}`;
+}
+
+async function memberIdFromPortalToken(value: unknown) {
+  const token = cleanText(value, 80);
+  if (!token) return null;
+  const [encodedId, encodedSignature, extra] = token.split(".");
+  if (!encodedId || !encodedSignature || extra) return null;
+  const idBytes = base64UrlToBytes(encodedId);
+  const suppliedSignature = base64UrlToBytes(encodedSignature);
+  if (!idBytes || !suppliedSignature) return null;
+  const memberId = bytesToUuid(idBytes);
+  if (!memberId) return null;
+  const expectedSignature = await memberTokenSignature(memberId);
+  if (suppliedSignature.length !== expectedSignature.length) return null;
+  let difference = 0;
+  for (let index = 0; index < expectedSignature.length; index += 1) {
+    difference |= expectedSignature[index] ^ suppliedSignature[index];
+  }
+  return difference === 0 ? memberId : null;
+}
+
+async function memberPortalUrl(memberId: string) {
+  const configured = Deno.env.get("DISHWASHER_MEMBER_PORTAL_URL")?.trim();
+  const baseUrl = configured || MEMBER_PORTAL_URL;
+  const url = new URL(baseUrl);
+  url.searchParams.set("t", await memberPortalToken(memberId));
+  return url.toString();
+}
 
 function timingSafeEqual(leftValue: string, rightValue: string) {
   const encoder = new TextEncoder();
@@ -325,7 +419,25 @@ function addCalendarDays(value: string, days: number) {
   return date.toISOString().slice(0, 10);
 }
 
-function discordShiftPayload(
+async function portalLinks(
+  assignments: Assignment[],
+  members: Member[],
+) {
+  const activeMemberIds = [
+    ...new Set(
+      assignments.filter((assignment) =>
+        ACTIVE_STATUSES.includes(assignment.status)
+      ).map((assignment) => assignment.member_id),
+    ),
+  ];
+  const links = new Map<string, string>();
+  await Promise.all(activeMemberIds.map(async (memberId) => {
+    links.set(memberId, await memberPortalUrl(memberId));
+  }));
+  return links;
+}
+
+async function discordShiftPayload(
   shift: Shift,
   assignments: Assignment[],
   members: Member[],
@@ -336,6 +448,7 @@ function discordShiftPayload(
     assignment.shift_id === shift.id &&
     ACTIVE_STATUSES.includes(assignment.status)
   );
+  const links = await portalLinks(active, members);
   const fields = [1, 2].map((position) => {
     const assignment = active.find((item) => item.position === position);
     const member = assignment ? byId.get(assignment.member_id) : null;
@@ -346,7 +459,11 @@ function discordShiftPayload(
       : "⚠️ voľné miesto";
     return {
       name: `Miesto ${position}`,
-      value: member ? `**${member.name}**\n${status}` : status,
+      value: member
+        ? `**${member.name}**\n${status}\n[Pozrieť môj rozpis](${
+          links.get(member.id)
+        })`
+        : status,
       inline: true,
     };
   });
@@ -392,7 +509,7 @@ function discordShiftPayload(
       footer: {
         text: interactive
           ? "Pridelený človek potvrdí svoju možnosť nižšie."
-          : "Automatické upozornenie z rozpisu služby riadu.",
+          : "Na osobnej stránke potvrď, či môžeš slúžiť.",
       },
     }],
     ...(interactive && buttons.length
@@ -454,7 +571,32 @@ async function discordWebhookRequest(
   return await response.json().catch(() => ({}));
 }
 
-function monthlySchedulePayload(
+async function deleteDiscordWebhookMessage(
+  config: DiscordWebhookConfig,
+  messageId: string,
+) {
+  const url = new URL(`${config.url}/messages/${messageId}`);
+  url.searchParams.set("thread_id", config.threadId);
+  const response = await fetch(url, { method: "DELETE" });
+  if (!response.ok && response.status !== 404) {
+    throw new Error(`Discord webhook zlyhal (${response.status})`);
+  }
+}
+
+async function replaceDiscordWebhookMessage(
+  config: DiscordWebhookConfig,
+  previousMessageId: string,
+  payload: Record<string, unknown>,
+) {
+  const message = await discordWebhookRequest(config, "", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+  await deleteDiscordWebhookMessage(config, previousMessageId);
+  return String(message.id ?? "");
+}
+
+async function monthlySchedulePayload(
   month: string,
   shifts: Shift[],
   assignments: Assignment[],
@@ -464,6 +606,7 @@ function monthlySchedulePayload(
   const active = assignments.filter((assignment) =>
     ACTIVE_STATUSES.includes(assignment.status)
   );
+  const links = await portalLinks(active, members);
   const mentionIds = [
     ...new Set(
       active.map((assignment) =>
@@ -490,6 +633,15 @@ function monthlySchedulePayload(
     year: "numeric",
     timeZone: "Europe/Bratislava",
   }).format(new Date(`${month}-12T12:00:00Z`));
+  const linkedMembers = [
+    ...new Set(active.map((assignment) => assignment.member_id)),
+  ].map((memberId) => byId.get(memberId)).filter(Boolean) as Member[];
+  const personalLinks = linkedMembers.map((member) => {
+    const label = member.discord_user_id
+      ? `<@${member.discord_user_id}>`
+      : `**${member.name}**`;
+    return `${label} — [môj rozpis](${links.get(member.id)})`;
+  });
   return {
     content: [
       `🍽️ **Rozpis služby riadu · ${monthName}**`,
@@ -497,10 +649,15 @@ function monthlySchedulePayload(
       lines.join("\n") || "Tento mesiac zatiaľ nemá služby.",
     ].join("\n"),
     allowed_mentions: { parse: [], users: mentionIds },
+    embeds: [{
+      title: "Pozrieť a potvrdiť rozpis",
+      description: personalLinks.join("\n"),
+      color: 0x2eae6b,
+    }],
   };
 }
 
-function shiftReminderPayload(
+async function shiftReminderPayload(
   shift: Shift,
   assignments: Assignment[],
   members: Member[],
@@ -510,6 +667,7 @@ function shiftReminderPayload(
     assignment.shift_id === shift.id &&
     ACTIVE_STATUSES.includes(assignment.status)
   );
+  const links = await portalLinks(active, members);
   const mentionIds = [
     ...new Set(
       active.map((assignment) =>
@@ -526,15 +684,28 @@ function shiftReminderPayload(
       ? `<@${member.discord_user_id}>`
       : `**${member.name}**`;
   });
+  const personalLinks = active.map((assignment) => {
+    const member = byId.get(assignment.member_id);
+    if (!member) return null;
+    const label = member.discord_user_id
+      ? `<@${member.discord_user_id}>`
+      : `**${member.name}**`;
+    return `${label} — [otvoriť môj rozpis](${links.get(member.id)})`;
+  }).filter(Boolean);
   return {
     content: [
       "🔔 **Zajtrajšia služba riadu**",
       `**${slovakShortDate(shift.service_date)}**`,
       names.join(" a "),
       "",
-      "Ak nemôžeš prísť, napíš prosím čo najskôr do tohto vlákna.",
+      "Prosím potvrď, či môžeš slúžiť.",
     ].join("\n"),
     allowed_mentions: { parse: [], users: mentionIds },
+    embeds: [{
+      title: "Potvrdenie služby",
+      description: personalLinks.join("\n"),
+      color: 0xf0b429,
+    }],
   };
 }
 
@@ -617,6 +788,8 @@ async function handleRosterCron(req: Request, admin: any) {
     return json(req, { success: false, error: parsed.error }, 400);
   }
   const forceMonthly = parsed.data.forceMonthly === true;
+  const replaceLatestMonthly = forceMonthly &&
+    parsed.data.replaceLatestMonthly === true;
   const forcedMonth = monthBounds(parsed.data.month)?.month ?? null;
   const now = bratislavaNowParts();
   if (!forceMonthly && now.hour !== 9) {
@@ -630,21 +803,51 @@ async function handleRosterCron(req: Request, admin: any) {
     await ensureShifts(admin, bounds);
     await fillOpenPositions(admin, bounds);
     const state = await loadState(admin, bounds);
-    const sentMonthly = await sendClaimedNotification(
-      admin,
-      webhook,
-      forceMonthly
-        ? `monthly-test:${month}:${crypto.randomUUID()}`
-        : `monthly:${month}`,
-      "monthly_schedule",
-      bounds.start,
-      monthlySchedulePayload(
-        month,
-        state.shifts,
-        state.assignments,
-        state.members,
-      ),
+    const payload = await monthlySchedulePayload(
+      month,
+      state.shifts,
+      state.assignments,
+      state.members,
     );
+    let sentMonthly = false;
+    if (replaceLatestMonthly) {
+      const previous = await admin.schema("invitation").from(
+        "dishwasher_notification_runs",
+      ).select("*").eq("kind", "monthly_schedule").eq(
+        "target_date",
+        bounds.start,
+      ).not("discord_message_id", "is", null).order("sent_at", {
+        ascending: false,
+      }).limit(1).maybeSingle();
+      if (previous.error) throw previous.error;
+      if (previous.data?.discord_message_id) {
+        const messageId = await replaceDiscordWebhookMessage(
+          webhook,
+          previous.data.discord_message_id,
+          payload,
+        );
+        const update = await admin.schema("invitation").from(
+          "dishwasher_notification_runs",
+        ).update({
+          discord_message_id: messageId,
+          sent_at: new Date().toISOString(),
+        }).eq("notification_key", previous.data.notification_key);
+        if (update.error) throw update.error;
+        sentMonthly = true;
+      }
+    }
+    if (!sentMonthly) {
+      sentMonthly = await sendClaimedNotification(
+        admin,
+        webhook,
+        forceMonthly
+          ? `monthly-test:${month}:${crypto.randomUUID()}`
+          : `monthly:${month}`,
+        "monthly_schedule",
+        bounds.start,
+        payload,
+      );
+    }
     if (sentMonthly) sent.push("monthly_schedule");
   }
 
@@ -667,7 +870,7 @@ async function handleRosterCron(req: Request, admin: any) {
       `reminder:${tomorrow}`,
       "shift_reminder",
       tomorrow,
-      shiftReminderPayload(
+      await shiftReminderPayload(
         shift,
         state.assignments,
         state.members,
@@ -703,7 +906,7 @@ async function syncDiscordShift(admin: any, shiftId: string) {
       {
         method: "PATCH",
         body: JSON.stringify(
-          discordShiftPayload(
+          await discordShiftPayload(
             shift,
             assignmentsResult.data,
             membersResult.data,
@@ -720,10 +923,97 @@ async function syncDiscordShift(admin: any, shiftId: string) {
     {
       method: "PATCH",
       body: JSON.stringify(
-        discordShiftPayload(shift, assignmentsResult.data, membersResult.data),
+        await discordShiftPayload(
+          shift,
+          assignmentsResult.data,
+          membersResult.data,
+        ),
       ),
     },
   );
+}
+
+async function replaceDiscordMessagesForShift(admin: any, shiftId: string) {
+  const webhook = discordWebhookConfig();
+  if (!webhook) {
+    await syncDiscordShift(admin, shiftId);
+    return;
+  }
+
+  const shiftResult = await admin.schema("invitation").from(
+    "dishwasher_shifts",
+  ).select("*").eq("id", shiftId).single();
+  if (shiftResult.error) throw shiftResult.error;
+  const shift = shiftResult.data as Shift;
+  const bounds = monthBounds(shift.service_date.slice(0, 7))!;
+  const state = await loadState(admin, bounds);
+  const assignments = state.assignments as Assignment[];
+  const members = state.members as Member[];
+
+  if (
+    shift.discord_message_id && shift.discord_channel_id === webhook.threadId
+  ) {
+    const messageId = await replaceDiscordWebhookMessage(
+      webhook,
+      shift.discord_message_id,
+      await discordShiftPayload(shift, assignments, members, false),
+    );
+    const update = await admin.schema("invitation").from("dishwasher_shifts")
+      .update({
+        discord_message_id: messageId,
+        published_at: new Date().toISOString(),
+      }).eq("id", shift.id);
+    if (update.error) throw update.error;
+  }
+
+  const reminderResult = await admin.schema("invitation").from(
+    "dishwasher_notification_runs",
+  ).select("*").eq("notification_key", `reminder:${shift.service_date}`)
+    .not("discord_message_id", "is", null).maybeSingle();
+  if (reminderResult.error) throw reminderResult.error;
+  if (reminderResult.data?.discord_message_id) {
+    const messageId = await replaceDiscordWebhookMessage(
+      webhook,
+      reminderResult.data.discord_message_id,
+      await shiftReminderPayload(shift, assignments, members),
+    );
+    const update = await admin.schema("invitation").from(
+      "dishwasher_notification_runs",
+    ).update({
+      discord_message_id: messageId,
+      sent_at: new Date().toISOString(),
+    }).eq("notification_key", reminderResult.data.notification_key);
+    if (update.error) throw update.error;
+  }
+
+  const monthlyResult = await admin.schema("invitation").from(
+    "dishwasher_notification_runs",
+  ).select("*").eq("kind", "monthly_schedule").eq(
+    "target_date",
+    bounds.start,
+  ).not("discord_message_id", "is", null).order("sent_at", {
+    ascending: false,
+  }).limit(1).maybeSingle();
+  if (monthlyResult.error) throw monthlyResult.error;
+  if (monthlyResult.data?.discord_message_id) {
+    const messageId = await replaceDiscordWebhookMessage(
+      webhook,
+      monthlyResult.data.discord_message_id,
+      await monthlySchedulePayload(
+        bounds.month,
+        state.shifts,
+        assignments,
+        members,
+      ),
+    );
+    const update = await admin.schema("invitation").from(
+      "dishwasher_notification_runs",
+    ).update({
+      discord_message_id: messageId,
+      sent_at: new Date().toISOString(),
+    }).eq("notification_key", monthlyResult.data.notification_key);
+    if (update.error) throw update.error;
+  }
 }
 
 function hexBytes(value: string) {
@@ -857,6 +1147,226 @@ async function handleDiscord(req: Request, admin: any) {
   });
 }
 
+async function loadMemberPortalState(admin: any, memberId: string) {
+  const memberResult = await admin.schema("invitation").from(
+    "dishwasher_members",
+  ).select("id,name,active").eq("id", memberId).single();
+  if (memberResult.error || !memberResult.data?.active) {
+    throw new Error("Osobný odkaz už nie je aktívny");
+  }
+
+  const today = bratislavaNowParts().date;
+  const endDate = addCalendarDays(today, 190);
+  const shiftsResult = await admin.schema("invitation").from(
+    "dishwasher_shifts",
+  ).select("id,service_date").gte("service_date", today).lte(
+    "service_date",
+    endDate,
+  ).order("service_date");
+  if (shiftsResult.error) throw shiftsResult.error;
+  const shifts = (shiftsResult.data ?? []) as Shift[];
+
+  let assignments: Assignment[] = [];
+  if (shifts.length) {
+    const assignmentsResult = await admin.schema("invitation").from(
+      "dishwasher_assignments",
+    ).select("id,shift_id,member_id,position,status,source").in(
+      "shift_id",
+      shifts.map((shift) => shift.id),
+    ).in("status", ACTIVE_STATUSES).order("position");
+    if (assignmentsResult.error) throw assignmentsResult.error;
+    assignments = assignmentsResult.data ?? [];
+  }
+
+  const memberIds = [...new Set(assignments.map((item) => item.member_id))];
+  const names = new Map<string, string>();
+  if (memberIds.length) {
+    const membersResult = await admin.schema("invitation").from(
+      "dishwasher_members",
+    ).select("id,name").in("id", memberIds);
+    if (membersResult.error) throw membersResult.error;
+    for (const member of membersResult.data ?? []) {
+      names.set(member.id, member.name);
+    }
+  }
+
+  const schedule = shifts.map((shift) => {
+    const people = [1, 2].map((position) => {
+      const assignment = assignments.find((item) =>
+        item.shift_id === shift.id && item.position === position
+      );
+      if (!assignment) return null;
+      const isMine = assignment.member_id === memberId;
+      return {
+        name: names.get(assignment.member_id) ?? "Neznámy človek",
+        status: assignment.status,
+        isMine,
+        assignmentId: isMine ? assignment.id : null,
+      };
+    });
+    return {
+      id: shift.id,
+      serviceDate: shift.service_date,
+      people,
+      confirmedCount: people.filter((person) =>
+        person?.status === "confirmed"
+      ).length,
+    };
+  });
+
+  return {
+    member: { name: memberResult.data.name },
+    today,
+    schedule,
+  };
+}
+
+async function handleMemberPortal(req: Request, admin: any) {
+  const basics = validateRequestBasics(req);
+  if (!basics.ok) return basics.response;
+  const parsed = await readJsonBody(req);
+  if (!parsed.ok) {
+    return json(req, { success: false, error: parsed.error }, 400);
+  }
+
+  let memberId: string | null = null;
+  try {
+    memberId = await memberIdFromPortalToken(parsed.data.token);
+  } catch (error) {
+    console.error("Dishwasher member token failed", error);
+  }
+  if (!memberId) {
+    return json(
+      req,
+      { success: false, error: "Osobný odkaz je neplatný" },
+      403,
+    );
+  }
+
+  const action = cleanText(parsed.data.action, 40);
+  try {
+    if (action === "get_portal_state") {
+      return json(req, {
+        success: true,
+        ...(await loadMemberPortalState(admin, memberId)),
+      });
+    }
+
+    if (action === "respond_assignment") {
+      const assignmentId = cleanText(parsed.data.assignmentId, 36);
+      const answer = cleanText(parsed.data.answer, 20);
+      if (!assignmentId || !["confirm", "decline"].includes(answer ?? "")) {
+        return json(req, { success: false, error: "Neplatná odpoveď" }, 400);
+      }
+      const assignmentResult = await admin.schema("invitation").from(
+        "dishwasher_assignments",
+      ).select("*").eq("id", assignmentId).eq("member_id", memberId).in(
+        "status",
+        ACTIVE_STATUSES,
+      ).maybeSingle();
+      if (assignmentResult.error) throw assignmentResult.error;
+      if (!assignmentResult.data) {
+        return json(req, {
+          success: false,
+          error: "Táto služba už nie je aktuálna",
+        }, 409);
+      }
+      const assignment = assignmentResult.data as Assignment;
+      const shiftResult = await admin.schema("invitation").from(
+        "dishwasher_shifts",
+      ).select("*").eq("id", assignment.shift_id).single();
+      if (shiftResult.error) throw shiftResult.error;
+      const shift = shiftResult.data as Shift;
+      if (shift.service_date < bratislavaNowParts().date) {
+        return json(req, {
+          success: false,
+          error: "Minulú službu už nie je možné upraviť",
+        }, 409);
+      }
+
+      if (answer === "confirm") {
+        const update = await admin.schema("invitation").from(
+          "dishwasher_assignments",
+        ).update({
+          status: "confirmed",
+          responded_at: new Date().toISOString(),
+          source: "portal",
+        }).eq("id", assignment.id);
+        if (update.error) throw update.error;
+        try {
+          await syncDiscordShift(admin, shift.id);
+        } catch (error) {
+          console.error("Dishwasher confirmation Discord sync failed", error);
+        }
+        return json(req, {
+          success: true,
+          message: "Služba je potvrdená",
+          ...(await loadMemberPortalState(admin, memberId)),
+        });
+      }
+
+      const decline = await admin.schema("invitation").from(
+        "dishwasher_assignments",
+      ).update({
+        status: "declined",
+        responded_at: new Date().toISOString(),
+        source: "portal",
+      }).eq("id", assignment.id);
+      if (decline.error) throw decline.error;
+      const availability = await admin.schema("invitation").from(
+        "dishwasher_availability",
+      ).upsert({
+        member_id: memberId,
+        service_date: shift.service_date,
+        available: false,
+        note: "Odmietnuté cez osobný rozpis",
+      }, { onConflict: "member_id,service_date" });
+      if (availability.error) throw availability.error;
+
+      const bounds = monthBounds(shift.service_date.slice(0, 7))!;
+      await fillOpenPositions(admin, bounds, shift.service_date);
+      const replacementResult = await admin.schema("invitation").from(
+        "dishwasher_assignments",
+      ).select("member_id").eq("shift_id", shift.id).eq(
+        "position",
+        assignment.position,
+      ).in("status", ACTIVE_STATUSES).maybeSingle();
+      if (replacementResult.error) throw replacementResult.error;
+      let replacementName: string | null = null;
+      if (replacementResult.data?.member_id) {
+        const replacementMember = await admin.schema("invitation").from(
+          "dishwasher_members",
+        ).select("name").eq("id", replacementResult.data.member_id).single();
+        if (replacementMember.error) throw replacementMember.error;
+        replacementName = replacementMember.data.name;
+      }
+
+      let discordUpdated = true;
+      try {
+        await replaceDiscordMessagesForShift(admin, shift.id);
+      } catch (error) {
+        discordUpdated = false;
+        console.error("Dishwasher replacement Discord sync failed", error);
+      }
+      return json(req, {
+        success: true,
+        replacementName,
+        discordUpdated,
+        message: replacementName
+          ? `Náhradu preberá ${replacementName}`
+          : "Služba je označená ako voľná",
+        ...(await loadMemberPortalState(admin, memberId)),
+      });
+    }
+
+    return json(req, { success: false, error: "Neznáma akcia" }, 400);
+  } catch (error) {
+    console.error("Dishwasher member portal failed", action, error);
+    const message = error instanceof Error ? error.message : "Operácia zlyhala";
+    return json(req, { success: false, error: message }, 500);
+  }
+}
+
 Deno.serve(async (req) => {
   const admin = createAdminClient(readServiceKey());
   if (!admin) {
@@ -880,6 +1390,12 @@ Deno.serve(async (req) => {
         },
       });
     }
+  }
+  if (new URL(req.url).pathname.endsWith("/member")) {
+    if (req.method === "OPTIONS") {
+      return new Response(null, { status: 204, headers: corsHeaders(req) });
+    }
+    return await handleMemberPortal(req, admin);
   }
   if (new URL(req.url).pathname.endsWith("/cron")) {
     try {
@@ -1141,7 +1657,7 @@ Deno.serve(async (req) => {
       let published = 0;
       for (const shift of state.shifts as Shift[]) {
         const channelId = webhook?.threadId ?? botChannelId;
-        const payload = discordShiftPayload(
+        const payload = await discordShiftPayload(
           shift,
           assignments,
           members,
