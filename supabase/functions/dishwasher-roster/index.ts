@@ -786,9 +786,11 @@ async function handleRosterCron(req: Request, admin: any) {
     return json(req, { success: false, error: parsed.error }, 400);
   }
   const forceMonthly = parsed.data.forceMonthly === true;
+  const forceReminder = parsed.data.forceReminder === true;
   const replaceLatestMonthly = forceMonthly &&
     parsed.data.replaceLatestMonthly === true;
   const forcedMonth = monthBounds(parsed.data.month)?.month ?? null;
+  const forcedReminderDate = cleanText(parsed.data.serviceDate, 10);
   const now = bratislavaNowParts();
   if (parsed.data.generateOnly === true) {
     if (!forcedMonth) {
@@ -812,6 +814,41 @@ async function handleRosterCron(req: Request, admin: any) {
       { success: false, error: "Discord webhook nie je nakonfigurovaný" },
       500,
     );
+  }
+  if (forceReminder) {
+    if (
+      !forcedReminderDate ||
+      !/^\d{4}-\d{2}-\d{2}$/.test(forcedReminderDate)
+    ) {
+      return json(req, { success: false, error: "Neplatný termín" }, 400);
+    }
+    const bounds = monthBounds(forcedReminderDate.slice(0, 7))!;
+    await ensureShifts(admin, bounds);
+    await fillOpenPositions(admin, bounds, forcedReminderDate);
+    const state = await loadState(admin, bounds);
+    const shift = (state.shifts as Shift[]).find((item) =>
+      item.service_date === forcedReminderDate
+    );
+    if (!shift) {
+      return json(req, {
+        success: false,
+        error: "V tento deň nie je služba riadu",
+      }, 400);
+    }
+    const sentReminder = await sendClaimedNotification(
+      admin,
+      webhook,
+      `reminder-test:${forcedReminderDate}:${crypto.randomUUID()}`,
+      "shift_reminder",
+      forcedReminderDate,
+      await shiftReminderPayload(shift, state.assignments, state.members),
+    );
+    return json(req, {
+      success: true,
+      localDate: now.date,
+      serviceDate: forcedReminderDate,
+      sent: sentReminder ? ["shift_reminder"] : [],
+    });
   }
   if (!forceMonthly && now.hour !== 9) {
     return json(req, { success: true, skipped: "outside_notification_hour" });

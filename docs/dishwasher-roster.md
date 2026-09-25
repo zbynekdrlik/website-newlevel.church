@@ -43,6 +43,10 @@ is present. Delivery claims are stored in
 `invitation.dishwasher_notification_runs` so retries cannot duplicate a monthly
 schedule or shift reminder.
 
+Protected operational tests can force either a monthly schedule or a reminder
+for one service date. Test runs use unique notification keys, so they never
+consume the real monthly or daily delivery claim.
+
 ## Personal member page
 
 Discord notifications contain a signed link for every assigned member. The link
