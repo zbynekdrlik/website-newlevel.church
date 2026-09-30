@@ -252,6 +252,7 @@
         editingCampaignId: null,
         audienceStats: null,
         concepts: [],
+        sendInProgress: false,
       };
       const $ = (selector) => document.querySelector(selector);
       const endpoint = () => `${$("[data-supabase-url]").value.trim().replace(/\/+$/, "")}/functions/v1/admin-sms`;
@@ -827,7 +828,7 @@
           state.contacts[0];
         const eventDate = formatEventDate(state.event?.event_date || $("[data-event-date]").value || "");
         return template
-          .replace(/\{\{\s*first_name\s*\}\}/g, first?.name?.split(/\s+/)[0] || "Ahoj")
+          .replace(/\{\{\s*first_name\s*\}\}/g, first?.name?.trim().split(/\s+/)[0] || "priateľ")
           .replace(/\{\{\s*name\s*\}\}/g, first?.name || "")
           .replace(/\{\{\s*email\s*\}\}/g, first?.email || "")
           .replace(/\{\{\s*phone\s*\}\}/g, first?.normalizedPhone || first?.phone || "")
@@ -920,6 +921,20 @@
         }
         await loadHistory();
         setResult(`Odoslané cez ${channelLabels.join(", ")}: ${sent} správ`);
+      }
+
+      async function submitManualSend() {
+        if (state.sendInProgress) return;
+        const button = $("[data-submit]");
+        state.sendInProgress = true;
+        button.disabled = true;
+        try {
+          await manualSend(!$("[data-schedule-toggle]").checked);
+        } finally {
+          state.sendInProgress = false;
+          button.disabled = false;
+          updateSchedule();
+        }
       }
 
       async function sendTestSms() {
@@ -1060,7 +1075,7 @@
         });
         $("[data-whatsapp-template-language]").addEventListener("input", saveConfig);
         $("[data-schedule-toggle]").addEventListener("change", updateSchedule);
-        $("[data-submit]").addEventListener("click", () => manualSend(!$("[data-schedule-toggle]").checked).catch(showError));
+        $("[data-submit]").addEventListener("click", () => submitManualSend().catch(showError));
         $("[data-send-test-sms]").addEventListener("click", () => sendTestSms().catch(showError));
         $("[data-send-test-email]").addEventListener("click", () => sendTestEmail().catch(showError));
         $("[data-concept-select]").addEventListener("change", updateConceptButtons);

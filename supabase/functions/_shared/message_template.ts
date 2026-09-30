@@ -59,7 +59,7 @@ export function renderContactTemplate(
   const name = typeof contact.name === "string" ? contact.name : "";
   const values: Record<string, string> = {
     name,
-    first_name: name.trim().split(/\s+/)[0] || "Ahoj",
+    first_name: name.trim().split(/\s+/)[0] || "priateľ",
     email: typeof contact.email === "string" ? contact.email : "",
     phone: typeof contact.phone === "string" ? contact.phone : "",
     event_name: String(event?.title ?? "New Level Party"),

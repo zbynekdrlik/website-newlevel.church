@@ -129,26 +129,17 @@ export async function dispatchDueMessages(
   options: DispatchOptions = {},
 ) {
   const safeLimit = Math.max(1, Math.min(Number(limit ?? 20), 50));
-  let query = admin
+  const { data: messages, error } = await admin
     .schema("invitation")
-    .from("message_queue")
-    .select(
-      "id,automation_id,contact_id,channel,recipient,subject,body,template_name,template_language,template_parameters,attempts",
-    )
-    .eq("status", "queued")
-    .lte("scheduled_for", new Date().toISOString())
-    .order("created_at", { ascending: true });
-
-  if (options.automationId) {
-    query = query.eq("automation_id", options.automationId);
-  }
-
-  const { data: messages, error } = await query.limit(safeLimit);
+    .rpc("claim_due_messages", {
+      p_limit: safeLimit,
+      p_automation_id: options.automationId ?? null,
+    });
 
   if (error || !messages) {
     return {
       ok: false as const,
-      error: "Queue load failed",
+      error: "Queue claim failed",
       details: error
         ? {
           code: error.code,
@@ -187,13 +178,7 @@ export async function dispatchDueMessages(
       "{{registration_url}}",
       registrationUrl,
     );
-    const attempts = Number(message.attempts ?? 0) + 1;
-    await admin
-      .schema("invitation")
-      .from("message_queue")
-      .update({ status: "processing", attempts })
-      .eq("id", message.id)
-      .eq("status", "queued");
+    const attempts = Number(message.attempts ?? 0);
 
     const result: SendResult = message.channel === "sms"
       ? await sendInfobipSms(message.recipient, renderedBody, {
@@ -214,6 +199,7 @@ export async function dispatchDueMessages(
           renderedBody,
           { ctaUrl: registrationUrl },
         ),
+        { idempotencyKey: `message-queue/${message.id}` },
       );
 
     const provider = message.channel === "sms"

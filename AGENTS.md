@@ -15,6 +15,10 @@
 - Shared provider dispatch lives in
   `supabase/functions/_shared/message_queue.ts` and is imported by the admin,
   cron, and authenticated queue dispatcher functions.
+- Dispatchers must claim due rows through `invitation.claim_due_messages`;
+  never send rows selected directly from `queued`, because manual and cron
+  dispatch can overlap. Queued Resend emails use the queue ID as their provider
+  idempotency key.
 - Campaign WhatsApp messages must use an approved Meta template. The default is
   `youth_invitation_sk` with language `sk`; body parameter 1 is the contact's
   first name and parameter 2 is the localized event date.

@@ -33,6 +33,16 @@ Deno.test("supports whitespace inside subject placeholders", () => {
   assertEquals(subject, "Pozvánka pre Mária");
 });
 
+Deno.test("uses a natural greeting when the contact has no name", () => {
+  const subject = renderContactTemplate(
+    "Ahoj {{first_name}} 👋 prídeš na YOUTH?",
+    { name: "" },
+    null,
+  );
+
+  assertEquals(subject, "Ahoj priateľ 👋 prídeš na YOUTH?");
+});
+
 Deno.test("formats an event date naturally in Slovak", () => {
   const message = renderContactTemplate(
     "Stretneme sa {{event_date}}.",

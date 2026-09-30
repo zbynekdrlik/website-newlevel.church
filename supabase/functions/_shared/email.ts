@@ -8,6 +8,11 @@ type PartyEmailOptions = {
   ctaLabel?: string;
 };
 
+type EmailSendOptions = {
+  idempotencyKey?: string;
+  timeoutMs?: number;
+};
+
 function escapeHtml(value: string) {
   return value
     .replaceAll("&", "&amp;")
@@ -86,13 +91,15 @@ export async function sendEmail(
   subject: string,
   text: string,
   html?: string,
-  timeoutMs = 15000,
+  options: EmailSendOptions = {},
 ): Promise<EmailSendResult> {
   const apiKey = Deno.env.get("RESEND_API_KEY")?.trim();
   const from = Deno.env.get("EMAIL_FROM")?.trim();
   const recipient = to.trim().toLowerCase();
   const safeSubject = subject.trim();
   const safeText = text.trim();
+  const idempotencyKey = options.idempotencyKey?.trim() ?? "";
+  const timeoutMs = options.timeoutMs ?? 15000;
 
   if (!apiKey || !from) {
     return {
@@ -126,6 +133,14 @@ export async function sendEmail(
     };
   }
 
+  if (idempotencyKey && idempotencyKey.length > 256) {
+    return {
+      ok: false,
+      errorCode: "INVALID_IDEMPOTENCY_KEY",
+      errorMessage: "email idempotency key is invalid",
+    };
+  }
+
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
@@ -135,6 +150,7 @@ export async function sendEmail(
       headers: {
         "Authorization": `Bearer ${apiKey}`,
         "Content-Type": "application/json",
+        ...(idempotencyKey ? { "Idempotency-Key": idempotencyKey } : {}),
       },
       body: JSON.stringify({
         from,
