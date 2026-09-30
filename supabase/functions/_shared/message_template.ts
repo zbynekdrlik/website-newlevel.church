@@ -29,8 +29,15 @@ function eventDateParts(event: Record<string, unknown> | null) {
     month: "long",
     timeZone: "Europe/Bratislava",
   }).format(parsedDate);
-  const localTime = startsAt.match(/T(\d{2}):(\d{2})/)?.slice(1).join(":") ||
-    "18:00";
+  const parsedStartsAt = startsAt ? new Date(startsAt) : null;
+  const localTime = parsedStartsAt && !Number.isNaN(parsedStartsAt.getTime())
+    ? new Intl.DateTimeFormat("sk-SK", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hourCycle: "h23",
+      timeZone: "Europe/Bratislava",
+    }).format(parsedStartsAt)
+    : "18:00";
 
   return { weekday, formattedDate, localTime };
 }

@@ -65,6 +65,19 @@ Deno.test("formats the date from starts_at when event_date is unavailable", () =
   assertEquals(message, "Stretneme sa v piatok 4. septembra o 18:30.");
 });
 
+Deno.test("converts a Supabase UTC timestamp to Bratislava time", () => {
+  const message = renderContactTemplate(
+    "Stretneme sa {{event_date}}.",
+    {},
+    {
+      event_date: "2026-10-02",
+      starts_at: "2026-10-02T16:00:00+00:00",
+    },
+  );
+
+  assertEquals(message, "Stretneme sa v piatok 2. októbra o 18:00.");
+});
+
 Deno.test("keeps the absolute date when sent the day before the event", () => {
   const message = renderContactTemplate(
     "Stretneme sa {{event_date}}.",

@@ -26,6 +26,8 @@
   renders as a Slovak weekday, date without a year, and time (for example
   `v piatok 18. septembra o 18:00`); relative wording such as `zajtra` or
   `tento piatok` is rejected because it can become stale.
+- Supabase returns `starts_at` timestamps normalized to UTC. Always format their
+  time with the `Europe/Bratislava` time zone; never extract the raw ISO hour.
 - The approved Meta template has the timing line `🕕 {{2}} o 18:00`. Parameter 2
   is always sent as `v piatok`, producing `🕕 v piatok o 18:00`.
 - WhatsApp free text is only appropriate inside the 24-hour customer-service
