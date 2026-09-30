@@ -19,6 +19,10 @@
   never send rows selected directly from `queued`, because manual and cron
   dispatch can overlap. Queued Resend emails use the queue ID as their provider
   idempotency key.
+- Multiple contacts may normalize to the same phone number. Manual queue rows
+  are deduplicated by channel and recipient, and the database trigger populates
+  `recipient_dedupe_key` so one automation cannot send repeatedly to the same
+  destination through different contact IDs.
 - Campaign WhatsApp messages must use an approved Meta template. The default is
   `youth_invitation_sk` with language `sk`; body parameter 1 is the contact's
   first name and parameter 2 is the localized event date.

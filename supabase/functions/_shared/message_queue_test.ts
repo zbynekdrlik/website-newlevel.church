@@ -1,4 +1,7 @@
-import { dispatchDueMessages } from "./message_queue.ts";
+import {
+  dedupeMessageRecipients,
+  dispatchDueMessages,
+} from "./message_queue.ts";
 
 function assertEquals<T>(actual: T, expected: T) {
   if (JSON.stringify(actual) !== JSON.stringify(expected)) {
@@ -39,4 +42,20 @@ Deno.test("claims due messages atomically before dispatching", async () => {
     },
   ]);
   assertEquals(result, { ok: true, processed: 0, results: [] });
+});
+
+Deno.test("deduplicates recipients within each channel", () => {
+  const rows = dedupeMessageRecipients([
+    { id: "first", channel: "whatsapp", recipient: "+421900000001" },
+    { id: "duplicate", channel: "whatsapp", recipient: "+421900000001" },
+    { id: "sms", channel: "sms", recipient: "+421900000001" },
+    { id: "email", channel: "email", recipient: " Person@Example.com " },
+    {
+      id: "email-duplicate",
+      channel: "email",
+      recipient: "person@example.com",
+    },
+  ]);
+
+  assertEquals(rows.map((row) => row.id), ["first", "sms", "email"]);
 });

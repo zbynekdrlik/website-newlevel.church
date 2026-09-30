@@ -900,7 +900,8 @@
         });
         if (!sendNow) {
           await loadHistory();
-          setResult(`Naplánované: ${result.queued} správ cez ${channelLabels.join(", ")}`);
+          const skipped = result.duplicatesSkipped ? ` · preskočené duplicity: ${result.duplicatesSkipped}` : "";
+          setResult(`Naplánované: ${result.queued} správ cez ${channelLabels.join(", ")}${skipped}`);
           return;
         }
 
@@ -920,7 +921,8 @@
           throw new Error("Nie všetky správy boli prijaté providerom. Pozri históriu nižšie.");
         }
         await loadHistory();
-        setResult(`Odoslané cez ${channelLabels.join(", ")}: ${sent} správ`);
+        const skipped = result.duplicatesSkipped ? ` · preskočené duplicity: ${result.duplicatesSkipped}` : "";
+        setResult(`Odoslané cez ${channelLabels.join(", ")}: ${sent} správ${skipped}`);
       }
 
       async function submitManualSend() {

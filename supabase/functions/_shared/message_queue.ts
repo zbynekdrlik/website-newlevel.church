@@ -36,6 +36,18 @@ type RegistrationContact = {
   phone: string | null;
 };
 
+export function dedupeMessageRecipients<
+  T extends { channel: string; recipient: string },
+>(rows: T[]) {
+  const seen = new Set<string>();
+  return rows.filter((row) => {
+    const key = `${row.channel}:${row.recipient.trim().toLowerCase()}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
 function cleanTemplateParameters(value: unknown) {
   if (!Array.isArray(value)) return [];
   return value

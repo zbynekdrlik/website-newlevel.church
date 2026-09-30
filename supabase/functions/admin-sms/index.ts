@@ -16,7 +16,10 @@ import {
   smsTestModeConfig,
 } from "../_shared/infobip.ts";
 import { expandSmsEmojiShortcodes } from "../_shared/emoji.ts";
-import { dispatchDueMessages } from "../_shared/message_queue.ts";
+import {
+  dedupeMessageRecipients,
+  dispatchDueMessages,
+} from "../_shared/message_queue.ts";
 import {
   materializeDueSmsCampaigns,
   updateSmsCampaignStatuses,
@@ -698,7 +701,7 @@ Deno.serve(async (req) => {
       if (batchError || !batch) throw new Error("Batch create failed");
 
       const queuedAt = new Date(scheduledFor).toISOString();
-      const rows = recipients.flatMap((contact: AudienceContact) => {
+      const candidateRows = recipients.flatMap((contact: AudienceContact) => {
         const bodyText = message
           ? renderContactTemplate(message, contact, event, queuedAt)
           : `[WhatsApp template: ${whatsappTemplateName}]`;
@@ -719,7 +722,7 @@ Deno.serve(async (req) => {
           contactRows.push({
             ...baseRow,
             channel: "sms",
-            recipient: contact.normalizedPhone,
+            recipient: contact.normalizedPhone!,
             template_name: sender,
             subject: name,
           });
@@ -728,7 +731,7 @@ Deno.serve(async (req) => {
           contactRows.push({
             ...baseRow,
             channel: "whatsapp",
-            recipient: contact.normalizedPhone,
+            recipient: contact.normalizedPhone!,
             template_name: whatsappMode === "template"
               ? whatsappTemplateName
               : null,
@@ -745,7 +748,7 @@ Deno.serve(async (req) => {
           contactRows.push({
             ...baseRow,
             channel: "email",
-            recipient: contact.email,
+            recipient: contact.email!,
             template_name: null,
             subject: renderContactTemplate(subject, contact, event, queuedAt)
               .slice(
@@ -757,6 +760,8 @@ Deno.serve(async (req) => {
 
         return contactRows;
       });
+      const rows = dedupeMessageRecipients(candidateRows);
+      const duplicatesSkipped = candidateRows.length - rows.length;
 
       if (!rows.length) {
         return json(
@@ -789,6 +794,7 @@ Deno.serve(async (req) => {
           mode: "manual_scheduled",
           automationId,
           queued: insertedRows.length,
+          duplicatesSkipped,
           channels,
           whatsappMode: channels.includes("whatsapp") ? whatsappMode : null,
           whatsappTemplateName: whatsappMode === "template"
@@ -809,6 +815,7 @@ Deno.serve(async (req) => {
         mode: "manual_now",
         automationId,
         queued: insertedRows.length,
+        duplicatesSkipped,
         channels,
         whatsappMode: channels.includes("whatsapp") ? whatsappMode : null,
         whatsappTemplateName: whatsappMode === "template"
