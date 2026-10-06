@@ -95,6 +95,10 @@ On production:
 https://newlevel.church/admin/sms
 ```
 
+When Email is selected, the composer has a checked-by-default option to include
+the “Potvrdiť účasť” button. Its setting is saved with local preferences and
+message concepts.
+
 Use:
 
 ```text

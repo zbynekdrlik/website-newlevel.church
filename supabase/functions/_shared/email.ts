@@ -6,6 +6,7 @@ type PartyEmailOptions = {
   preheader?: string;
   ctaUrl?: string;
   ctaLabel?: string;
+  showCta?: boolean;
   imageContentId?: string;
 };
 
@@ -76,7 +77,12 @@ export function renderPartyEmailHtml(
   const ctaUrl = escapeHtml(
     options.ctaUrl ?? "https://www.newlevel.church/youth/",
   );
-  const ctaLabel = escapeHtml(options.ctaLabel ?? "Potvrdit ucast");
+  const ctaLabel = escapeHtml(options.ctaLabel ?? "Potvrdiť účasť");
+  const ctaButton = options.showCta === false ? "" : `<tr>
+              <td style="padding:10px 26px 28px;">
+                <a href="${ctaUrl}" style="display:inline-block;background:#2563eb;color:#ffffff;text-decoration:none;font-weight:800;font-size:15px;padding:13px 18px;border-radius:12px;">${ctaLabel}</a>
+              </td>
+            </tr>`;
   const inlineImage = options.imageContentId
     ? `<tr>
               <td style="padding:16px 26px 8px;">
@@ -113,11 +119,7 @@ export function renderPartyEmailHtml(
               </td>
             </tr>
             ${inlineImage}
-            <tr>
-              <td style="padding:10px 26px 28px;">
-                <a href="${ctaUrl}" style="display:inline-block;background:#2563eb;color:#ffffff;text-decoration:none;font-weight:800;font-size:15px;padding:13px 18px;border-radius:12px;">${ctaLabel}</a>
-              </td>
-            </tr>
+            ${ctaButton}
             <tr>
               <td style="padding:20px 26px;background:#111827;border-top:1px solid #273244;color:#9ca3af;font-size:13px;line-height:1.55;">
                 Jedlo, hry, karaoke a dobra atmosfera. Sleduj nas aj na Instagrame @newlevel_youth.

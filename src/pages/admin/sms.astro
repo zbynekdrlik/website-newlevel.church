@@ -50,6 +50,8 @@
       .preview-image { display: block; width: min(100%, 480px); max-height: 320px; margin: 14px auto 0; border-radius: 8px; object-fit: contain; }
       .email-image-row { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
       .email-image-row [data-email-image-name] { min-width: 0; overflow: hidden; color: #a9abb3; text-overflow: ellipsis; white-space: nowrap; }
+      .inline-check { display: flex; align-items: center; gap: 10px; margin: 12px 0; }
+      .inline-check input { width: 18px; height: 18px; margin: 0; accent-color: #38bdf8; }
       .email-image-status.is-error { color: #f87171; }
       .result { color: #7dd3fc; font-weight: 800; }
       .result.is-error { color: #f87171; }
@@ -212,6 +214,7 @@
           <label>Predmet emailu<input data-email-subject maxlength="180" placeholder="Pozvánka na New Level Youth" /></label>
           <p class="hint">Ukážka predmetu: <strong data-email-subject-preview></strong></p>
           <div class="channel-settings">
+            <label class="inline-check"><input data-email-cta type="checkbox" checked />Zobraziť tlačidlo „Potvrdiť účasť“ v emaili</label>
             <label>Fotografia v emaili<input data-email-image type="file" accept="image/*" /></label>
             <p class="hint">Fotka sa zobrazí priamo v emaile a bude aj jeho prílohou. Obrázok sa zmenší na JPEG do 900 kB.</p>
             <p class="hint email-image-status" data-email-image-status role="status" aria-live="polite" hidden></p>
@@ -290,6 +293,7 @@
         localStorage.setItem("smsAdminKey", $("[data-admin-key]").value.trim());
         localStorage.setItem("smsSender", $("[data-sender]").value.trim());
         localStorage.setItem("smsEmailSubject", $("[data-email-subject]").value.trim());
+        localStorage.setItem("smsEmailCtaEnabled", String($("[data-email-cta]").checked));
         localStorage.setItem("smsTestPhone", $("[data-test-phone]").value.trim());
         localStorage.setItem("smsTestEmail", $("[data-test-email]").value.trim());
         localStorage.setItem("smsChannels", JSON.stringify(selectedChannels()));
@@ -306,6 +310,7 @@
         $("[data-admin-key]").value = state.adminKey;
         $("[data-sender]").value = localStorage.getItem("smsSender") || "NewLevel";
         $("[data-email-subject]").value = localStorage.getItem("smsEmailSubject") || "Pozvánka na New Level Youth";
+        $("[data-email-cta]").checked = localStorage.getItem("smsEmailCtaEnabled") !== "false";
         $("[data-test-phone]").value = localStorage.getItem("smsTestPhone") || "";
         $("[data-test-email]").value = localStorage.getItem("smsTestEmail") || "";
         $("[data-whatsapp-mode]").value = localStorage.getItem("smsWhatsappMode") || "template";
@@ -442,6 +447,7 @@
           channels: selectedChannels(),
           sender: $("[data-sender]").value.trim(),
           subject,
+          emailCtaEnabled: $("[data-email-cta]").checked,
           message,
           whatsappMode: $("[data-whatsapp-mode]").value,
           whatsappTemplateName: $("[data-whatsapp-template-name]").value.trim(),
@@ -465,6 +471,7 @@
         });
         $("[data-sender]").value = typeof concept.sender === "string" ? concept.sender : "NewLevel";
         $("[data-email-subject]").value = typeof concept.subject === "string" ? concept.subject : "";
+        $("[data-email-cta]").checked = concept.emailCtaEnabled !== false;
         $("[data-message]").value = typeof concept.message === "string" ? concept.message : "";
         $("[data-whatsapp-mode]").value = concept.whatsappMode === "text" ? "text" : "template";
         $("[data-whatsapp-template-name]").value = typeof concept.whatsappTemplateName === "string" ? concept.whatsappTemplateName : "youth_invitation_sk";
@@ -965,6 +972,7 @@
           whatsappMode,
           whatsappTemplateName,
           whatsappTemplateLanguage,
+          emailCtaEnabled: $("[data-email-cta]").checked,
           eventDate: $("[data-event-date]").value,
           audienceType: audience,
           selectedContactIds: selected,
@@ -1136,6 +1144,7 @@
           email,
           subject,
           message,
+          emailCtaEnabled: $("[data-email-cta]").checked,
           emailImage: state.emailImage ? { path: state.emailImage.path } : null,
         });
         const providerLine = result.providerMessageId ? ` Resend ID: ${result.providerMessageId}` : "";
@@ -1222,6 +1231,7 @@
           saveConfig();
           updateEmailSubjectPreview();
         });
+        $("[data-email-cta]").addEventListener("change", saveConfig);
         document.querySelectorAll("[data-channel]").forEach((input) => {
           input.addEventListener("change", () => {
             saveConfig();

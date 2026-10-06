@@ -58,6 +58,7 @@ type AdminSmsBody = {
   whatsappMode?: WhatsAppMode;
   whatsappTemplateName?: string;
   whatsappTemplateLanguage?: string;
+  emailCtaEnabled?: boolean;
   emailImage?: unknown;
   imageBase64?: string;
   fileName?: string;
@@ -699,6 +700,7 @@ Deno.serve(async (req) => {
         subject,
         message,
         renderPartyEmailHtml(subject, message, {
+          showCta: body.emailCtaEnabled !== false,
           ...(emailImageAttachment
             ? { imageContentId: EMAIL_IMAGE_CONTENT_ID }
             : {}),
@@ -728,6 +730,7 @@ Deno.serve(async (req) => {
       const emailImagePath = body.emailImage
         ? cleanEmailImagePath(body.emailImage)
         : null;
+      const emailCtaEnabled = body.emailCtaEnabled !== false;
       const whatsappMode = cleanWhatsAppMode(body.whatsappMode);
       const whatsappTemplateName = cleanWhatsAppTemplateName(
         body.whatsappTemplateName,
@@ -893,7 +896,10 @@ Deno.serve(async (req) => {
             ...baseRow,
             channel: "email",
             recipient: contact.email!,
-            template_parameters: emailImagePath ? { emailImagePath } : [],
+            template_parameters: {
+              ...(emailImagePath ? { emailImagePath } : {}),
+              emailCtaEnabled,
+            },
             template_name: null,
             subject: renderContactTemplate(subject, contact, event, queuedAt)
               .slice(

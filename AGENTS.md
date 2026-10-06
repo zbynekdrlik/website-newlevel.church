@@ -15,7 +15,9 @@
 - Email campaign photos are normalized to JPEG and stored privately in the
   `email-campaign-images` Storage bucket. Email queue rows reference the image
   at `template_parameters.emailImagePath`; the shared dispatcher sends it as a
-  CID inline attachment so it appears in the email body.
+  CID inline attachment so it appears in the email body. The optional
+  `Potvrdiť účasť` button is controlled by the admin and stored in
+  `template_parameters.emailCtaEnabled`; legacy rows keep the button enabled.
 - Shared provider dispatch lives in
   `supabase/functions/_shared/message_queue.ts` and is imported by the admin,
   cron, and authenticated queue dispatcher functions.

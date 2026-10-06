@@ -54,6 +54,11 @@ function emailImagePath(value: unknown) {
     : null;
 }
 
+function emailCtaEnabled(value: unknown) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return true;
+  return (value as Record<string, unknown>).emailCtaEnabled !== false;
+}
+
 async function sendQueuedEmail(
   admin: any,
   message: QueueMessage,
@@ -99,6 +104,7 @@ async function sendQueuedEmail(
     body,
     renderPartyEmailHtml(subject, body, {
       ctaUrl: registrationUrl,
+      showCta: emailCtaEnabled(message.template_parameters),
       ...(attachment ? { imageContentId: EMAIL_IMAGE_CONTENT_ID } : {}),
     }),
     {
