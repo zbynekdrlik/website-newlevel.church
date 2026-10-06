@@ -500,12 +500,13 @@
         setResult("Koncept bol vymazaný.");
       }
 
-      async function api(body) {
+      async function api(body, options = {}) {
         if (!state.adminKey) throw new Error("Najprv zadaj admin API kľúč.");
         const response = await fetch(endpoint(), {
           method: "POST",
           headers: { "x-admin-sms-key": state.adminKey, "Content-Type": "application/json" },
           body: JSON.stringify(body),
+          signal: options.signal,
         });
         const data = await response.json().catch(() => ({ error: "Server vrátil nečitateľnú odpoveď" }));
         if (!response.ok || !data.success) {
@@ -1104,6 +1105,8 @@
 
       async function uploadEmailImage(file) {
         const input = $("[data-email-image]");
+        const controller = new AbortController();
+        let timeout;
         state.emailImageUploadInProgress = true;
         input.disabled = true;
         updateSchedule();
@@ -1117,19 +1120,24 @@
             reader.onerror = () => reject(new Error("Fotografiu sa nepodarilo načítať."));
             reader.readAsDataURL(blob);
           });
+          timeout = window.setTimeout(() => controller.abort(), 45_000);
           const result = await api({
             action: "upload_email_image",
             imageBase64: dataUrl.slice(dataUrl.indexOf(",") + 1),
             fileName: file.name,
-          });
+          }, { signal: controller.signal });
           setEmailImage(result.emailImage, URL.createObjectURL(blob));
           updateSegmentPreview();
           setEmailImageStatus("Fotografia je pripravená na odoslanie.");
           setResult(`Fotografia „${result.emailImage.filename}“ je pridaná do emailu.`);
         } catch (error) {
-          setEmailImageStatus(error instanceof Error ? error.message : String(error), true);
-          throw error;
+          const uploadError = controller.signal.aborted
+            ? new Error("Nahrávanie fotografie trvalo viac ako 45 sekúnd. Skontroluj pripojenie a skús to znova.")
+            : error;
+          setEmailImageStatus(uploadError instanceof Error ? uploadError.message : String(uploadError), true);
+          throw uploadError;
         } finally {
+          if (timeout !== undefined) window.clearTimeout(timeout);
           state.emailImageUploadInProgress = false;
           input.disabled = false;
           input.value = "";
