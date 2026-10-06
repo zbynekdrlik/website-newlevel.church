@@ -185,29 +185,59 @@ async function sendWhatsApp(
       text: { preview_url: false, body },
     };
 
-  const response = await fetch(
-    `https://graph.facebook.com/v20.0/${phoneNumberId}/messages`,
-    {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${token}`,
-        "Content-Type": "application/json",
+  const sendPayload = async (payload: unknown) => {
+    const response = await fetch(
+      `https://graph.facebook.com/v20.0/${phoneNumberId}/messages`,
+      {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
       },
-      body: JSON.stringify(messagePayload),
-    },
-  );
+    );
+    const data = await response.json().catch(() => ({}));
+    return { response, data };
+  };
 
-  const data = await response.json().catch(() => ({}));
-  const id = data.messages?.[0]?.id as string | undefined;
+  let { response, data } = await sendPayload(messagePayload);
   const providerMessage = typeof data.error?.message === "string"
     ? data.error.message
     : "whatsapp send failed";
   const providerDetails = typeof data.error?.error_data?.details === "string"
     ? data.error.error_data.details
     : "";
-  const errorMessage = providerDetails
-    ? `${providerMessage}: ${providerDetails}`
-    : providerMessage;
+  const parameterMismatch = Number(data.error?.code) === 132000 &&
+    /body:\s*number of localizable_params\s*\(2\)\s*does not match the expected number of params\s*\(1\)/i
+      .test(`${providerMessage} ${providerDetails}`);
+
+  if (templateName && templateParameters.length === 2 && parameterMismatch) {
+    const oneParameterPayload = {
+      ...messagePayload,
+      template: {
+        name: templateName,
+        language: { code: templateLanguage },
+        components: [{
+          type: "body",
+          parameters: [{ type: "text", text: templateParameters[0] }],
+        }],
+      },
+    };
+    ({ response, data } = await sendPayload(oneParameterPayload));
+  }
+
+  const id = data.messages?.[0]?.id as string | undefined;
+  const finalProviderMessage = typeof data.error?.message === "string"
+    ? data.error.message
+    : "whatsapp send failed";
+  const finalProviderDetails =
+    typeof data.error?.error_data?.details === "string"
+      ? data.error.error_data.details
+      : "";
+  const errorMessage = finalProviderDetails
+    ? `${finalProviderMessage}: ${finalProviderDetails}`
+    : finalProviderMessage;
   return response.ok ? { ok: true, providerMessageId: id ?? null } : {
     ok: false,
     errorCode: `WHATSAPP_HTTP_${response.status}`,

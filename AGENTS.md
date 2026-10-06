@@ -31,7 +31,9 @@
   destination through different contact IDs.
 - Campaign WhatsApp messages must use an approved Meta template. The default is
   `youth_invitation_sk` with language `sk`; body parameter 1 is the contact's
-  first name and parameter 2 is the localized event date.
+  first name and parameter 2 is the localized event date. If Meta reports that
+  the template expects exactly one body parameter, dispatch retries with the
+  first name only.
 - `{{event_date}}` inserts the selected event's localized weekday, date without
   a year, and time (for example `v piatok 18. septembra o 18:00`). Static
   wording such as `zajtra` or `tento piatok` is allowed in message text and is
