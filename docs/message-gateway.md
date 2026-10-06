@@ -39,9 +39,10 @@ sablonu. Admin predvolene pouziva `youth_invitation_sk` (`sk`): prvy parameter
 je krstne meno kontaktu a druhy parameter je vzdy `v piatok`. Casovy riadok
 schvalenej Meta sablony `🕕 {{2}} o 18:00` preto vzdy zobrazi
 `🕕 v piatok o 18:00`. V messaging admine musia email, SMS a
-WhatsApp volny text pouzivat `{{event_date}}`; relativne formulacie ako `zajtra`
-alebo `tento piatok` admin server odmietne. Volny text je urceny iba na odpoved
-do 24 hodin od poslednej spravy pouzivatela.
+WhatsApp volny text mozu obsahovat bezne formulacie ako `zajtra` alebo
+`tento piatok`; admin ich automaticky neoznacuje ani neodmieta. Premenna
+`{{event_date}}` automaticky doplni termin vybraneho podujatia. Volny text je
+urceny iba na odpoved do 24 hodin od poslednej spravy pouzivatela.
 
 Token a ID telefonneho cisla su iba v Supabase secrets:
 

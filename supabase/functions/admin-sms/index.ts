@@ -30,7 +30,6 @@ import {
   sendEmail,
 } from "../_shared/email.ts";
 import {
-  findUnsafeRelativeDatePhrase,
   formatEventDate,
   renderContactTemplate,
 } from "../_shared/message_template.ts";
@@ -797,20 +796,6 @@ Deno.serve(async (req) => {
         return json(req, {
           success: false,
           error: "Scheduled time is required",
-        }, 400);
-      }
-      const unsafeMessagePhrase = message && needsFreeText
-        ? findUnsafeRelativeDatePhrase(message)
-        : null;
-      const unsafeSubjectPhrase = channels.includes("email")
-        ? findUnsafeRelativeDatePhrase(subject)
-        : null;
-      const unsafePhrase = unsafeMessagePhrase || unsafeSubjectPhrase;
-      if (unsafePhrase) {
-        return json(req, {
-          success: false,
-          error:
-            `Text „${unsafePhrase}“ sa môže pri inom dni odoslania stať nesprávnym. Použi {{event_date}}.`,
         }, 400);
       }
       const eventDate = typeof event.event_date === "string"

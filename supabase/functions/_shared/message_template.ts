@@ -1,12 +1,5 @@
 import { buildRegistrationUrl } from "./registration_url.ts";
 
-const RELATIVE_DATE_PATTERN =
-  /\b(?:dnes|zajtra|pozajtra|(?:tento|túto|budúci|budúcu|najbližší|najbližšiu|v|vo)\s+(?:pondelok|utorok|stredu|streda|štvrtok|piatok|sobotu|sobota|nedeľu|nedeľa|týždeň))\b/iu;
-
-export function findUnsafeRelativeDatePhrase(value: string) {
-  return value.match(RELATIVE_DATE_PATTERN)?.[0] ?? null;
-}
-
 function eventDateParts(event: Record<string, unknown> | null) {
   const eventDate = typeof event?.event_date === "string"
     ? event.event_date

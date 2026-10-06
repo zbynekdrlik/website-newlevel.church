@@ -1,7 +1,4 @@
-import {
-  findUnsafeRelativeDatePhrase,
-  renderContactTemplate,
-} from "./message_template.ts";
+import { renderContactTemplate } from "./message_template.ts";
 
 function assertEquals<T>(actual: T, expected: T) {
   if (actual !== expected) {
@@ -87,21 +84,4 @@ Deno.test("keeps the absolute date when sent the day before the event", () => {
   );
 
   assertEquals(message, "Stretneme sa v piatok 4. septembra o 18:00.");
-});
-
-Deno.test("detects relative date wording that can become stale", () => {
-  assertEquals(findUnsafeRelativeDatePhrase("Príď zajtra o 18:00."), "zajtra");
-  assertEquals(
-    findUnsafeRelativeDatePhrase("Vidíme sa tento piatok."),
-    "tento piatok",
-  );
-  assertEquals(findUnsafeRelativeDatePhrase("Vidíme sa v piatok."), "v piatok");
-  assertEquals(
-    findUnsafeRelativeDatePhrase("Vidíme sa {{event_date}}."),
-    null,
-  );
-  assertEquals(
-    findUnsafeRelativeDatePhrase("Stretávame sa každý piatok."),
-    null,
-  );
 });

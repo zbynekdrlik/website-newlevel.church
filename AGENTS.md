@@ -30,10 +30,11 @@
 - Campaign WhatsApp messages must use an approved Meta template. The default is
   `youth_invitation_sk` with language `sk`; body parameter 1 is the contact's
   first name and parameter 2 is the localized event date.
-- Event timing sent from the messaging admin must use `{{event_date}}`. It
-  renders as a Slovak weekday, date without a year, and time (for example
-  `v piatok 18. septembra o 18:00`); relative wording such as `zajtra` or
-  `tento piatok` is rejected because it can become stale.
+- `{{event_date}}` inserts the selected event's localized weekday, date without
+  a year, and time (for example `v piatok 18. septembra o 18:00`). Static
+  wording such as `zajtra` or `tento piatok` is allowed in message text and is
+  not automatically warned about or rejected; use the variable when the date
+  should follow the selected event.
 - Supabase returns `starts_at` timestamps normalized to UTC. Always format their
   time with the `Europe/Bratislava` time zone; never extract the raw ISO hour.
 - The currently used `youth_out` Meta template has the timing line `📅 {{2}}`
