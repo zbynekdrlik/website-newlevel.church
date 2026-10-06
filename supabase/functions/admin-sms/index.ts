@@ -24,7 +24,11 @@ import {
   materializeDueSmsCampaigns,
   updateSmsCampaignStatuses,
 } from "../_shared/sms_campaigns.ts";
-import { renderPartyEmailHtml, sendEmail } from "../_shared/email.ts";
+import {
+  emailImageAttachmentFromBytes,
+  renderPartyEmailHtml,
+  sendEmail,
+} from "../_shared/email.ts";
 import {
   findUnsafeRelativeDatePhrase,
   formatEventDate,
@@ -55,7 +59,15 @@ type AdminSmsBody = {
   whatsappMode?: WhatsAppMode;
   whatsappTemplateName?: string;
   whatsappTemplateLanguage?: string;
+  emailImage?: unknown;
+  imageBase64?: string;
+  fileName?: string;
 };
+
+const EMAIL_IMAGE_BUCKET = "email-campaign-images";
+const MAX_EMAIL_IMAGE_BYTES = 900_000;
+const MAX_EMAIL_IMAGE_REQUEST_BYTES = 1_500_000;
+const EMAIL_IMAGE_CONTENT_ID = "campaign-image";
 
 type ContactRow = {
   id: string;
@@ -130,6 +142,28 @@ function cleanUuid(value: unknown) {
   return typeof value === "string" && /^[0-9a-f-]{36}$/i.test(value)
     ? value
     : null;
+}
+
+function cleanEmailImagePath(value: unknown) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const path = (value as Record<string, unknown>).path;
+  return typeof path === "string" &&
+      /^campaign\/[0-9a-f-]{36}\.jpg$/i.test(path)
+    ? path
+    : null;
+}
+
+async function loadEmailImageAttachment(admin: any, path: string) {
+  const { data, error } = await admin.storage
+    .from(EMAIL_IMAGE_BUCKET)
+    .download(path);
+  if (error || !data) return null;
+
+  return emailImageAttachmentFromBytes(
+    new Uint8Array(await data.arrayBuffer()),
+    "pozvanka.jpg",
+    EMAIL_IMAGE_CONTENT_ID,
+  );
 }
 
 function cleanChannels(value: unknown): MessageChannel[] {
@@ -441,7 +475,7 @@ Deno.serve(async (req) => {
     return json(req, { success: false, error: "Server not configured" }, 500);
   }
 
-  const parsed = await readJsonBody(req);
+  const parsed = await readJsonBody(req, MAX_EMAIL_IMAGE_REQUEST_BYTES);
   if (!parsed.ok) {
     return json(req, { success: false, error: parsed.error }, 400);
   }
@@ -452,6 +486,85 @@ Deno.serve(async (req) => {
   try {
     if (action === "config") {
       return json(req, { success: true, ...smsTestModeConfig() });
+    }
+
+    if (action === "upload_email_image") {
+      const encoded = typeof body.imageBase64 === "string"
+        ? body.imageBase64
+        : "";
+      if (
+        !encoded || encoded.length > Math.ceil(MAX_EMAIL_IMAGE_BYTES / 3) * 4 ||
+        !/^[A-Za-z0-9+/]+={0,2}$/.test(encoded)
+      ) {
+        return json(req, {
+          success: false,
+          error: "Vyber platný obrázok do emailu.",
+        }, 400);
+      }
+
+      let bytes: Uint8Array;
+      try {
+        bytes = Uint8Array.from(
+          atob(encoded),
+          (character) => character.charCodeAt(0),
+        );
+      } catch {
+        return json(req, {
+          success: false,
+          error: "Obrázok sa nepodarilo spracovať.",
+        }, 400);
+      }
+
+      if (
+        !emailImageAttachmentFromBytes(bytes) ||
+        bytes.length > MAX_EMAIL_IMAGE_BYTES
+      ) {
+        return json(req, {
+          success: false,
+          error: "Obrázok musí byť JPEG s veľkosťou do 900 kB.",
+        }, 400);
+      }
+
+      const path = `campaign/${crypto.randomUUID()}.jpg`;
+      const { error } = await admin.storage
+        .from(EMAIL_IMAGE_BUCKET)
+        .upload(path, bytes, {
+          contentType: "image/jpeg",
+          cacheControl: "3600",
+          upsert: false,
+        });
+      if (error) throw new Error("Obrázok sa nepodarilo uložiť.");
+
+      const originalFileName = typeof body.fileName === "string"
+        ? body.fileName.split(/[\\/]/).pop()?.trim().slice(0, 120)
+        : "";
+      return json(req, {
+        success: true,
+        emailImage: {
+          path,
+          filename: originalFileName || "fotografia.jpg",
+        },
+      });
+    }
+
+    if (action === "email_image_url") {
+      const path = cleanEmailImagePath(body.emailImage);
+      if (!path) {
+        return json(req, {
+          success: false,
+          error: "Obrázok v koncepte nie je platný.",
+        }, 400);
+      }
+      const { data, error } = await admin.storage
+        .from(EMAIL_IMAGE_BUCKET)
+        .createSignedUrl(path, 3600);
+      if (error || !data?.signedUrl) {
+        return json(req, {
+          success: false,
+          error: "Obrázok sa nepodarilo načítať.",
+        }, 404);
+      }
+      return json(req, { success: true, signedUrl: data.signedUrl });
     }
 
     if (action === "list_events") {
@@ -543,6 +656,9 @@ Deno.serve(async (req) => {
       const email = cleanText(body.email, 254)?.toLowerCase() ?? "";
       const subject = cleanText(body.subject, 180) ?? "";
       const message = cleanText(body.message, 5000) ?? "";
+      const emailImagePath = body.emailImage
+        ? cleanEmailImagePath(body.emailImage)
+        : null;
 
       if (!isValidEmail(email)) {
         return json(req, {
@@ -563,11 +679,36 @@ Deno.serve(async (req) => {
         }, 400);
       }
 
+      if (body.emailImage && !emailImagePath) {
+        return json(req, {
+          success: false,
+          error: "Obrázok v emaili nie je platný.",
+        }, 400);
+      }
+      const emailImageAttachment = emailImagePath
+        ? await loadEmailImageAttachment(admin, emailImagePath)
+        : null;
+      if (emailImagePath && !emailImageAttachment) {
+        return json(req, {
+          success: false,
+          error: "Obrázok v emaili sa nepodarilo načítať.",
+        }, 400);
+      }
+
       const result = await sendEmail(
         email,
         subject,
         message,
-        renderPartyEmailHtml(subject, message),
+        renderPartyEmailHtml(subject, message, {
+          ...(emailImageAttachment
+            ? { imageContentId: EMAIL_IMAGE_CONTENT_ID }
+            : {}),
+        }),
+        {
+          ...(emailImageAttachment
+            ? { attachments: [emailImageAttachment] }
+            : {}),
+        },
       );
       const didSend = result.ok === true;
       return json(req, {
@@ -585,6 +726,9 @@ Deno.serve(async (req) => {
       const audienceType = body.audienceType ?? "all_with_phone";
       const selectedIds = new Set(cleanUuidList(body.selectedContactIds));
       const channels = cleanChannels(body.channels);
+      const emailImagePath = body.emailImage
+        ? cleanEmailImagePath(body.emailImage)
+        : null;
       const whatsappMode = cleanWhatsAppMode(body.whatsappMode);
       const whatsappTemplateName = cleanWhatsAppTemplateName(
         body.whatsappTemplateName,
@@ -610,6 +754,21 @@ Deno.serve(async (req) => {
         return json(req, {
           success: false,
           error: "Select at least one channel",
+        }, 400);
+      }
+      if (body.emailImage && (!channels.includes("email") || !emailImagePath)) {
+        return json(req, {
+          success: false,
+          error: "Vybranú fotografiu možno použiť iba pri emaili.",
+        }, 400);
+      }
+      if (
+        emailImagePath &&
+        !await loadEmailImageAttachment(admin, emailImagePath)
+      ) {
+        return json(req, {
+          success: false,
+          error: "Obrázok v emaili sa nepodarilo načítať.",
         }, 400);
       }
       const needsFreeText = channels.some((channel) =>
@@ -749,6 +908,7 @@ Deno.serve(async (req) => {
             ...baseRow,
             channel: "email",
             recipient: contact.email!,
+            template_parameters: emailImagePath ? { emailImagePath } : [],
             template_name: null,
             subject: renderContactTemplate(subject, contact, event, queuedAt)
               .slice(

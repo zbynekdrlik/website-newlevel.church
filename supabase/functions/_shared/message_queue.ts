@@ -1,4 +1,9 @@
-import { renderPartyEmailHtml, sendEmail } from "./email.ts";
+import {
+  type EmailAttachment,
+  emailImageAttachmentFromBytes,
+  renderPartyEmailHtml,
+  sendEmail,
+} from "./email.ts";
 import { sendInfobipSms } from "./infobip.ts";
 import { buildRegistrationUrl } from "./registration_url.ts";
 
@@ -35,6 +40,73 @@ type RegistrationContact = {
   email: string | null;
   phone: string | null;
 };
+
+const EMAIL_IMAGE_BUCKET = "email-campaign-images";
+const EMAIL_IMAGE_CONTENT_ID = "campaign-image";
+type EmailImageAttachmentCache = Map<string, Promise<EmailAttachment | null>>;
+
+function emailImagePath(value: unknown) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const path = (value as Record<string, unknown>).emailImagePath;
+  return typeof path === "string" &&
+      /^campaign\/[0-9a-f-]{36}\.jpg$/i.test(path)
+    ? path
+    : null;
+}
+
+async function sendQueuedEmail(
+  admin: any,
+  message: QueueMessage,
+  subject: string,
+  body: string,
+  registrationUrl: string,
+  attachmentCache: EmailImageAttachmentCache,
+): Promise<SendResult> {
+  const path = emailImagePath(message.template_parameters);
+  let attachment: EmailAttachment | undefined;
+
+  if (path) {
+    let attachmentPromise = attachmentCache.get(path);
+    if (!attachmentPromise) {
+      attachmentPromise = (async () => {
+        try {
+          const { data, error } = await admin.storage
+            .from(EMAIL_IMAGE_BUCKET)
+            .download(path);
+          if (error || !data) return null;
+          return emailImageAttachmentFromBytes(
+            new Uint8Array(await data.arrayBuffer()),
+          );
+        } catch {
+          return null;
+        }
+      })();
+      attachmentCache.set(path, attachmentPromise);
+    }
+    attachment = await attachmentPromise ?? undefined;
+    if (!attachment) {
+      return {
+        ok: false,
+        errorCode: "EMAIL_ATTACHMENT_UNAVAILABLE",
+        errorMessage: "email image attachment is unavailable or invalid",
+      };
+    }
+  }
+
+  return await sendEmail(
+    message.recipient,
+    subject,
+    body,
+    renderPartyEmailHtml(subject, body, {
+      ctaUrl: registrationUrl,
+      ...(attachment ? { imageContentId: EMAIL_IMAGE_CONTENT_ID } : {}),
+    }),
+    {
+      idempotencyKey: `message-queue/${message.id}`,
+      ...(attachment ? { attachments: [attachment] } : {}),
+    },
+  );
+}
 
 export function dedupeMessageRecipients<
   T extends { channel: string; recipient: string },
@@ -121,13 +193,19 @@ async function sendWhatsApp(
 
   const data = await response.json().catch(() => ({}));
   const id = data.messages?.[0]?.id as string | undefined;
+  const providerMessage = typeof data.error?.message === "string"
+    ? data.error.message
+    : "whatsapp send failed";
+  const providerDetails = typeof data.error?.error_data?.details === "string"
+    ? data.error.error_data.details
+    : "";
+  const errorMessage = providerDetails
+    ? `${providerMessage}: ${providerDetails}`
+    : providerMessage;
   return response.ok ? { ok: true, providerMessageId: id ?? null } : {
     ok: false,
     errorCode: `WHATSAPP_HTTP_${response.status}`,
-    errorMessage: String(data.error?.message ?? "whatsapp send failed").slice(
-      0,
-      180,
-    ),
+    errorMessage: errorMessage.slice(0, 280),
   };
 }
 
@@ -180,6 +258,7 @@ export async function dispatchDueMessages(
   );
 
   const results = [];
+  const emailImageAttachmentCache: EmailImageAttachmentCache = new Map();
   for (const message of queueMessages) {
     const contact = contactsById.get(message.contact_id) ?? {
       email: message.channel === "email" ? message.recipient : null,
@@ -202,16 +281,13 @@ export async function dispatchDueMessages(
         templateLanguage: message.template_language,
         templateParameters: message.template_parameters,
       })
-      : await sendEmail(
-        message.recipient,
+      : await sendQueuedEmail(
+        admin,
+        message,
         message.subject ?? "New Level Youth",
         renderedBody,
-        renderPartyEmailHtml(
-          message.subject ?? "New Level Youth",
-          renderedBody,
-          { ctaUrl: registrationUrl },
-        ),
-        { idempotencyKey: `message-queue/${message.id}` },
+        registrationUrl,
+        emailImageAttachmentCache,
       );
 
     const provider = message.channel === "sms"

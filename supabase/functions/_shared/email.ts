@@ -6,11 +6,46 @@ type PartyEmailOptions = {
   preheader?: string;
   ctaUrl?: string;
   ctaLabel?: string;
+  imageContentId?: string;
 };
+
+export type EmailAttachment = {
+  filename: string;
+  contentType: string;
+  contentId: string;
+  content: string;
+};
+
+export function emailImageAttachmentFromBytes(
+  bytes: Uint8Array,
+  filename = "pozvanka.jpg",
+  contentId = "campaign-image",
+): EmailAttachment | null {
+  if (
+    bytes.length === 0 || bytes.length > 900_000 || bytes[0] !== 0xff ||
+    bytes[1] !== 0xd8 || bytes[2] !== 0xff
+  ) return null;
+
+  let binary = "";
+  const chunkSize = 0x8000;
+  for (let offset = 0; offset < bytes.length; offset += chunkSize) {
+    binary += String.fromCharCode(
+      ...bytes.subarray(offset, Math.min(offset + chunkSize, bytes.length)),
+    );
+  }
+
+  return {
+    filename,
+    contentType: "image/jpeg",
+    contentId,
+    content: btoa(binary),
+  };
+}
 
 type EmailSendOptions = {
   idempotencyKey?: string;
   timeoutMs?: number;
+  attachments?: EmailAttachment[];
 };
 
 function escapeHtml(value: string) {
@@ -42,6 +77,15 @@ export function renderPartyEmailHtml(
     options.ctaUrl ?? "https://www.newlevel.church/youth/",
   );
   const ctaLabel = escapeHtml(options.ctaLabel ?? "Potvrdit ucast");
+  const inlineImage = options.imageContentId
+    ? `<tr>
+              <td style="padding:16px 26px 8px;">
+                <img src="cid:${
+      escapeHtml(options.imageContentId)
+    }" alt="Fotografia k pozvánke" width="568" style="display:block;width:100%;max-width:568px;height:auto;border:0;border-radius:12px;">
+              </td>
+            </tr>`
+    : "";
 
   return `<!doctype html>
 <html lang="sk">
@@ -68,6 +112,7 @@ export function renderPartyEmailHtml(
                 ${textToHtml(body)}
               </td>
             </tr>
+            ${inlineImage}
             <tr>
               <td style="padding:10px 26px 28px;">
                 <a href="${ctaUrl}" style="display:inline-block;background:#2563eb;color:#ffffff;text-decoration:none;font-weight:800;font-size:15px;padding:13px 18px;border-radius:12px;">${ctaLabel}</a>
@@ -158,6 +203,16 @@ export async function sendEmail(
         subject: safeSubject,
         text: safeText,
         html: html ?? renderPartyEmailHtml(safeSubject, safeText),
+        ...(options.attachments?.length
+          ? {
+            attachments: options.attachments.map((attachment) => ({
+              filename: attachment.filename,
+              content_type: attachment.contentType,
+              content_id: attachment.contentId,
+              content: attachment.content,
+            })),
+          }
+          : {}),
       }),
       signal: controller.signal,
     });

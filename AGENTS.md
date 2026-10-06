@@ -12,6 +12,10 @@
 
 - Outbound SMS, WhatsApp, and email rows are stored in
   `invitation.message_queue`.
+- Email campaign photos are normalized to JPEG and stored privately in the
+  `email-campaign-images` Storage bucket. Email queue rows reference the image
+  at `template_parameters.emailImagePath`; the shared dispatcher sends it as a
+  CID inline attachment so it appears in the email body.
 - Shared provider dispatch lives in
   `supabase/functions/_shared/message_queue.ts` and is imported by the admin,
   cron, and authenticated queue dispatcher functions.

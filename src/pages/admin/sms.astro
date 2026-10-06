@@ -47,6 +47,9 @@
       tr.is-muted { color: #747985; }
       .message-cell { max-width: 320px; overflow: hidden; text-overflow: ellipsis; }
       .preview { min-height: 58px; margin-top: 12px; padding: 12px; border-radius: 6px; background: #0d0f14; color: #d7d9df; white-space: pre-wrap; }
+      .preview-image { display: block; width: min(100%, 480px); max-height: 320px; margin: 14px auto 0; border-radius: 8px; object-fit: contain; }
+      .email-image-row { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
+      .email-image-row [data-email-image-name] { min-width: 0; overflow: hidden; color: #a9abb3; text-overflow: ellipsis; white-space: nowrap; }
       .result { color: #7dd3fc; font-weight: 800; }
       .result.is-error { color: #f87171; }
       .schedule-toggle { display: inline-flex; margin-top: 14px; cursor: pointer; }
@@ -199,7 +202,7 @@
             <label>Jazyk šablóny<input data-whatsapp-template-language value="sk" maxlength="8" /></label>
           </div>
           <p class="hint" data-whatsapp-template-hint>
-            Použije sa schválená šablóna <strong data-whatsapp-template-preview>youth_invitation_sk</strong>. Meta šablóna má riadok <strong>📅 &#123;&#123;2&#125;&#125;</strong>; premenná 2 sa odošle ako celý termín, napríklad <strong>v piatok 2. októbra o 18:00</strong>.
+            Použije sa schválená šablóna <strong data-whatsapp-template-preview>youth_invitation_sk</strong>. Jej text musí mať dve premenné: <strong>&#123;&#123;1&#125;&#125;</strong> pre meno a <strong>&#123;&#123;2&#125;&#125;</strong> pre celý termín, napríklad <strong>v piatok 2. októbra o 18:00</strong>. Ikona <strong>📅</strong> môže na zariadení ukazovať pevné číslo (napríklad 17); dátum udalosti sa dopĺňa do textu a ikonu možno zmeniť iba úpravou schválenej Meta šablóny.
           </p>
           <p class="hint" data-whatsapp-text-hint hidden>
             Voľný text Meta povolí iba do 24 hodín od poslednej správy používateľa. Pre prvú správu a kampane použi schválenú šablónu.
@@ -208,6 +211,14 @@
         <div class="channel-settings" data-email-settings hidden>
           <label>Predmet emailu<input data-email-subject maxlength="180" placeholder="Pozvánka na New Level Youth" /></label>
           <p class="hint">Ukážka predmetu: <strong data-email-subject-preview></strong></p>
+          <div class="channel-settings">
+            <label>Fotografia v emaili<input data-email-image type="file" accept="image/*" /></label>
+            <p class="hint">Fotka sa zobrazí priamo v emaile a bude aj jeho prílohou. Obrázok sa zmenší na JPEG do 900 kB.</p>
+            <div class="email-image-row" data-email-image-info hidden>
+              <span data-email-image-name></span>
+              <button type="button" data-remove-email-image>Odstrániť fotku</button>
+            </div>
+          </div>
           <div class="test-grid">
             <label>Testovací email<input data-test-email type="email" placeholder="vas@email.sk" /></label>
             <button type="button" data-send-test-email>Poslať testovací email</button>
@@ -216,7 +227,10 @@
         <label><span data-message-label>Text správy</span><textarea data-message rows="7" placeholder="Ahoj &#123;&#123;first_name&#125;&#125;, vidíme sa na New Level Youth?"></textarea></label>
         <p class="hint">Môžeš použiť: &#123;&#123;first_name&#125;&#125;, &#123;&#123;name&#125;&#125;, &#123;&#123;event_date&#125;&#125;, &#123;&#123;registration_url&#125;&#125;. Termín píš vždy ako <strong>&#123;&#123;event_date&#125;&#125;</strong>, nie ručne ako „zajtra“ alebo „tento piatok“.</p>
         <p class="date-warning" data-date-safety hidden></p>
-        <div class="preview" data-preview>Ukážka sa zobrazí po napísaní správy.</div>
+        <div class="preview">
+          <span data-preview data-preview-text>Ukážka sa zobrazí po napísaní správy.</span>
+          <img class="preview-image" data-preview-image alt="Ukážka fotografie v emaili" hidden />
+        </div>
       </section>
 
       <section class="panel">
@@ -253,6 +267,8 @@
         audienceStats: null,
         concepts: [],
         sendInProgress: false,
+        emailImageUploadInProgress: false,
+        emailImage: null,
       };
       const $ = (selector) => document.querySelector(selector);
       const endpoint = () => `${$("[data-supabase-url]").value.trim().replace(/\/+$/, "")}/functions/v1/admin-sms`;
@@ -280,6 +296,7 @@
         localStorage.setItem("smsWhatsappMode", $("[data-whatsapp-mode]").value);
         localStorage.setItem("smsWhatsappTemplateName", $("[data-whatsapp-template-name]").value.trim());
         localStorage.setItem("smsWhatsappTemplateLanguage", $("[data-whatsapp-template-language]").value.trim());
+        localStorage.setItem("smsEmailImage", JSON.stringify(state.emailImage ? { path: state.emailImage.path, filename: state.emailImage.filename } : null));
         state.adminKey = $("[data-admin-key]").value.trim();
       }
 
@@ -300,6 +317,59 @@
             input.checked = savedChannels.includes(input.value);
           });
         }
+        try {
+          const savedImage = JSON.parse(localStorage.getItem("smsEmailImage") || "null");
+          if (
+            savedImage &&
+            typeof savedImage.path === "string" &&
+            /^campaign\/[0-9a-f-]{36}\.jpg$/i.test(savedImage.path)
+          ) {
+            state.emailImage = {
+              path: savedImage.path,
+              filename: typeof savedImage.filename === "string" ? savedImage.filename : "fotografia.jpg",
+              previewUrl: "",
+            };
+          }
+        } catch {
+          state.emailImage = null;
+        }
+        if (state.emailImage) setEmailImage(state.emailImage);
+      }
+
+      function setEmailImage(image, previewUrl = "") {
+        const previousUrl = state.emailImage?.previewUrl || "";
+        if (previousUrl.startsWith("blob:") && previousUrl !== previewUrl) {
+          URL.revokeObjectURL(previousUrl);
+        }
+        state.emailImage = image
+          ? { path: image.path, filename: image.filename, previewUrl }
+          : null;
+        localStorage.setItem("smsEmailImage", JSON.stringify(
+          state.emailImage
+            ? { path: state.emailImage.path, filename: state.emailImage.filename }
+            : null,
+        ));
+        $("[data-email-image-info]").hidden = !state.emailImage;
+        $("[data-email-image-name]").textContent = state.emailImage?.filename || "";
+        updateEmailImagePreview();
+      }
+
+      function updateEmailImagePreview() {
+        const preview = $("[data-preview-image]");
+        const shouldShow = selectedChannels().includes("email") &&
+          Boolean(state.emailImage?.previewUrl);
+        preview.hidden = !shouldShow;
+        if (shouldShow) preview.src = state.emailImage.previewUrl;
+        else preview.removeAttribute("src");
+      }
+
+      async function restoreEmailImagePreview() {
+        if (!state.emailImage || !state.adminKey) return;
+        const result = await api({
+          action: "email_image_url",
+          emailImage: { path: state.emailImage.path },
+        });
+        setEmailImage(state.emailImage, result.signedUrl);
       }
 
       function readConcepts() {
@@ -369,6 +439,9 @@
           whatsappMode: $("[data-whatsapp-mode]").value,
           whatsappTemplateName: $("[data-whatsapp-template-name]").value.trim(),
           whatsappTemplateLanguage: $("[data-whatsapp-template-language]").value.trim(),
+          emailImage: selectedChannels().includes("email") && state.emailImage
+            ? { path: state.emailImage.path, filename: state.emailImage.filename }
+            : null,
         };
         state.concepts = [concept, ...state.concepts].slice(0, MAX_CONCEPTS);
         writeConcepts();
@@ -376,7 +449,7 @@
         setResult(`Koncept „${name}“ je uložený v tomto zariadení.`);
       }
 
-      function loadSelectedConcept() {
+      async function loadSelectedConcept() {
         const concept = state.concepts.find((item) => item.id === $("[data-concept-select]").value);
         if (!concept) throw new Error("Vyber koncept, ktorý chceš načítať.");
         const channels = Array.isArray(concept.channels) ? concept.channels : [];
@@ -389,6 +462,17 @@
         $("[data-whatsapp-mode]").value = concept.whatsappMode === "text" ? "text" : "template";
         $("[data-whatsapp-template-name]").value = typeof concept.whatsappTemplateName === "string" ? concept.whatsappTemplateName : "youth_invitation_sk";
         $("[data-whatsapp-template-language]").value = typeof concept.whatsappTemplateLanguage === "string" ? concept.whatsappTemplateLanguage : "sk";
+        setEmailImage(
+          concept.emailImage &&
+              typeof concept.emailImage.path === "string" &&
+              /^campaign\/[0-9a-f-]{36}\.jpg$/i.test(concept.emailImage.path)
+            ? {
+              path: concept.emailImage.path,
+              filename: typeof concept.emailImage.filename === "string" ? concept.emailImage.filename : "fotografia.jpg",
+            }
+            : null,
+        );
+        if (state.emailImage && state.adminKey) await restoreEmailImagePreview();
         saveConfig();
         updateChannelSettings();
         renderContacts();
@@ -598,6 +682,7 @@
         await loadCampaigns();
         await loadHistory();
         await loadAudience();
+        await restoreEmailImagePreview();
         $("[data-access]").open = false;
       }
 
@@ -758,6 +843,7 @@
       function updateSegmentPreview() {
         const text = expandEmojiShortcodes($("[data-message]").value);
         const channels = selectedChannels();
+        updateEmailImagePreview();
         const eventDate = formatEventDate(state.event?.event_date || $("[data-event-date]").value || "");
         $("[data-event-date-summary]").textContent = eventDate
           ? `Termín použitý vo všetkých správach: ${eventDate}`
@@ -767,7 +853,7 @@
         if (templateOnly) {
           const templateName = $("[data-whatsapp-template-name]").value.trim() || "youth_invitation_sk";
           $("[data-segments]").textContent = "Schválená WhatsApp šablóna";
-          $("[data-preview]").textContent = `Meta šablóna: ${templateName}\n{{1}} = krstné meno príjemcu\n{{2}} = ${eventDate}\nVýsledok: 📅 ${eventDate}`;
+          $("[data-preview]").textContent = `Meta šablóna: ${templateName}\n{{1}} = krstné meno príjemcu\n{{2}} = ${eventDate}\nDynamický termín v správe: ${eventDate}`;
           updateEmailSubjectPreview();
           return;
         }
@@ -842,6 +928,9 @@
       }
 
       async function manualSend(sendNow) {
+        if (state.emailImageUploadInProgress) {
+          throw new Error("Počkaj, kým sa fotografia nahrá.");
+        }
         const selected = [...state.selected];
         const channels = selectedChannels();
         const channelLabels = selectedChannelLabels();
@@ -878,7 +967,7 @@
         const emailLine = channels.includes("email") ? `\nPredmet emailu (ukážka): ${renderPreviewTemplate(subject)}` : "";
         const safeEventDate = formatEventDate($("[data-event-date]").value);
         const eventLine = `\nTermín v správe: ${safeEventDate}`;
-        const whatsappLine = channels.includes("whatsapp") && whatsappMode === "template" ? `\nMeta šablóna: ${whatsappTemplateName} (${whatsappTemplateLanguage})\nWhatsApp {{2}}: ${safeEventDate}\nVýsledok WhatsApp: 📅 ${safeEventDate}` : "";
+        const whatsappLine = channels.includes("whatsapp") && whatsappMode === "template" ? `\nMeta šablóna: ${whatsappTemplateName} (${whatsappTemplateLanguage})\nWhatsApp {{2}} – dynamický termín: ${safeEventDate}` : "";
         const confirmationBody = channels.length === 1 && usesWhatsAppTemplate() ? "Premenné šablóny sa doplnia menom a dátumom mládeže." : message;
         const ok = confirm(`Potvrdiť odoslanie?\n\nKanály: ${channelLabels.join(", ")}${smsLine}${emailLine}${whatsappLine}${eventLine}\n${recipientLine}${scheduleLine}\nRežim: ${sendNow ? "odoslať teraz" : "odoslať neskôr"}\n\n${confirmationBody}`);
         if (!ok) return;
@@ -897,6 +986,9 @@
           selectedContactIds: selected,
           sendNow,
           scheduledFor,
+          emailImage: channels.includes("email") && state.emailImage
+            ? { path: state.emailImage.path }
+            : null,
         });
         if (!sendNow) {
           await loadHistory();
@@ -962,7 +1054,77 @@
         await loadHistory();
       }
 
+      function canvasToJpeg(canvas, quality) {
+        return new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", quality));
+      }
+
+      async function prepareEmailImage(file) {
+        if (!file.type.startsWith("image/")) {
+          throw new Error("Vyber platný obrázok.");
+        }
+        if (file.size > 20 * 1024 * 1024) {
+          throw new Error("Pôvodná fotografia môže mať najviac 20 MB.");
+        }
+
+        const bitmap = await createImageBitmap(file);
+        try {
+          if (bitmap.width * bitmap.height > 40_000_000) {
+            throw new Error("Fotografia má príliš veľké rozlíšenie.");
+          }
+          let scale = Math.min(1, 1800 / bitmap.width, 1200 / bitmap.height);
+          let quality = 0.86;
+          for (let attempt = 0; attempt < 8; attempt += 1) {
+            const canvas = document.createElement("canvas");
+            canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+            canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+            const context = canvas.getContext("2d");
+            if (!context) throw new Error("Fotografiu sa nepodarilo spracovať.");
+            context.fillStyle = "#ffffff";
+            context.fillRect(0, 0, canvas.width, canvas.height);
+            context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+            const blob = await canvasToJpeg(canvas, quality);
+            if (blob && blob.size <= 900_000) return blob;
+            if (attempt < 3) quality -= 0.1;
+            else scale *= 0.82;
+          }
+          throw new Error("Fotografiu sa nepodarilo zmenšiť pod 900 kB.");
+        } finally {
+          bitmap.close();
+        }
+      }
+
+      async function uploadEmailImage(file) {
+        const input = $("[data-email-image]");
+        state.emailImageUploadInProgress = true;
+        input.disabled = true;
+        try {
+          setResult("Pripravujem fotografiu…");
+          const blob = await prepareEmailImage(file);
+          const dataUrl = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(String(reader.result || ""));
+            reader.onerror = () => reject(new Error("Fotografiu sa nepodarilo načítať."));
+            reader.readAsDataURL(blob);
+          });
+          const result = await api({
+            action: "upload_email_image",
+            imageBase64: dataUrl.slice(dataUrl.indexOf(",") + 1),
+            fileName: file.name,
+          });
+          setEmailImage(result.emailImage, URL.createObjectURL(blob));
+          updateSegmentPreview();
+          setResult(`Fotografia „${result.emailImage.filename}“ je pridaná do emailu.`);
+        } finally {
+          state.emailImageUploadInProgress = false;
+          input.disabled = false;
+          input.value = "";
+        }
+      }
+
       async function sendTestEmail() {
+        if (state.emailImageUploadInProgress) {
+          throw new Error("Počkaj, kým sa fotografia nahrá.");
+        }
         const email = $("[data-test-email]").value.trim();
         const subject = renderPreviewTemplate($("[data-email-subject]").value.trim());
         const message = $("[data-preview]").textContent.trim();
@@ -976,6 +1138,7 @@
           email,
           subject,
           message,
+          emailImage: state.emailImage ? { path: state.emailImage.path } : null,
         });
         const providerLine = result.providerMessageId ? ` Resend ID: ${result.providerMessageId}` : "";
         setResult(`Testovací email bol odoslaný.${providerLine}`);
@@ -1080,12 +1243,21 @@
         $("[data-submit]").addEventListener("click", () => submitManualSend().catch(showError));
         $("[data-send-test-sms]").addEventListener("click", () => sendTestSms().catch(showError));
         $("[data-send-test-email]").addEventListener("click", () => sendTestEmail().catch(showError));
+        $("[data-email-image]").addEventListener("change", (event) => {
+          const file = event.currentTarget.files?.[0];
+          if (file) uploadEmailImage(file).catch(showError);
+        });
+        $("[data-remove-email-image]").addEventListener("click", () => {
+          setEmailImage(null);
+          saveConfig();
+          setResult("Fotografia bola odstránená z emailu.");
+        });
         $("[data-concept-select]").addEventListener("change", updateConceptButtons);
         $("[data-save-concept]").addEventListener("click", () => {
           try { saveConcept(); } catch (error) { showError(error); }
         });
         $("[data-load-concept]").addEventListener("click", () => {
-          try { loadSelectedConcept(); } catch (error) { showError(error); }
+          loadSelectedConcept().catch(showError);
         });
         $("[data-delete-concept]").addEventListener("click", deleteSelectedConcept);
       }
