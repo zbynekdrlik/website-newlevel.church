@@ -44,14 +44,27 @@ type RegistrationContact = {
 const EMAIL_IMAGE_BUCKET = "email-campaign-images";
 const EMAIL_IMAGE_CONTENT_ID = "campaign-image";
 type EmailImageAttachmentCache = Map<string, Promise<EmailAttachment | null>>;
+type WhatsAppImageUrlCache = Map<string, Promise<string | null>>;
+
+function campaignImagePath(value: unknown) {
+  return typeof value === "string" &&
+      /^campaign\/[0-9a-f-]{36}\.jpg$/i.test(value)
+    ? value
+    : null;
+}
 
 function emailImagePath(value: unknown) {
   if (!value || typeof value !== "object" || Array.isArray(value)) return null;
-  const path = (value as Record<string, unknown>).emailImagePath;
-  return typeof path === "string" &&
-      /^campaign\/[0-9a-f-]{36}\.jpg$/i.test(path)
-    ? path
-    : null;
+  return campaignImagePath(
+    (value as Record<string, unknown>).emailImagePath,
+  );
+}
+
+function whatsappImagePath(value: unknown) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  return campaignImagePath(
+    (value as Record<string, unknown>).whatsappHeaderImagePath,
+  );
 }
 
 function emailCtaEnabled(value: unknown) {
@@ -133,9 +146,55 @@ function cleanTemplateParameters(value: unknown) {
     .map((item) => item.trim().slice(0, 1024));
 }
 
+function whatsappBodyParameters(value: unknown) {
+  if (Array.isArray(value)) return cleanTemplateParameters(value);
+  if (!value || typeof value !== "object") return [];
+  return cleanTemplateParameters(
+    (value as Record<string, unknown>).bodyParameters,
+  );
+}
+
+function isSingleBodyParameterMismatch(code: unknown, details: string) {
+  return Number(code) === 132000 &&
+    /body:\s*number of localizable_params\s*\(2\)\s*does not match the expected number of params\s*\(1\)/i
+      .test(details);
+}
+
+function isMissingImageHeader(code: unknown, details: string) {
+  return Number(code) === 132012 &&
+    /header:\s*format mismatch,\s*expected image,\s*received unknown/i
+      .test(details);
+}
+
+async function createWhatsAppImageUrl(
+  admin: any,
+  path: string,
+  cache: WhatsAppImageUrlCache,
+) {
+  let imageUrl = cache.get(path);
+  if (!imageUrl) {
+    imageUrl = (async () => {
+      try {
+        const { data, error } = await admin.storage
+          .from(EMAIL_IMAGE_BUCKET)
+          .createSignedUrl(path, 3600);
+        return error || !data?.signedUrl ? null : data.signedUrl;
+      } catch {
+        return null;
+      }
+    })();
+    cache.set(path, imageUrl);
+  }
+  const result = await imageUrl;
+  if (!result) cache.delete(path);
+  return result;
+}
+
 async function sendWhatsApp(
+  admin: any,
   to: string,
   body: string,
+  imageUrlCache: WhatsAppImageUrlCache,
   options: {
     templateName?: string | null;
     templateLanguage?: string | null;
@@ -154,30 +213,44 @@ async function sendWhatsApp(
 
   const templateName = options.templateName?.trim() ?? "";
   const templateLanguage = options.templateLanguage?.trim() || "sk";
-  const templateParameters = cleanTemplateParameters(
+  const templateParameters = whatsappBodyParameters(
     options.templateParameters,
   );
-  const messagePayload = templateName
-    ? {
+  const headerImagePath = whatsappImagePath(options.templateParameters);
+  const buildTemplatePayload = (
+    bodyParameters: string[],
+    headerImageUrl: string | null,
+  ) => {
+    const components = [
+      ...(headerImageUrl
+        ? [{
+          type: "header",
+          parameters: [{
+            type: "image",
+            image: { link: headerImageUrl },
+          }],
+        }]
+        : []),
+      ...(bodyParameters.length
+        ? [{
+          type: "body",
+          parameters: bodyParameters.map((text) => ({ type: "text", text })),
+        }]
+        : []),
+    ];
+    return {
       messaging_product: "whatsapp",
       to: to.replace(/^\+/, ""),
       type: "template",
       template: {
         name: templateName,
         language: { code: templateLanguage },
-        ...(templateParameters.length
-          ? {
-            components: [{
-              type: "body",
-              parameters: templateParameters.map((text) => ({
-                type: "text",
-                text,
-              })),
-            }],
-          }
-          : {}),
+        ...(components.length ? { components } : {}),
       },
-    }
+    };
+  };
+  const messagePayload = templateName
+    ? buildTemplatePayload(templateParameters, null)
     : {
       messaging_product: "whatsapp",
       to: to.replace(/^\+/, ""),
@@ -202,29 +275,48 @@ async function sendWhatsApp(
   };
 
   let { response, data } = await sendPayload(messagePayload);
-  const providerMessage = typeof data.error?.message === "string"
-    ? data.error.message
-    : "whatsapp send failed";
-  const providerDetails = typeof data.error?.error_data?.details === "string"
-    ? data.error.error_data.details
-    : "";
-  const parameterMismatch = Number(data.error?.code) === 132000 &&
-    /body:\s*number of localizable_params\s*\(2\)\s*does not match the expected number of params\s*\(1\)/i
-      .test(`${providerMessage} ${providerDetails}`);
+  let bodyParameters = templateParameters;
+  let headerImageUrl: string | null = null;
+  let bodyParametersReduced = false;
 
-  if (templateName && templateParameters.length === 2 && parameterMismatch) {
-    const oneParameterPayload = {
-      ...messagePayload,
-      template: {
-        name: templateName,
-        language: { code: templateLanguage },
-        components: [{
-          type: "body",
-          parameters: [{ type: "text", text: templateParameters[0] }],
-        }],
-      },
-    };
-    ({ response, data } = await sendPayload(oneParameterPayload));
+  for (let retry = 0; retry < 2 && !response.ok; retry += 1) {
+    const providerMessage = typeof data.error?.message === "string"
+      ? data.error.message
+      : "";
+    const providerDetails = typeof data.error?.error_data?.details === "string"
+      ? data.error.error_data.details
+      : "";
+    const mismatchDetails = `${providerMessage} ${providerDetails}`;
+
+    if (
+      templateName && !headerImageUrl && headerImagePath &&
+      isMissingImageHeader(data.error?.code, mismatchDetails)
+    ) {
+      headerImageUrl = await createWhatsAppImageUrl(
+        admin,
+        headerImagePath,
+        imageUrlCache,
+      );
+      if (!headerImageUrl) {
+        return {
+          ok: false,
+          errorCode: "WHATSAPP_IMAGE_UNAVAILABLE",
+          errorMessage: "Fotografiu sa nepodarilo načítať pre WhatsApp.",
+        };
+      }
+    } else if (
+      templateName && !bodyParametersReduced && bodyParameters.length === 2 &&
+      isSingleBodyParameterMismatch(data.error?.code, mismatchDetails)
+    ) {
+      bodyParameters = bodyParameters.slice(0, 1);
+      bodyParametersReduced = true;
+    } else {
+      break;
+    }
+
+    ({ response, data } = await sendPayload(
+      buildTemplatePayload(bodyParameters, headerImageUrl),
+    ));
   }
 
   const id = data.messages?.[0]?.id as string | undefined;
@@ -238,6 +330,16 @@ async function sendWhatsApp(
   const errorMessage = finalProviderDetails
     ? `${finalProviderMessage}: ${finalProviderDetails}`
     : finalProviderMessage;
+  if (
+    !response.ok && isMissingImageHeader(data.error?.code, errorMessage)
+  ) {
+    return {
+      ok: false,
+      errorCode: "WHATSAPP_IMAGE_REQUIRED",
+      errorMessage:
+        "Táto WhatsApp šablóna vyžaduje fotografiu v hlavičke. Vyber fotografiu a skús odoslanie znova.",
+    };
+  }
   return response.ok ? { ok: true, providerMessageId: id ?? null } : {
     ok: false,
     errorCode: `WHATSAPP_HTTP_${response.status}`,
@@ -295,6 +397,7 @@ export async function dispatchDueMessages(
 
   const results = [];
   const emailImageAttachmentCache: EmailImageAttachmentCache = new Map();
+  const whatsappImageUrlCache: WhatsAppImageUrlCache = new Map();
   for (const message of queueMessages) {
     const contact = contactsById.get(message.contact_id) ?? {
       email: message.channel === "email" ? message.recipient : null,
@@ -312,11 +415,17 @@ export async function dispatchDueMessages(
         sender: message.template_name,
       })
       : message.channel === "whatsapp"
-      ? await sendWhatsApp(message.recipient, renderedBody, {
-        templateName: message.template_name,
-        templateLanguage: message.template_language,
-        templateParameters: message.template_parameters,
-      })
+      ? await sendWhatsApp(
+        admin,
+        message.recipient,
+        renderedBody,
+        whatsappImageUrlCache,
+        {
+          templateName: message.template_name,
+          templateLanguage: message.template_language,
+          templateParameters: message.template_parameters,
+        },
+      )
       : await sendQueuedEmail(
         admin,
         message,

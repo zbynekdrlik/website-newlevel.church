@@ -204,24 +204,26 @@
             <label>Jazyk šablóny<input data-whatsapp-template-language value="sk" maxlength="8" /></label>
           </div>
           <p class="hint" data-whatsapp-template-hint>
-            Použije sa schválená šablóna <strong data-whatsapp-template-preview>youth_invitation_sk</strong>. Premenná <strong>&#123;&#123;1&#125;&#125;</strong> predstavuje meno a <strong>&#123;&#123;2&#125;&#125;</strong> celý termín, napríklad <strong>v piatok 2. októbra o 18:00</strong>. Ak šablóna prijme iba jednu premennú, odoslanie sa automaticky zopakuje len s menom. Ikona <strong>📅</strong> môže na zariadení ukazovať pevné číslo (napríklad 17); dátum udalosti sa dopĺňa do textu šablóny a ikonu možno zmeniť iba úpravou schválenej Meta šablóny.
+            Použije sa schválená šablóna <strong data-whatsapp-template-preview>youth_invitation_sk</strong>. Premenná <strong>&#123;&#123;1&#125;&#125;</strong> predstavuje meno a <strong>&#123;&#123;2&#125;&#125;</strong> celý termín, napríklad <strong>v piatok 2. októbra o 18:00</strong>. Ak šablóna prijme iba jednu premennú, odoslanie sa automaticky zopakuje len s menom. Ak šablóna vyžaduje obrázkovú hlavičku, vyber fotografiu kampane nižšie. Ikona <strong>📅</strong> môže na zariadení ukazovať pevné číslo (napríklad 17); dátum udalosti sa dopĺňa do textu šablóny a ikonu možno zmeniť iba úpravou schválenej Meta šablóny.
           </p>
           <p class="hint" data-whatsapp-text-hint hidden>
             Voľný text Meta povolí iba do 24 hodín od poslednej správy používateľa. Pre prvú správu a kampane použi schválenú šablónu.
           </p>
+        </div>
+        <div class="channel-settings" data-campaign-image-settings hidden>
+          <label>Fotografia kampane<input data-email-image type="file" accept="image/*" /></label>
+          <p class="hint">V emaile sa zobrazí v správe aj ako príloha. Vo WhatsAppe sa použije ako obrázková hlavička, ak ju šablóna vyžaduje. Fotografia sa zmenší na JPEG do 900 kB.</p>
+          <p class="hint email-image-status" data-email-image-status role="status" aria-live="polite" hidden></p>
+          <div class="email-image-row" data-email-image-info hidden>
+            <span data-email-image-name></span>
+            <button type="button" data-remove-email-image>Odstrániť fotku</button>
+          </div>
         </div>
         <div class="channel-settings" data-email-settings hidden>
           <label>Predmet emailu<input data-email-subject maxlength="180" placeholder="Pozvánka na New Level Youth" /></label>
           <p class="hint">Ukážka predmetu: <strong data-email-subject-preview></strong></p>
           <div class="channel-settings">
             <label class="inline-check"><input data-email-cta type="checkbox" checked />Zobraziť tlačidlo „Potvrdiť účasť“ v emaili</label>
-            <label>Fotografia v emaili<input data-email-image type="file" accept="image/*" /></label>
-            <p class="hint">Fotka sa zobrazí priamo v emaile a bude aj jeho prílohou. Obrázok sa zmenší na JPEG do 900 kB.</p>
-            <p class="hint email-image-status" data-email-image-status role="status" aria-live="polite" hidden></p>
-            <div class="email-image-row" data-email-image-info hidden>
-              <span data-email-image-name></span>
-              <button type="button" data-remove-email-image>Odstrániť fotku</button>
-            </div>
           </div>
           <div class="test-grid">
             <label>Testovací email<input data-test-email type="email" placeholder="vas@email.sk" /></label>
@@ -232,7 +234,7 @@
         <p class="hint">Môžeš použiť: &#123;&#123;first_name&#125;&#125;, &#123;&#123;name&#125;&#125;, &#123;&#123;event_date&#125;&#125;, &#123;&#123;registration_url&#125;&#125;. Premenná &#123;&#123;event_date&#125;&#125; automaticky doplní termín vybraného podujatia.</p>
         <div class="preview">
           <span data-preview data-preview-text>Ukážka sa zobrazí po napísaní správy.</span>
-          <img class="preview-image" data-preview-image alt="Ukážka fotografie v emaili" hidden />
+          <img class="preview-image" data-preview-image alt="Ukážka fotografie kampane" hidden />
         </div>
       </section>
 
@@ -356,7 +358,7 @@
         ));
         $("[data-email-image-info]").hidden = !state.emailImage;
         $("[data-email-image-name]").textContent = state.emailImage?.filename || "";
-        updateEmailImagePreview();
+        updateCampaignImagePreview();
       }
 
       function setEmailImageStatus(message, isError = false) {
@@ -366,9 +368,10 @@
         status.classList.toggle("is-error", isError);
       }
 
-      function updateEmailImagePreview() {
+      function updateCampaignImagePreview() {
         const preview = $("[data-preview-image]");
-        const shouldShow = selectedChannels().includes("email") &&
+        const channels = selectedChannels();
+        const shouldShow = (channels.includes("email") || usesWhatsAppTemplate()) &&
           Boolean(state.emailImage?.previewUrl);
         preview.hidden = !shouldShow;
         if (shouldShow) preview.src = state.emailImage.previewUrl;
@@ -452,7 +455,7 @@
           whatsappMode: $("[data-whatsapp-mode]").value,
           whatsappTemplateName: $("[data-whatsapp-template-name]").value.trim(),
           whatsappTemplateLanguage: $("[data-whatsapp-template-language]").value.trim(),
-          emailImage: selectedChannels().includes("email") && state.emailImage
+          emailImage: (selectedChannels().includes("email") || usesWhatsAppTemplate()) && state.emailImage
             ? { path: state.emailImage.path, filename: state.emailImage.filename }
             : null,
         };
@@ -858,7 +861,7 @@
       function updateSegmentPreview() {
         const text = expandEmojiShortcodes($("[data-message]").value);
         const channels = selectedChannels();
-        updateEmailImagePreview();
+        updateCampaignImagePreview();
         const eventDate = formatEventDate(state.event?.event_date || $("[data-event-date]").value || "");
         $("[data-event-date-summary]").textContent = eventDate
           ? `Termín použitý vo všetkých správach: ${eventDate}`
@@ -978,7 +981,7 @@
           selectedContactIds: selected,
           sendNow,
           scheduledFor,
-          emailImage: channels.includes("email") && state.emailImage
+          emailImage: (channels.includes("email") || (channels.includes("whatsapp") && whatsappMode === "template")) && state.emailImage
             ? { path: state.emailImage.path }
             : null,
         });
@@ -1111,7 +1114,7 @@
           setEmailImage(result.emailImage, URL.createObjectURL(blob));
           updateSegmentPreview();
           setEmailImageStatus("Fotografia je pripravená na odoslanie.");
-          setResult(`Fotografia „${result.emailImage.filename}“ je pridaná do emailu.`);
+          setResult(`Fotografia „${result.emailImage.filename}“ je pripravená pre vybrané kanály.`);
         } catch (error) {
           const uploadError = controller.signal.aborted
             ? new Error("Nahrávanie fotografie trvalo viac ako 45 sekúnd. Skontroluj pripojenie a skús to znova.")
@@ -1165,6 +1168,10 @@
         $("[data-whatsapp-settings]").hidden = !channels.includes("whatsapp");
         $("[data-email-settings]").hidden = !channels.includes("email");
         const templateMode = $("[data-whatsapp-mode]").value === "template";
+        $("[data-campaign-image-settings]").hidden = !(
+          channels.includes("email") ||
+          (channels.includes("whatsapp") && templateMode)
+        );
         $("[data-whatsapp-template-fields]").hidden = !templateMode;
         $("[data-whatsapp-template-hint]").hidden = !templateMode;
         $("[data-whatsapp-text-hint]").hidden = templateMode;

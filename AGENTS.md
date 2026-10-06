@@ -34,6 +34,9 @@
   first name and parameter 2 is the localized event date. If Meta reports that
   the template expects exactly one body parameter, dispatch retries with the
   first name only.
+- Campaign photos are stored in the private `email-campaign-images` bucket. If
+  a WhatsApp template reports that its header expects an image, dispatch signs
+  that stored photo URL and retries with an image header component.
 - `{{event_date}}` inserts the selected event's localized weekday, date without
   a year, and time (for example `v piatok 18. septembra o 18:00`). Static
   wording such as `zajtra` or `tento piatok` is allowed in message text and is

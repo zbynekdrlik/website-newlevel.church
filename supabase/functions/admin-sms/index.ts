@@ -498,7 +498,7 @@ Deno.serve(async (req) => {
       ) {
         return json(req, {
           success: false,
-          error: "Vyber platný obrázok do emailu.",
+          error: "Vyber platnú fotografiu.",
         }, 400);
       }
 
@@ -521,7 +521,7 @@ Deno.serve(async (req) => {
       ) {
         return json(req, {
           success: false,
-          error: "Obrázok musí byť JPEG s veľkosťou do 900 kB.",
+          error: "Fotografia musí byť JPEG s veľkosťou do 900 kB.",
         }, 400);
       }
 
@@ -758,10 +758,12 @@ Deno.serve(async (req) => {
           error: "Select at least one channel",
         }, 400);
       }
-      if (body.emailImage && (!channels.includes("email") || !emailImagePath)) {
+      const imageSupported = channels.includes("email") ||
+        (channels.includes("whatsapp") && whatsappMode === "template");
+      if (body.emailImage && (!imageSupported || !emailImagePath)) {
         return json(req, {
           success: false,
-          error: "Vybranú fotografiu možno použiť iba pri emaili.",
+          error: "Fotografiu možno použiť v emaile alebo WhatsApp šablóne.",
         }, 400);
       }
       if (
@@ -770,7 +772,7 @@ Deno.serve(async (req) => {
       ) {
         return json(req, {
           success: false,
-          error: "Obrázok v emaili sa nepodarilo načítať.",
+          error: "Fotografiu sa nepodarilo načítať.",
         }, 400);
       }
       const needsFreeText = channels.some((channel) =>
@@ -886,7 +888,12 @@ Deno.serve(async (req) => {
               ? whatsappTemplateLanguage
               : null,
             template_parameters: whatsappMode === "template"
-              ? whatsappTemplateParameters(contact, event)
+              ? {
+                bodyParameters: whatsappTemplateParameters(contact, event),
+                ...(emailImagePath
+                  ? { whatsappHeaderImagePath: emailImagePath }
+                  : {}),
+              }
               : [],
             subject: name,
           });
