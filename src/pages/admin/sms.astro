@@ -50,6 +50,7 @@
       .preview-image { display: block; width: min(100%, 480px); max-height: 320px; margin: 14px auto 0; border-radius: 8px; object-fit: contain; }
       .email-image-row { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
       .email-image-row [data-email-image-name] { min-width: 0; overflow: hidden; color: #a9abb3; text-overflow: ellipsis; white-space: nowrap; }
+      .email-image-status.is-error { color: #f87171; }
       .result { color: #7dd3fc; font-weight: 800; }
       .result.is-error { color: #f87171; }
       .schedule-toggle { display: inline-flex; margin-top: 14px; cursor: pointer; }
@@ -214,6 +215,7 @@
           <div class="channel-settings">
             <label>Fotografia v emaili<input data-email-image type="file" accept="image/*" /></label>
             <p class="hint">Fotka sa zobrazí priamo v emaile a bude aj jeho prílohou. Obrázok sa zmenší na JPEG do 900 kB.</p>
+            <p class="hint email-image-status" data-email-image-status role="status" aria-live="polite" hidden></p>
             <div class="email-image-row" data-email-image-info hidden>
               <span data-email-image-name></span>
               <button type="button" data-remove-email-image>Odstrániť fotku</button>
@@ -352,6 +354,13 @@
         $("[data-email-image-info]").hidden = !state.emailImage;
         $("[data-email-image-name]").textContent = state.emailImage?.filename || "";
         updateEmailImagePreview();
+      }
+
+      function setEmailImageStatus(message, isError = false) {
+        const status = $("[data-email-image-status]");
+        status.textContent = message;
+        status.hidden = !message;
+        status.classList.toggle("is-error", isError);
       }
 
       function updateEmailImagePreview() {
@@ -1097,9 +1106,11 @@
         const input = $("[data-email-image]");
         state.emailImageUploadInProgress = true;
         input.disabled = true;
+        updateSchedule();
         try {
-          setResult("Pripravujem fotografiu…");
+          setEmailImageStatus("Pripravujem fotografiu…");
           const blob = await prepareEmailImage(file);
+          setEmailImageStatus("Nahrávam fotografiu do bezpečného úložiska…");
           const dataUrl = await new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.onload = () => resolve(String(reader.result || ""));
@@ -1113,11 +1124,16 @@
           });
           setEmailImage(result.emailImage, URL.createObjectURL(blob));
           updateSegmentPreview();
+          setEmailImageStatus("Fotografia je pripravená na odoslanie.");
           setResult(`Fotografia „${result.emailImage.filename}“ je pridaná do emailu.`);
+        } catch (error) {
+          setEmailImageStatus(error instanceof Error ? error.message : String(error), true);
+          throw error;
         } finally {
           state.emailImageUploadInProgress = false;
           input.disabled = false;
           input.value = "";
+          updateSchedule();
         }
       }
 
@@ -1172,8 +1188,11 @@
       function updateSchedule() {
         const scheduled = $("[data-schedule-toggle]").checked;
         $("[data-schedule-fields]").hidden = !scheduled;
-        $("[data-submit]").textContent = channelActionText(scheduled);
-        if (state.editingCampaignId) $("[data-submit]").textContent = "Uložiť zmeny";
+        const submit = $("[data-submit]");
+        submit.textContent = channelActionText(scheduled);
+        if (state.editingCampaignId) submit.textContent = "Uložiť zmeny";
+        submit.disabled = state.sendInProgress || state.emailImageUploadInProgress;
+        $("[data-send-test-email]").disabled = state.emailImageUploadInProgress;
       }
 
       function setDefaultSchedule() {
