@@ -63,6 +63,15 @@
 - Before enabling or repairing the cron, inspect overdue queued rows: all due
   rows can be delivered immediately once the cron becomes healthy.
 
+## WhatsApp delivery receipts
+
+- The WhatsApp queue status sent means Meta accepted the API request; it does
+  not confirm recipient delivery. The whatsapp-webhook Edge Function verifies
+  Meta's signature and stores the latest sent, delivered, read, or failed
+  receipt on the queue row. Set WHATSAPP_APP_SECRET and
+  WHATSAPP_WEBHOOK_VERIFY_TOKEN in Supabase and subscribe the Meta WABA to the
+  messages webhook field. Setup steps are in docs/whatsapp-delivery-webhook.md.
+
 ## Staff dishwasher roster
 
 - The private roster UI is `src/pages/staff/riad.astro`; all roster data and

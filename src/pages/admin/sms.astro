@@ -49,6 +49,7 @@
       .preview { min-height: 58px; margin-top: 12px; padding: 12px; border-radius: 6px; background: #0d0f14; color: #d7d9df; white-space: pre-wrap; }
       .preview-image { display: block; width: min(100%, 480px); max-height: 320px; margin: 14px auto 0; border-radius: 8px; object-fit: contain; }
       .email-image-row { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
+      .email-image-thumbnail { width: 72px; height: 72px; flex: 0 0 auto; border-radius: 6px; object-fit: cover; }
       .email-image-row [data-email-image-name] { min-width: 0; overflow: hidden; color: #a9abb3; text-overflow: ellipsis; white-space: nowrap; }
       .inline-check { display: flex; align-items: center; gap: 10px; margin: 12px 0; }
       .inline-check input { width: 18px; height: 18px; margin: 0; accent-color: #38bdf8; }
@@ -121,6 +122,7 @@
           <h2>Posledné správy</h2>
           <button type="button" data-load-history>Obnoviť históriu</button>
         </div>
+        <p class="hint">„Meta prijala“ znamená prijatie požiadavky, nie potvrdené doručenie. Stav doručenia alebo chybu Meta zobrazí po zapnutí webhooku; „Doručené“ potvrdzuje doručenie do WhatsAppu.</p>
         <div class="table-wrap">
           <table>
             <thead>
@@ -212,9 +214,10 @@
         </div>
         <div class="channel-settings" data-campaign-image-settings hidden>
           <label>Fotografia kampane<input data-email-image type="file" accept="image/*" /></label>
-          <p class="hint">V emaile sa zobrazí v správe aj ako príloha. Vo WhatsAppe sa použije ako obrázková hlavička, ak ju šablóna vyžaduje. Fotografia sa zmenší na JPEG do 900 kB.</p>
+          <p class="hint">V emaile sa zobrazí v správe aj ako príloha. Vo WhatsAppe sa použije ako obrázková hlavička, ak ju šablóna vyžaduje. Fotografia sa zmenší na JPEG do 900 kB. Po nahratí sa pole súboru vyčistí, fotka však zostane priložená.</p>
           <p class="hint email-image-status" data-email-image-status role="status" aria-live="polite" hidden></p>
           <div class="email-image-row" data-email-image-info hidden>
+            <img class="email-image-thumbnail" data-email-image-thumbnail alt="Nahratá fotografia kampane" hidden />
             <span data-email-image-name></span>
             <button type="button" data-remove-email-image>Odstrániť fotku</button>
           </div>
@@ -351,6 +354,7 @@
         state.emailImage = image
           ? { path: image.path, filename: image.filename, previewUrl }
           : null;
+        setEmailImageStatus(state.emailImage ? "Fotografia je nahratá a pripravená na odoslanie." : "");
         localStorage.setItem("smsEmailImage", JSON.stringify(
           state.emailImage
             ? { path: state.emailImage.path, filename: state.emailImage.filename }
@@ -358,6 +362,10 @@
         ));
         $("[data-email-image-info]").hidden = !state.emailImage;
         $("[data-email-image-name]").textContent = state.emailImage?.filename || "";
+        const thumbnail = $("[data-email-image-thumbnail]");
+        thumbnail.hidden = !state.emailImage?.previewUrl;
+        if (state.emailImage?.previewUrl) thumbnail.src = state.emailImage.previewUrl;
+        else thumbnail.removeAttribute("src");
         updateCampaignImagePreview();
       }
 
@@ -789,23 +797,53 @@
           const row = document.createElement("tr");
           const time = item.sent_at || item.created_at;
           const deliveryStatus = item.delivery_status || item.delivery_status_group || "";
-          const status = deliveryStatus ? `${item.status || ""} / ${deliveryStatus}` : item.status || "";
+          const whatsappDeliveryLabels = {
+            sent: "Meta prijala, čaká sa na doručenie",
+            delivered: "Doručené",
+            read: "Prečítané",
+            failed: "Nedoručené",
+          };
+          const status = item.channel === "whatsapp"
+            ? item.provider_delivery_status
+              ? whatsappDeliveryLabels[item.provider_delivery_status] || item.provider_delivery_status
+              : item.status === "sent"
+                ? "Meta prijala; doručenie neoverené"
+                : item.status === "processing"
+                  ? Date.now() - Date.parse(item.created_at) > 5 * 60 * 1000
+                    ? "Výsledok odoslania je neznámy"
+                    : "Odosielanie prebieha"
+                  : item.status === "queued"
+                    ? "Čaká vo fronte"
+                    : item.status || ""
+            : deliveryStatus ? `${item.status || ""} / ${deliveryStatus}` : item.status || "";
           const detailParts = [
             item.delivery_description,
             item.delivery_error && item.delivery_error !== "NO_ERROR" ? item.delivery_error : "",
             item.delivery_error_description && item.delivery_error_description !== "No Error" ? item.delivery_error_description : "",
             item.delivery_sms_count ? `${item.delivery_sms_count} segment${item.delivery_sms_count === 1 ? "" : "y"}` : "",
             item.delivery_lookup_error ? `Infobip log: ${item.delivery_lookup_error}` : "",
+            item.provider_delivery_error_code ? `Meta ${item.provider_delivery_error_code}` : "",
+            item.provider_delivery_error,
+            item.channel === "whatsapp" && item.status === "processing" &&
+                Date.now() - Date.parse(item.created_at) > 5 * 60 * 1000
+              ? "Odoslanie sa prerušilo; pred opakovaním skontroluj Meta"
+              : "",
             item.last_error,
           ].filter(Boolean);
-          row.innerHTML = `
-            <td>${time ? localDateTimeLabel(time) : ""}</td>
-            <td>${item.channel || ""}</td>
-            <td>${item.recipient || ""}</td>
-            <td>${status}</td>
-            <td>${item.provider_message_id || ""}</td>
-            <td class="message-cell">${detailParts.join(" | ")}</td>
-          `;
+          const values = [
+            time ? localDateTimeLabel(time) : "",
+            item.channel || "",
+            item.recipient || "",
+            status,
+            item.provider_message_id || "",
+            detailParts.join(" | "),
+          ];
+          for (const [index, value] of values.entries()) {
+            const cell = document.createElement("td");
+            if (index === 5) cell.className = "message-cell";
+            cell.textContent = String(value);
+            row.append(cell);
+          }
           tbody.append(row);
         }
       }
@@ -1009,7 +1047,10 @@
         }
         await loadHistory();
         const skipped = result.duplicatesSkipped ? ` · preskočené duplicity: ${result.duplicatesSkipped}` : "";
-        setResult(`Odoslané cez ${channelLabels.join(", ")}: ${sent} správ${skipped}`);
+        const sentSummary = channels.length === 1 && channels[0] === "whatsapp"
+          ? `Meta prijala ${sent} WhatsApp požiadaviek. Doručenie over v histórii.`
+          : `Poskytovatelia prijali ${sent} správ cez ${channelLabels.join(", ")}.`;
+        setResult(`${sentSummary}${skipped}`);
       }
 
       async function submitManualSend() {

@@ -397,6 +397,9 @@ verify_jwt = false
 [functions.admin-sms]
 verify_jwt = false
 
+[functions.whatsapp-webhook]
+verify_jwt = false
+
 [functions.queue-party-invitations]
 verify_jwt = true
 

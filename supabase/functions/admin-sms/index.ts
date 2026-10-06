@@ -1130,7 +1130,7 @@ Deno.serve(async (req) => {
         .schema("invitation")
         .from("message_queue")
         .select(
-          "id,automation_id,channel,recipient,subject,status,provider,provider_message_id,last_error,scheduled_for,sent_at,created_at",
+          "id,automation_id,channel,recipient,subject,status,provider,provider_message_id,last_error,provider_delivery_status,provider_delivery_at,provider_delivery_error_code,provider_delivery_error,scheduled_for,sent_at,created_at",
         )
         .order("created_at", { ascending: false })
         .limit(Math.min(Number(body.limit ?? 100), 300));
