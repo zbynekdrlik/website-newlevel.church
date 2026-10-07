@@ -7,46 +7,20 @@ type PartyEmailOptions = {
   ctaUrl?: string;
   ctaLabel?: string;
   showCta?: boolean;
-  imageContentId?: string;
+  imageUrl?: string;
 };
 
-export type EmailAttachment = {
-  filename: string;
-  contentType: string;
-  contentId: string;
-  content: string;
-};
+export const MAX_CAMPAIGN_IMAGE_BYTES = 900_000;
+export const EMAIL_IMAGE_SIGNED_URL_TTL_SECONDS = 7 * 24 * 60 * 60;
 
-export function emailImageAttachmentFromBytes(
-  bytes: Uint8Array,
-  filename = "pozvanka.jpg",
-  contentId = "campaign-image",
-): EmailAttachment | null {
-  if (
-    bytes.length === 0 || bytes.length > 900_000 || bytes[0] !== 0xff ||
-    bytes[1] !== 0xd8 || bytes[2] !== 0xff
-  ) return null;
-
-  let binary = "";
-  const chunkSize = 0x8000;
-  for (let offset = 0; offset < bytes.length; offset += chunkSize) {
-    binary += String.fromCharCode(
-      ...bytes.subarray(offset, Math.min(offset + chunkSize, bytes.length)),
-    );
-  }
-
-  return {
-    filename,
-    contentType: "image/jpeg",
-    contentId,
-    content: btoa(binary),
-  };
+export function isValidCampaignImage(bytes: Uint8Array) {
+  return bytes.length > 0 && bytes.length <= MAX_CAMPAIGN_IMAGE_BYTES &&
+    bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff;
 }
 
 type EmailSendOptions = {
   idempotencyKey?: string;
   timeoutMs?: number;
-  attachments?: EmailAttachment[];
 };
 
 function escapeHtml(value: string) {
@@ -78,19 +52,16 @@ export function renderPartyEmailHtml(
     options.ctaUrl ?? "https://www.newlevel.church/youth/",
   );
   const ctaLabel = escapeHtml(options.ctaLabel ?? "Potvrdiť účasť");
-  const ctaButton = options.showCta === false ? "" : `<tr>
-              <td style="padding:10px 26px 28px;">
-                <a href="${ctaUrl}" style="display:inline-block;background:#2563eb;color:#ffffff;text-decoration:none;font-weight:800;font-size:15px;padding:13px 18px;border-radius:12px;">${ctaLabel}</a>
-              </td>
-            </tr>`;
-  const inlineImage = options.imageContentId
-    ? `<tr>
-              <td style="padding:16px 26px 8px;">
-                <img src="cid:${
-      escapeHtml(options.imageContentId)
-    }" alt="Fotografia k pozvánke" width="568" style="display:block;width:100%;max-width:568px;height:auto;border:0;border-radius:12px;">
-              </td>
-            </tr>`
+  const ctaButton = options.showCta === false
+    ? ""
+    : `<p style="margin:24px 0 0;font-size:16px;line-height:1.5;">
+              <a href="${ctaUrl}" style="color:#1d4ed8;text-decoration:underline;">${ctaLabel}</a>
+            </p>`;
+  const imageUrl = options.imageUrl ? escapeHtml(options.imageUrl) : "";
+  const inlineImage = imageUrl
+    ? `<p style="margin:24px 0 0;">
+              <img src="${imageUrl}" alt="Fotografia k pozvánke" width="568" style="display:block;width:100%;max-width:568px;height:auto;border:0;">
+            </p>`
     : "";
 
   return `<!doctype html>
@@ -100,31 +71,17 @@ export function renderPartyEmailHtml(
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>${safeSubject}</title>
   </head>
-  <body style="margin:0;background:#0f1117;color:#f8fafc;font-family:Inter,Arial,sans-serif;">
+  <body style="margin:0;background:#ffffff;color:#1f2937;font-family:Arial,Helvetica,sans-serif;">
     <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;">${preheader}</div>
-    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#0f1117;padding:28px 14px;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
       <tr>
-        <td align="center">
-          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:620px;background:#171a23;border:1px solid #2a2f3d;border-radius:18px;overflow:hidden;">
-            <tr>
-              <td style="padding:26px 26px 18px;background:#10131b;">
-                <div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#93c5fd;font-weight:700;">New Level Youth</div>
-                <h1 style="margin:10px 0 0;font-size:30px;line-height:1.12;color:#ffffff;">${safeSubject}</h1>
-                <p style="margin:12px 0 0;color:#cbd5e1;font-size:15px;line-height:1.6;">Každý piatok o 18:00, Letná 31/26, Spišská Nová Ves.</p>
-              </td>
-            </tr>
-            <tr>
-              <td style="padding:24px 26px 4px;color:#e5e7eb;font-size:16px;line-height:1.7;">
-                ${textToHtml(body)}
-              </td>
-            </tr>
-            ${inlineImage}
-            ${ctaButton}
-            <tr>
-              <td style="padding:20px 26px;background:#111827;border-top:1px solid #273244;color:#9ca3af;font-size:13px;line-height:1.55;">
-                Jedlo, hry, karaoke a dobra atmosfera. Sleduj nas aj na Instagrame @newlevel_youth.
-              </td>
-            </tr>
+        <td align="center" style="padding:24px 16px;">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:600px;">
+            <tr><td style="padding:0 0 18px;color:#4b5563;font-size:14px;font-weight:700;">New Level Youth</td></tr>
+            <tr><td style="color:#1f2937;font-size:16px;line-height:1.6;">${
+    textToHtml(body)
+  }${inlineImage}${ctaButton}</td></tr>
+            <tr><td style="padding-top:28px;color:#6b7280;font-size:13px;line-height:1.5;">New Level Church · Spišská Nová Ves</td></tr>
           </table>
         </td>
       </tr>
@@ -205,16 +162,6 @@ export async function sendEmail(
         subject: safeSubject,
         text: safeText,
         html: html ?? renderPartyEmailHtml(safeSubject, safeText),
-        ...(options.attachments?.length
-          ? {
-            attachments: options.attachments.map((attachment) => ({
-              filename: attachment.filename,
-              content_type: attachment.contentType,
-              content_id: attachment.contentId,
-              content: attachment.content,
-            })),
-          }
-          : {}),
       }),
       signal: controller.signal,
     });

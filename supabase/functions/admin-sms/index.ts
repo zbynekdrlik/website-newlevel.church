@@ -25,7 +25,9 @@ import {
   updateSmsCampaignStatuses,
 } from "../_shared/sms_campaigns.ts";
 import {
-  emailImageAttachmentFromBytes,
+  EMAIL_IMAGE_SIGNED_URL_TTL_SECONDS,
+  isValidCampaignImage,
+  MAX_CAMPAIGN_IMAGE_BYTES,
   renderPartyEmailHtml,
   sendEmail,
 } from "../_shared/email.ts";
@@ -65,9 +67,8 @@ type AdminSmsBody = {
 };
 
 const EMAIL_IMAGE_BUCKET = "email-campaign-images";
-const MAX_EMAIL_IMAGE_BYTES = 900_000;
+const MAX_EMAIL_IMAGE_BYTES = MAX_CAMPAIGN_IMAGE_BYTES;
 const MAX_EMAIL_IMAGE_REQUEST_BYTES = 1_500_000;
-const EMAIL_IMAGE_CONTENT_ID = "campaign-image";
 
 type ContactRow = {
   id: string;
@@ -153,17 +154,15 @@ function cleanEmailImagePath(value: unknown) {
     : null;
 }
 
-async function loadEmailImageAttachment(admin: any, path: string) {
-  const { data, error } = await admin.storage
-    .from(EMAIL_IMAGE_BUCKET)
-    .download(path);
-  if (error || !data) return null;
-
-  return emailImageAttachmentFromBytes(
-    new Uint8Array(await data.arrayBuffer()),
-    "pozvanka.jpg",
-    EMAIL_IMAGE_CONTENT_ID,
-  );
+async function createEmailImageUrl(admin: any, path: string) {
+  try {
+    const { data, error } = await admin.storage
+      .from(EMAIL_IMAGE_BUCKET)
+      .createSignedUrl(path, EMAIL_IMAGE_SIGNED_URL_TTL_SECONDS);
+    return error || !data?.signedUrl ? null : data.signedUrl;
+  } catch {
+    return null;
+  }
 }
 
 function cleanChannels(value: unknown): MessageChannel[] {
@@ -516,8 +515,7 @@ Deno.serve(async (req) => {
       }
 
       if (
-        !emailImageAttachmentFromBytes(bytes) ||
-        bytes.length > MAX_EMAIL_IMAGE_BYTES
+        !isValidCampaignImage(bytes)
       ) {
         return json(req, {
           success: false,
@@ -685,13 +683,13 @@ Deno.serve(async (req) => {
           error: "Obrázok v emaili nie je platný.",
         }, 400);
       }
-      const emailImageAttachment = emailImagePath
-        ? await loadEmailImageAttachment(admin, emailImagePath)
+      const emailImageUrl = emailImagePath
+        ? await createEmailImageUrl(admin, emailImagePath)
         : null;
-      if (emailImagePath && !emailImageAttachment) {
+      if (emailImagePath && !emailImageUrl) {
         return json(req, {
           success: false,
-          error: "Obrázok v emaili sa nepodarilo načítať.",
+          error: "Obrázok v emaili sa nepodarilo sprístupniť.",
         }, 400);
       }
 
@@ -701,15 +699,8 @@ Deno.serve(async (req) => {
         message,
         renderPartyEmailHtml(subject, message, {
           showCta: body.emailCtaEnabled !== false,
-          ...(emailImageAttachment
-            ? { imageContentId: EMAIL_IMAGE_CONTENT_ID }
-            : {}),
+          ...(emailImageUrl ? { imageUrl: emailImageUrl } : {}),
         }),
-        {
-          ...(emailImageAttachment
-            ? { attachments: [emailImageAttachment] }
-            : {}),
-        },
       );
       const didSend = result.ok === true;
       return json(req, {
@@ -768,7 +759,7 @@ Deno.serve(async (req) => {
       }
       if (
         emailImagePath &&
-        !await loadEmailImageAttachment(admin, emailImagePath)
+        !await createEmailImageUrl(admin, emailImagePath)
       ) {
         return json(req, {
           success: false,

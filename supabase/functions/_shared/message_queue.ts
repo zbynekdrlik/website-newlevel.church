@@ -1,6 +1,5 @@
 import {
-  type EmailAttachment,
-  emailImageAttachmentFromBytes,
+  EMAIL_IMAGE_SIGNED_URL_TTL_SECONDS,
   renderPartyEmailHtml,
   sendEmail,
 } from "./email.ts";
@@ -42,8 +41,7 @@ type RegistrationContact = {
 };
 
 const EMAIL_IMAGE_BUCKET = "email-campaign-images";
-const EMAIL_IMAGE_CONTENT_ID = "campaign-image";
-type EmailImageAttachmentCache = Map<string, Promise<EmailAttachment | null>>;
+type EmailImageUrlCache = Map<string, Promise<string | null>>;
 type WhatsAppImageUrlCache = Map<string, Promise<string | null>>;
 
 function campaignImagePath(value: unknown) {
@@ -78,35 +76,33 @@ async function sendQueuedEmail(
   subject: string,
   body: string,
   registrationUrl: string,
-  attachmentCache: EmailImageAttachmentCache,
+  imageUrlCache: EmailImageUrlCache,
 ): Promise<SendResult> {
   const path = emailImagePath(message.template_parameters);
-  let attachment: EmailAttachment | undefined;
+  let imageUrl: string | undefined;
 
   if (path) {
-    let attachmentPromise = attachmentCache.get(path);
-    if (!attachmentPromise) {
-      attachmentPromise = (async () => {
+    let imageUrlPromise = imageUrlCache.get(path);
+    if (!imageUrlPromise) {
+      imageUrlPromise = (async () => {
         try {
           const { data, error } = await admin.storage
             .from(EMAIL_IMAGE_BUCKET)
-            .download(path);
-          if (error || !data) return null;
-          return emailImageAttachmentFromBytes(
-            new Uint8Array(await data.arrayBuffer()),
-          );
+            .createSignedUrl(path, EMAIL_IMAGE_SIGNED_URL_TTL_SECONDS);
+          return error || !data?.signedUrl ? null : data.signedUrl;
         } catch {
           return null;
         }
       })();
-      attachmentCache.set(path, attachmentPromise);
+      imageUrlCache.set(path, imageUrlPromise);
     }
-    attachment = await attachmentPromise ?? undefined;
-    if (!attachment) {
+    imageUrl = await imageUrlPromise ?? undefined;
+    if (!imageUrl) {
+      imageUrlCache.delete(path);
       return {
         ok: false,
-        errorCode: "EMAIL_ATTACHMENT_UNAVAILABLE",
-        errorMessage: "email image attachment is unavailable or invalid",
+        errorCode: "EMAIL_IMAGE_UNAVAILABLE",
+        errorMessage: "email image link is unavailable",
       };
     }
   }
@@ -118,11 +114,10 @@ async function sendQueuedEmail(
     renderPartyEmailHtml(subject, body, {
       ctaUrl: registrationUrl,
       showCta: emailCtaEnabled(message.template_parameters),
-      ...(attachment ? { imageContentId: EMAIL_IMAGE_CONTENT_ID } : {}),
+      ...(imageUrl ? { imageUrl } : {}),
     }),
     {
       idempotencyKey: `message-queue/${message.id}`,
-      ...(attachment ? { attachments: [attachment] } : {}),
     },
   );
 }
@@ -396,7 +391,7 @@ export async function dispatchDueMessages(
   );
 
   const results = [];
-  const emailImageAttachmentCache: EmailImageAttachmentCache = new Map();
+  const emailImageUrlCache: EmailImageUrlCache = new Map();
   const whatsappImageUrlCache: WhatsAppImageUrlCache = new Map();
   for (const message of queueMessages) {
     const contact = contactsById.get(message.contact_id) ?? {
@@ -432,7 +427,7 @@ export async function dispatchDueMessages(
         message.subject ?? "New Level Youth",
         renderedBody,
         registrationUrl,
-        emailImageAttachmentCache,
+        emailImageUrlCache,
       );
 
     const provider = message.channel === "sms"

@@ -1,8 +1,4 @@
-import {
-  emailImageAttachmentFromBytes,
-  renderPartyEmailHtml,
-  sendEmail,
-} from "./email.ts";
+import { renderPartyEmailHtml, sendEmail } from "./email.ts";
 
 function assertEquals<T>(actual: T, expected: T) {
   if (JSON.stringify(actual) !== JSON.stringify(expected)) {
@@ -31,23 +27,16 @@ Deno.test("sends the Resend idempotency key", async () => {
   };
 
   try {
-    const attachment = emailImageAttachmentFromBytes(
-      Uint8Array.of(0xff, 0xd8, 0xff),
-      "photo.jpg",
-      "campaign-image",
-    );
-    if (!attachment) throw new Error("Expected a valid JPEG attachment");
+    const imageUrl =
+      "https://example.supabase.co/storage/v1/object/sign/campaign.jpg?token=test";
     const result = await sendEmail(
       "person@example.com",
       "Pozvánka",
       "Text pozvánky",
       renderPartyEmailHtml("Pozvánka", "Text pozvánky", {
-        imageContentId: attachment.contentId,
+        imageUrl,
       }),
-      {
-        idempotencyKey: "message-queue/queue-1",
-        attachments: [attachment],
-      },
+      { idempotencyKey: "message-queue/queue-1" },
     );
 
     assertEquals(result, { ok: true, providerMessageId: "email-1" });
@@ -55,14 +44,9 @@ Deno.test("sends the Resend idempotency key", async () => {
       requestHeaders.get("Idempotency-Key"),
       "message-queue/queue-1",
     );
-    assertEquals(requestBody.attachments, [{
-      filename: "photo.jpg",
-      content_type: "image/jpeg",
-      content_id: "campaign-image",
-      content: "/9j/",
-    }]);
-    if (!(requestBody.html as string).includes('src="cid:campaign-image"')) {
-      throw new Error("Expected the email HTML to reference the inline photo");
+    assertEquals(requestBody.attachments, undefined);
+    if (!(requestBody.html as string).includes(`src="${imageUrl}"`)) {
+      throw new Error("Expected the email HTML to reference the hosted photo");
     }
   } finally {
     globalThis.fetch = originalFetch;
