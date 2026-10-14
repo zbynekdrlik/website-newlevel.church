@@ -63,6 +63,9 @@
 - The public Party food counter reads `GET register-party` so
   `invitation.party_registrations` remains the source of truth; Cloudflare KV is
   only a legacy availability fallback.
+- Discord registration notifications show the total registrations for that
+  event date, including people who did not request food. Count registration
+  rows, not the food counter.
 - Before enabling or repairing the cron, inspect overdue queued rows: all due
   rows can be delivered immediately once the cron becomes healthy.
 

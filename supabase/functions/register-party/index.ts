@@ -34,6 +34,7 @@ function discordEventDate(value: string) {
 async function sendDiscordNotification(
   payload: Record<string, unknown>,
   eventDate: string,
+  registrationCount: number | null,
 ): Promise<DiscordResult> {
   const webhookUrl = Deno.env.get("DISCORD_PARTY_WEBHOOK_URL")?.trim();
   if (!webhookUrl) return { ok: false, error: "not_configured" };
@@ -66,6 +67,13 @@ async function sendDiscordNotification(
         {
           name: "Termín",
           value: discordEventDate(eventDate),
+          inline: true,
+        },
+        {
+          name: "Aktuálne prihlásených",
+          value: registrationCount === null
+            ? "nedostupné"
+            : String(registrationCount),
           inline: true,
         },
         ...(message === "žiadna"
@@ -185,7 +193,31 @@ Deno.serve(async (req) => {
     return json(req, { success: false, error: "Registration failed" }, 500);
   }
 
-  const discord = await sendDiscordNotification(body, eventDate);
+  const { data: registrationCountData, error: registrationCountError } =
+    await (admin as any).rpc("get_party_registration_count", {
+      p_event_date: eventDate,
+    });
+  const parsedRegistrationCount = registrationCountData == null
+    ? NaN
+    : Number(registrationCountData);
+  const registrationCount = !registrationCountError &&
+      Number.isSafeInteger(parsedRegistrationCount) &&
+      parsedRegistrationCount >= 0
+    ? parsedRegistrationCount
+    : null;
+
+  if (registrationCountError) {
+    console.error(
+      "Failed to count party registrations",
+      registrationCountError,
+    );
+  }
+
+  const discord = await sendDiscordNotification(
+    body,
+    eventDate,
+    registrationCount,
+  );
   let count: number | null = null;
   if (wantsFood) {
     const { data } = await (admin as any).rpc(
