@@ -1,6 +1,7 @@
 import {
   dedupeMessageRecipients,
   dispatchDueMessages,
+  whatsappBodyParameters,
 } from "./message_queue.ts";
 
 function assertEquals<T>(actual: T, expected: T) {
@@ -58,4 +59,34 @@ Deno.test("deduplicates recipients within each channel", () => {
   ]);
 
   assertEquals(rows.map((row) => row.id), ["first", "sms", "email"]);
+});
+
+Deno.test("does not duplicate the fixed time in a WhatsApp template", () => {
+  const parameters = {
+    bodyParameters: ["Alex", "v piatok 16. októbra o 18:00"],
+    eventDate: "2026-10-16",
+    whatsappTemplateIncludesTime: true,
+  };
+  assertEquals(
+    whatsappBodyParameters(
+      parameters,
+      "youth_invitation_sk",
+      "2026-10-15T17:00:00Z",
+    ),
+    ["Alex", "zajtra"],
+  );
+  assertEquals(
+    whatsappBodyParameters({
+      ...parameters,
+      whatsappTemplateIncludesTime: false,
+    }, "youth_out"),
+    ["Alex", "v piatok 16. októbra o 18:00"],
+  );
+  assertEquals(
+    whatsappBodyParameters(
+      { bodyParameters: parameters.bodyParameters },
+      "youth_invitation_sk",
+    ),
+    ["Alex", "v piatok 16. októbra"],
+  );
 });

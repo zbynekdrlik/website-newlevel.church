@@ -60,6 +60,7 @@ type AdminSmsBody = {
   whatsappMode?: WhatsAppMode;
   whatsappTemplateName?: string;
   whatsappTemplateLanguage?: string;
+  whatsappTemplateIncludesTime?: boolean;
   emailCtaEnabled?: boolean;
   emailImage?: unknown;
   imageBase64?: string;
@@ -729,6 +730,10 @@ Deno.serve(async (req) => {
       const whatsappTemplateLanguage = cleanWhatsAppTemplateLanguage(
         body.whatsappTemplateLanguage,
       );
+      const whatsappTemplateIncludesTime =
+        body.whatsappTemplateIncludesTime === true ||
+        (body.whatsappTemplateIncludesTime === undefined &&
+          whatsappTemplateName === "youth_invitation_sk");
       const message = cleanText(body.message, 1000);
       const name = cleanText(body.name, 120) ?? "Manual message";
       const subject = cleanText(body.subject, 180) ?? "New Level Youth";
@@ -780,6 +785,17 @@ Deno.serve(async (req) => {
         return json(req, {
           success: false,
           error: "A valid WhatsApp template name and language are required",
+        }, 400);
+      }
+      if (
+        channels.includes("whatsapp") && whatsappMode === "template" &&
+        whatsappTemplateIncludesTime &&
+        !formatEventDate(event).endsWith(" o 18:00")
+      ) {
+        return json(req, {
+          success: false,
+          error:
+            "Vybraná šablóna má pevný čas 18:00, ale udalosť začína v inom čase.",
         }, 400);
       }
       if (channels.includes("sms") && !sender) {
@@ -881,6 +897,8 @@ Deno.serve(async (req) => {
             template_parameters: whatsappMode === "template"
               ? {
                 bodyParameters: whatsappTemplateParameters(contact, event),
+                eventDate,
+                whatsappTemplateIncludesTime,
                 ...(emailImagePath
                   ? { whatsappHeaderImagePath: emailImagePath }
                   : {}),

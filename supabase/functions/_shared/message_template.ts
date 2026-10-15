@@ -35,6 +35,21 @@ function eventDateParts(event: Record<string, unknown> | null) {
   return { weekday, formattedDate, localTime };
 }
 
+function bratislavaDay(value: Date | string) {
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    timeZone: "Europe/Bratislava",
+  }).formatToParts(date);
+  const values = Object.fromEntries(
+    parts.map((part) => [part.type, part.value]),
+  );
+  return `${values.year}-${values.month}-${values.day}`;
+}
+
 export function formatEventDate(
   event: Record<string, unknown> | null,
   _sentAt: Date | string = new Date(),
@@ -48,6 +63,28 @@ export function formatEventDate(
       : "";
   }
   return `v ${parts.weekday} ${parts.formattedDate} o ${parts.localTime}`;
+}
+
+export function formatEventDateWithoutTime(
+  event: Record<string, unknown> | null,
+  sentAt: Date | string = new Date(),
+) {
+  const parts = eventDateParts(event);
+  if (!parts) return formatEventDate(event).replace(/ o \d{1,2}:\d{2}$/, "");
+
+  const eventDay = typeof event?.event_date === "string" &&
+      /^\d{4}-\d{2}-\d{2}$/.test(event.event_date)
+    ? event.event_date
+    : typeof event?.starts_at === "string"
+    ? bratislavaDay(event.starts_at)
+    : null;
+  const sendDay = bratislavaDay(sentAt);
+  if (eventDay && sendDay) {
+    const daysUntilEvent = (Date.parse(`${eventDay}T00:00:00Z`) -
+      Date.parse(`${sendDay}T00:00:00Z`)) / 86_400_000;
+    if (daysUntilEvent === 1) return "zajtra";
+  }
+  return `v ${parts.weekday} ${parts.formattedDate}`;
 }
 
 export function renderContactTemplate(

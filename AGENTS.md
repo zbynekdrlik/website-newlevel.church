@@ -34,9 +34,13 @@
   destination through different contact IDs.
 - Campaign WhatsApp messages must use an approved Meta template. The default is
   `youth_invitation_sk` with language `sk`; body parameter 1 is the contact's
-  first name and parameter 2 is the localized event date. If Meta reports that
-  the template expects exactly one body parameter, dispatch retries with the
-  first name only.
+  first name. Its template already adds `o 18:00` after body parameter 2, so
+  parameter 2 must contain only the day (`zajtra` when sent the day before the
+  event, otherwise the localized date). Templates without a fixed time, such as
+  `youth_out`, require the full date and time in parameter 2. The admin's
+  `whatsappTemplateIncludesTime` setting records this choice; the dispatcher
+  formats relative wording at actual send time. If Meta reports that a template
+  expects exactly one body parameter, dispatch retries with the first name only.
 - Campaign photos are stored in the private `email-campaign-images` bucket. If
   a WhatsApp template reports that its header expects an image, dispatch signs
   that stored photo URL and retries with an image header component.

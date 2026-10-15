@@ -5,6 +5,7 @@ import {
 } from "./email.ts";
 import { sendInfobipSms } from "./infobip.ts";
 import { buildRegistrationUrl } from "./registration_url.ts";
+import { formatEventDateWithoutTime } from "./message_template.ts";
 
 type SendResult =
   | {
@@ -141,12 +142,33 @@ function cleanTemplateParameters(value: unknown) {
     .map((item) => item.trim().slice(0, 1024));
 }
 
-function whatsappBodyParameters(value: unknown) {
+export function whatsappBodyParameters(
+  value: unknown,
+  templateName: string,
+  sentAt: Date | string = new Date(),
+) {
   if (Array.isArray(value)) return cleanTemplateParameters(value);
   if (!value || typeof value !== "object") return [];
-  return cleanTemplateParameters(
-    (value as Record<string, unknown>).bodyParameters,
-  );
+  const parameters = value as Record<string, unknown>;
+  const bodyParameters = cleanTemplateParameters(parameters.bodyParameters);
+  const timeInTemplate = parameters.whatsappTemplateIncludesTime === true ||
+    (parameters.whatsappTemplateIncludesTime === undefined &&
+      templateName === "youth_invitation_sk");
+  if (!timeInTemplate || bodyParameters.length < 2) return bodyParameters;
+
+  const eventDate = typeof parameters.eventDate === "string"
+    ? parameters.eventDate
+    : null;
+  if (eventDate && /^\d{4}-\d{2}-\d{2}$/.test(eventDate)) {
+    bodyParameters[1] = formatEventDateWithoutTime(
+      { event_date: eventDate },
+      sentAt,
+    );
+  } else {
+    // Legacy queued rows have only the fully formatted parameter.
+    bodyParameters[1] = bodyParameters[1].replace(/ o \d{1,2}:\d{2}$/, "");
+  }
+  return bodyParameters;
 }
 
 function isSingleBodyParameterMismatch(code: unknown, details: string) {
@@ -210,6 +232,7 @@ async function sendWhatsApp(
   const templateLanguage = options.templateLanguage?.trim() || "sk";
   const templateParameters = whatsappBodyParameters(
     options.templateParameters,
+    templateName,
   );
   const headerImagePath = whatsappImagePath(options.templateParameters);
   const buildTemplatePayload = (

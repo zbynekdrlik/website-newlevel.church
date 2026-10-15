@@ -111,8 +111,12 @@ and Supabase service role key stay only in Supabase secrets.
 
 For campaign WhatsApp messages, use an approved Meta template. The admin defaults
 to `youth_invitation_sk` in language `sk`; template body parameter 1 is the
-recipient's first name and parameter 2 is always `v piatok`. The approved Meta
-template timing line is `🕕 {{2}} o 18:00`, producing `🕕 v piatok o 18:00`.
+recipient's first name. For templates with a fixed `o 18:00` after parameter 2,
+enable the checkbox in the admin. Parameter 2 then contains `zajtra` when the
+message is sent the day before the event, or the localized date without a time
+otherwise. Leave the checkbox off for templates such as `youth_out` whose
+parameter 2 must include the full date and time. The dispatcher computes
+`zajtra` when the message is actually sent, including scheduled messages.
 Email, SMS, and WhatsApp free text may include normal wording such as `zajtra`
 or `tento piatok`; the admin does not warn about or reject these phrases.
 `{{event_date}}` remains available when the selected event's date should be

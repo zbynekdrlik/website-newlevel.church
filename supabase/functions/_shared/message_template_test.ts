@@ -1,4 +1,7 @@
-import { renderContactTemplate } from "./message_template.ts";
+import {
+  formatEventDateWithoutTime,
+  renderContactTemplate,
+} from "./message_template.ts";
 
 function assertEquals<T>(actual: T, expected: T) {
   if (actual !== expected) {
@@ -84,4 +87,16 @@ Deno.test("keeps the absolute date when sent the day before the event", () => {
   );
 
   assertEquals(message, "Stretneme sa v piatok 4. septembra o 18:00.");
+});
+
+Deno.test("uses tomorrow for a template that already contains the time", () => {
+  const event = { event_date: "2026-10-16", starts_at: "2026-10-16T16:00:00Z" };
+  assertEquals(
+    formatEventDateWithoutTime(event, "2026-10-15T18:00:00Z"),
+    "zajtra",
+  );
+  assertEquals(
+    formatEventDateWithoutTime(event, "2026-10-14T18:00:00Z"),
+    "v piatok 16. októbra",
+  );
 });
