@@ -5,6 +5,11 @@
 - Static Astro 5 site deployed to Cloudflare Pages as `newlevel-church`.
 - Supabase project `kbpuhcuiljbwgxgiauku` provides the `invitation` schema and
   Deno Edge Functions.
+- The separate Buffet app keeps its database migration in this project's
+  `supabase/migrations/20261015120000_buffet_initial.sql` and catalog extension
+  `supabase/migrations/20261015130000_buffet_catalog.sql`. Its `buffet` schema
+  is private; authenticated clients use `public.buffet_*` invoker wrappers.
+  Do not expose `buffet` through the Data API or grant direct table access.
 - The messaging admin is `src/pages/admin/sms.astro`; its API is
   `supabase/functions/admin-sms/index.ts`.
 
