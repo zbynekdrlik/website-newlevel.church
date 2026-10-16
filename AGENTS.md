@@ -7,9 +7,13 @@
   Deno Edge Functions.
 - The separate Buffet app keeps its database migration in this project's
   `supabase/migrations/20261015120000_buffet_initial.sql` and catalog extension
-  `supabase/migrations/20261015130000_buffet_catalog.sql`. Its `buffet` schema
+  `supabase/migrations/20261015130000_buffet_catalog.sql`. One-time member links
+  are in `supabase/migrations/20261016133000_buffet_member_invitations.sql` and
+  `supabase/functions/buffet-member-invite/index.ts`. Its `buffet` schema
   is private; authenticated clients use `public.buffet_*` invoker wrappers.
-  Do not expose `buffet` through the Data API or grant direct table access.
+  Do not expose `buffet` through the Data API or grant direct table access. The
+  invitation Edge Function is the only component that creates seller Auth
+  users; raw invite tokens and generated passwords must never be persisted.
 - The messaging admin is `src/pages/admin/sms.astro`; its API is
   `supabase/functions/admin-sms/index.ts`.
 

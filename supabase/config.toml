@@ -421,6 +421,9 @@ verify_jwt = true
 [functions.test-email]
 verify_jwt = true
 
+[functions.buffet-member-invite]
+verify_jwt = false
+
 [analytics]
 enabled = true
 port = 54327
