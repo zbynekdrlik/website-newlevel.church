@@ -1,4 +1,5 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { createInvitationCredentials } from "./credentials.ts";
 import {
   createAdminClient,
   readPublishableKey,
@@ -113,9 +114,7 @@ Deno.serve(async (req) => {
     );
   }
 
-  const identity = crypto.randomUUID();
-  const email = `${identity}@members.bufet.newlevel.church`;
-  const password = `${crypto.randomUUID()}-${crypto.randomUUID()}-Aa1!`;
+  const { email, password } = createInvitationCredentials();
   const { data: created, error: createError } = await admin.auth.admin
     .createUser({
       email,

@@ -14,6 +14,10 @@
   Do not expose `buffet` through the Data API or grant direct table access. The
   invitation Edge Function is the only component that creates seller Auth
   users; raw invite tokens and generated passwords must never be persisted.
+  Auth passwords must fit the 72-byte limit; run
+  `deno test supabase/functions/buffet-member-invite/credentials_test.ts` when
+  changing invitation credentials. Production invitation checks must exercise
+  successful redemption and session access, not only invalid-token responses.
 - The messaging admin is `src/pages/admin/sms.astro`; its API is
   `supabase/functions/admin-sms/index.ts`.
 
