@@ -107,6 +107,8 @@
       .modal-body { padding: 22px; overflow: auto; }
       .form-grid { display: grid; grid-template-columns: 1.2fr 1.5fr 1fr .8fr; gap: 10px; }
       label { display: grid; gap: 6px; color: var(--muted); font-size: 12px; font-weight: 800; }
+      .checkbox-row { display: flex; align-items: center; gap: 9px; margin-top: 14px; color: var(--ink); font-size: 14px; }
+      .checkbox-row input { width: 17px; height: 17px; margin: 0; accent-color: var(--brand); }
       .form-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
       .people-list { display: grid; margin-top: 24px; border-top: 1px solid var(--line); }
       .import-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 22px; padding-bottom: 20px; border-bottom: 1px solid var(--line); }
@@ -119,6 +121,8 @@
       .integration.is-ready { background: var(--green-soft); color: var(--green); }
       .integration strong { display: block; }
       .integration p { margin-top: 4px; font-size: 13px; line-height: 1.45; }
+      .integration button { margin-top: 12px; background: var(--surface); }
+      .integration a { color: inherit; font-weight: 700; }
       .integration details { margin-top: 10px; }
       .integration summary { cursor: pointer; font-size: 13px; font-weight: 800; }
       .integration ol { margin: 9px 0 0; padding-left: 20px; font-size: 13px; line-height: 1.5; }
@@ -231,6 +235,7 @@
             <label>Discord ID (prepojenie)<input inputmode="numeric" maxlength="22" placeholder="123…" data-person-discord /></label>
             <label>Stav<select data-person-active><option value="true">Aktívny</option><option value="false">Neaktívny</option></select></label>
           </div>
+          <label class="checkbox-row"><input type="checkbox" data-person-buffet /> V deň služby má aj bufet</label>
           <div class="form-actions">
             <button type="button" data-person-cancel hidden>Zrušiť úpravu</button>
             <button class="primary" type="submit">Uložiť človeka</button>
@@ -245,7 +250,7 @@
     <script>
       const ENDPOINT = "https://kbpuhcuiljbwgxgiauku.supabase.co/functions/v1/dishwasher-roster";
       const ACCESS_KEY = "dishwasherStaffKey";
-      const state = { key: localStorage.getItem(ACCESS_KEY) || "", month: "", members: [], shifts: [], assignments: [], availability: [], integrations: { discordConfigured: false, discordMode: "none" }, busy: false };
+      const state = { key: localStorage.getItem(ACCESS_KEY) || "", month: "", members: [], shifts: [], assignments: [], availability: [], integrations: { discordConfigured: false, discordMode: "none" }, lastTestMessageUrl: null, busy: false };
       const $ = (selector) => document.querySelector(selector);
       const escapeHtml = (value) => String(value ?? "").replace(/[&<>'"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[character]);
 
@@ -298,7 +303,7 @@
         const unavailable = new Set(state.availability.filter((row) => row.service_date === shiftDate && row.available === false).map((row) => row.member_id));
         const assignedElsewhere = new Set(state.assignments.filter((item) => item.shift_id === shiftId && item.member_id !== selectedId).map((item) => item.member_id));
         const options = state.members.filter((member) => member.active).map((member) => {
-          const suffix = unavailable.has(member.id) ? " · nemôže" : "";
+          const suffix = `${member.also_buffet ? " · bufet" : ""}${unavailable.has(member.id) ? " · nemôže" : ""}`;
           const disabled = member.id !== selectedId && (unavailable.has(member.id) || assignedElsewhere.has(member.id));
           return `<option value="${member.id}" ${member.id === selectedId ? "selected" : ""} ${disabled ? "disabled" : ""}>${escapeHtml(memberDisplayName(member) + suffix)}</option>`;
         }).join("");
@@ -355,10 +360,14 @@
         const discordStatus = $("[data-discord-status]");
         discordStatus.classList.toggle("is-ready", state.integrations.discordConfigured);
         discordStatus.innerHTML = state.integrations.discordMode === "webhook"
-          ? `<strong>Discord vlákno je pripojené ✓</strong><p>Rozpis môže posielať jednosmerné upozornenia priamo do vybraného vlákna.</p>`
+          ? `<strong>Discord vlákno je pripojené ✓</strong><p>Správy smerujú do vlákna ID ${escapeHtml(state.integrations.discordThreadId)}.</p>`
           : state.integrations.discordConfigured
           ? `<strong>Discord bot je pripojený ✓</strong><p>Po doplnení Discord ID ku každému človeku môže rozpis prijímať potvrdenia.</p>`
           : `<strong>Discord bot ešte nie je pripojený</strong><p>Mená a rozpis fungujú už teraz. Na potvrdenia v Discorde treba dokončiť bot pripojenie.</p><details><summary>Čo bude potrebné</summary><ol><li>Vytvoriť Discord aplikáciu a bota.</li><li>Pridať bota na váš server.</li><li>Nastaviť bot token, public key a ID cieľového kanála.</li><li>Ku každému menu doplniť jeho Discord ID.</li></ol></details>`;
+        if (state.integrations.discordConfigured) {
+          discordStatus.innerHTML += `<button type="button" data-test-discord>Poslať testovaciu správu</button>${state.lastTestMessageUrl ? `<p><a href="${escapeHtml(state.lastTestMessageUrl)}" target="_blank" rel="noopener noreferrer">Otvoriť testovaciu správu na Discorde</a></p>` : ""}`;
+          $("[data-test-discord]").addEventListener("click", testDiscord);
+        }
         const list = $("[data-people-list]");
         if (!state.members.length) {
           list.innerHTML = `<div class="empty"><h3>Zatiaľ tu nikto nie je</h3><p>Pridaj prvého človeka cez formulár vyššie.</p></div>`;
@@ -373,6 +382,7 @@
               <div class="person-heading">
                 <strong>${escapeHtml(memberDisplayName(member))}</strong>
                 <span class="person-status ${member.active ? "" : "is-inactive"}">${member.active ? "Aktívny" : "Neaktívny"}</span>
+                ${member.also_buffet ? '<span class="person-status">Aj bufet</span>' : ""}
               </div>
               <div class="person-meta">
                 <span class="${hasEmail ? "" : "is-missing"}">${hasEmail ? escapeHtml(member.email) : "Email nedoplnený"}</span>
@@ -426,6 +436,15 @@
         } catch (error) { notify(error.message, true); } finally { setBusy(false); }
       }
 
+      async function testDiscord() {
+        setBusy(true);
+        try {
+          const result = await api("test_discord");
+          state.lastTestMessageUrl = result.messageUrl;
+          notify(`Testovacia správa odišla do Discord vlákna ${result.channelId}.`);
+        } catch (error) { notify(error.message, true); } finally { setBusy(false); renderPeople(); }
+      }
+
       async function assignMember(event) {
         const select = event.currentTarget;
         if (!select.value) {
@@ -459,6 +478,7 @@
         $("[data-person-email]").value = member.email || "";
         $("[data-person-discord]").value = member.discord_user_id || "";
         $("[data-person-active]").value = String(member.active);
+        $("[data-person-buffet]").checked = member.also_buffet === true;
         $("[data-person-cancel]").hidden = false;
         $("[data-person-name]").focus();
       }
@@ -473,7 +493,7 @@
         event.preventDefault();
         setBusy(true);
         try {
-          await api("save_member", { id: $("[data-person-id]").value || undefined, name: $("[data-person-name]").value, email: $("[data-person-email]").value, discordUserId: $("[data-person-discord]").value, active: $("[data-person-active]").value === "true" });
+          await api("save_member", { id: $("[data-person-id]").value || undefined, name: $("[data-person-name]").value, email: $("[data-person-email]").value, discordUserId: $("[data-person-discord]").value, active: $("[data-person-active]").value === "true", alsoBuffet: $("[data-person-buffet]").checked });
           resetPersonForm();
           render();
           notify("Človek je uložený.");

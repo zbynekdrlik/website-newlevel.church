@@ -13,6 +13,7 @@ type Member = {
   email: string | null;
   discord_user_id: string | null;
   active: boolean;
+  also_buffet: boolean;
 };
 
 type Shift = {
@@ -231,7 +232,8 @@ async function loadState(
       Deno.env.get("DISCORD_DISHWASHER_PUBLIC_KEY")?.trim() &&
       Deno.env.get("DISCORD_DISHWASHER_CHANNEL_ID")?.trim(),
   );
-  const webhookConfigured = Boolean(discordWebhookConfig());
+  const webhook = discordWebhookConfig();
+  const webhookConfigured = Boolean(webhook);
 
   return {
     members: membersResult.data ?? [],
@@ -245,6 +247,7 @@ async function loadState(
         : botConfigured
         ? "bot"
         : "none",
+      discordThreadId: webhook?.threadId ?? null,
     },
   };
 }
@@ -464,9 +467,9 @@ async function discordShiftPayload(
     return {
       name: "Služobník",
       value: member
-        ? `**${member.name}**\n${status}\n[Pozrieť môj rozpis](${
-          links.get(member.id)
-        })`
+        ? `**${member.name}**${
+          member.also_buffet ? " · riady + bufet" : ""
+        }\n${status}\n[Pozrieť môj rozpis](${links.get(member.id)})`
         : status,
       inline: true,
     };
@@ -627,9 +630,10 @@ async function monthlySchedulePayload(
       if (!assignment) return "*voľné miesto*";
       const member = byId.get(assignment.member_id);
       if (!member) return "*neznámy človek*";
-      return member.discord_user_id
+      const label = member.discord_user_id
         ? `<@${member.discord_user_id}>`
         : `**${member.name}**`;
+      return member.also_buffet ? `${label} (riady + bufet)` : label;
     });
     return `**${slovakShortDate(shift.service_date)}** — ${names.join(", ")}`;
   });
@@ -686,9 +690,10 @@ async function shiftReminderPayload(
     if (!assignment) return "*voľné miesto*";
     const member = byId.get(assignment.member_id);
     if (!member) return "*neznámy človek*";
-    return member.discord_user_id
+    const label = member.discord_user_id
       ? `<@${member.discord_user_id}>`
       : `**${member.name}**`;
+    return member.also_buffet ? `${label} — riady + bufet` : label;
   });
   const personalLinks = active.map((assignment) => {
     const member = byId.get(assignment.member_id);
@@ -1498,6 +1503,51 @@ Deno.serve(async (req) => {
       return json(req, { success: true, ...(await loadState(admin, bounds)) });
     }
 
+    if (action === "test_discord") {
+      const webhook = discordWebhookConfig();
+      const botChannelId =
+        Deno.env.get("DISCORD_DISHWASHER_CHANNEL_ID")?.trim() ?? "";
+      const botConfigured = Boolean(
+        Deno.env.get("DISCORD_DISHWASHER_BOT_TOKEN")?.trim() &&
+          /^\d{15,22}$/.test(botChannelId),
+      );
+      if (!webhook && !botConfigured) {
+        return json(req, {
+          success: false,
+          error: "Discord nie je nakonfigurovaný",
+        }, 400);
+      }
+      const payload = {
+        content:
+          "🧪 Test správy rozpisu riadu. Toto je cieľové vlákno pre upozornenia.",
+        allowed_mentions: { parse: [] },
+      };
+      const message = webhook
+        ? await discordWebhookRequest(webhook, "", {
+          method: "POST",
+          body: JSON.stringify(payload),
+        })
+        : await discordRequest(`/channels/${botChannelId}/messages`, {
+          method: "POST",
+          body: JSON.stringify(payload),
+        });
+      const channelId = webhook?.threadId ?? botChannelId;
+      let guildId = message.guild_id;
+      if (!guildId && webhook) {
+        try {
+          const info = await fetch(webhook.url);
+          if (info.ok) guildId = (await info.json()).guild_id;
+          else console.error("Discord webhook metadata failed", info.status);
+        } catch (error) {
+          console.error("Discord webhook metadata failed", error);
+        }
+      }
+      const messageUrl = guildId && message.id
+        ? `https://discord.com/channels/${guildId}/${channelId}/${message.id}`
+        : null;
+      return json(req, { success: true, channelId, messageUrl });
+    }
+
     if (action === "generate_month") {
       await ensureShifts(admin, bounds);
       const result = await fillOpenPositions(admin, bounds);
@@ -1513,8 +1563,11 @@ Deno.serve(async (req) => {
       const name = cleanText(parsed.data.name, 120);
       const email = cleanText(parsed.data.email, 254)?.toLowerCase() ?? null;
       const discordUserIdValue = cleanText(parsed.data.discordUserId, 22);
+      const alsoBuffet = parsed.data.alsoBuffet;
       if (
-        !name || !validEmail(email) || !validDiscordUserId(discordUserIdValue)
+        !name || !validEmail(email) ||
+        !validDiscordUserId(discordUserIdValue) ||
+        (alsoBuffet !== undefined && typeof alsoBuffet !== "boolean")
       ) {
         return json(req, {
           success: false,
@@ -1526,6 +1579,7 @@ Deno.serve(async (req) => {
         email,
         discord_user_id: discordUserIdValue,
         active: parsed.data.active !== false,
+        ...(alsoBuffet === undefined ? {} : { also_buffet: alsoBuffet }),
       };
       const query = id
         ? admin.schema("invitation").from("dishwasher_members").update(values)

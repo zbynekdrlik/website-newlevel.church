@@ -3,6 +3,9 @@
 The roster page is `/staff/riad`. It is a static shell; all private data is
 loaded from the `dishwasher-roster` Edge Function after the shared staff key is
 validated.
+In **Ľudia**, the staff can see the configured Discord thread ID and send a
+test message there. The member checkbox **V deň služby má aj bufet** adds
+`riady + bufet` next to that member in Discord schedules and reminders.
 
 ## Supabase
 

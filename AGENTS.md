@@ -118,6 +118,8 @@
 - Members can be added individually or imported from a CSV with `meno`/`name`,
   `email`, and optional `discord_id` columns. Imports update an existing member
   when the normalized email matches.
+- `dishwasher_members.also_buffet` is a member-level flag. Discord schedules
+  and reminders label assigned people with that flag as `riady + bufet`.
 - Discord confirmations use an application bot and signed component
   interactions, not webhook reactions. They require
   `DISCORD_DISHWASHER_BOT_TOKEN`, `DISCORD_DISHWASHER_PUBLIC_KEY`, and
