@@ -18,6 +18,14 @@
   `deno test supabase/functions/buffet-member-invite/credentials_test.ts` when
   changing invitation credentials. Production invitation checks must exercise
   successful redemption and session access, not only invalid-token responses.
+  Member permissions live in `20261016150000_buffet_member_permissions.sql`:
+  sales/reversals, meetings/cash, restocking, and products/categories/photos are
+  independent boolean grants. Only active admins set these grants; admin access
+  is implicit. RPCs and photo Storage RLS must enforce current grants and active
+  membership. Existing/new sellers retain sales/meetings access by default.
+  Hosted Storage allows updating policy conditions, but renaming a policy on
+  `storage.objects` fails with an owner error for the CLI migration role; retain
+  the existing policy names when changing their conditions.
 - The messaging admin is `src/pages/admin/sms.astro`; its API is
   `supabase/functions/admin-sms/index.ts`.
 
