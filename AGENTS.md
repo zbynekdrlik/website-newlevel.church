@@ -28,6 +28,12 @@
   inventory was consumed. Reversal must use the sale's snapshot even after a
   product mode change. The nine-argument product-details RPC requires an explicit
   tracking boolean; the legacy eight-argument RPC preserves existing modes.
+  `20261019173000_buffet_cancel_meeting.sql` adds open-meeting cancellation for
+  active admins only. It uses the meeting lock, restores unreversed sales'
+  consumed stock from `stock_tracked`, preserves restocks/audit rows, and records
+  `cancelled_at`/`cancelled_by` with terminal `closed_at`. Retries are no-ops;
+  closed meetings remain immutable. All reports must exclude cancelled meetings.
+  Regression tests live in the Bufet sibling's `tests/test_database.sh`.
   Hosted Storage allows updating policy conditions, but renaming a policy on
   `storage.objects` fails with an owner error for the CLI migration role; retain
   the existing policy names when changing their conditions.
