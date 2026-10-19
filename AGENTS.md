@@ -23,6 +23,11 @@
   independent boolean grants. Only active admins set these grants; admin access
   is implicit. RPCs and photo Storage RLS must enforce current grants and active
   membership. Existing/new sellers retain sales/meetings access by default.
+  Optional inventory tracking is in `20261019160000_buffet_optional_stock.sql`:
+  `products.track_stock` defaults true and `sales.stock_tracked` snapshots whether
+  inventory was consumed. Reversal must use the sale's snapshot even after a
+  product mode change. The nine-argument product-details RPC requires an explicit
+  tracking boolean; the legacy eight-argument RPC preserves existing modes.
   Hosted Storage allows updating policy conditions, but renaming a policy on
   `storage.objects` fails with an owner error for the CLI migration role; retain
   the existing policy names when changing their conditions.
