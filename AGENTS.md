@@ -32,6 +32,8 @@
   `src/content/party/photos/*.json` for its gallery and rotating hero. Every
   photo path must exist under `public/`; activity photos are selected by
   `activityPhotosByTitle` in the page.
+- Homepage hero photos in `src/content/homepage/hero.json` fill the viewport;
+  use large originals, not the 600×400 gallery thumbnails in `public/images/uploads/`.
 
 ## Messaging architecture
 
