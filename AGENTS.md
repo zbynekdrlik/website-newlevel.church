@@ -28,6 +28,10 @@
   the existing policy names when changing their conditions.
 - The messaging admin is `src/pages/admin/sms.astro`; its API is
   `supabase/functions/admin-sms/index.ts`.
+- The Youth page `src/pages/youth/index.astro` loads
+  `src/content/party/photos/*.json` for its gallery and rotating hero. Every
+  photo path must exist under `public/`; activity photos are selected by
+  `activityPhotosByTitle` in the page.
 
 ## Messaging architecture
 

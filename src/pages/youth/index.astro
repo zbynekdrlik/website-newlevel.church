@@ -15,8 +15,8 @@ const heroBackgroundPhotos = partyPhotos
 const heroPhoto = heroBackgroundPhotos[0] || { image: '/images/uploads/party-image00002.jpg', caption: 'Wrapy a hranolky' };
 const activityPhotosByTitle: Record<string, string> = {
   'Jedlo od šéfkuchára': '/images/uploads/party-image00002.jpg',
-  'Ping Pong': '/images/uploads/party-image00010.jpg',
-  'Kalčeto': '/images/uploads/party-image00011.jpg',
+  'Ping Pong': '/images/uploads/image00001.png',
+  'Kalčeto': '/images/uploads/image00002.jpeg',
   'Varenie zadarmo': '/images/uploads/party-image00003.jpg',
   'Karaoke': '/images/uploads/party-image00006.jpg',
 };
@@ -303,7 +303,7 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
         </div>
         <div class="activity-row" aria-label="Aktivity">
           {page.activities.map((item: { emoji: string; title: string; description: string }, index: number) => {
-            const activityPhoto = activityPhotosByTitle[item.title] || partyPhotos[index % partyPhotos.length]?.image;
+            const activityPhoto = activityPhotosByTitle[item.title];
             return (
             <div class={`activity-item activity-item-${(index % 4) + 1}`}>
               <div class="activity-image">
