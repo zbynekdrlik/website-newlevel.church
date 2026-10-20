@@ -110,12 +110,14 @@ sent to the `admin-sms` Edge Function as `x-admin-sms-key`; the Infobip API key
 and Supabase service role key stay only in Supabase secrets.
 
 For campaign WhatsApp messages, use an approved Meta template. The admin defaults
-to `youth_invitation_sk` in language `sk`; template body parameter 1 is the
-recipient's first name. For templates with a fixed `o 18:00` after parameter 2,
-enable the checkbox in the admin. Parameter 2 then contains `zajtra` when the
-message is sent the day before the event, or the localized date without a time
-otherwise. Leave the checkbox off for templates such as `youth_out` whose
-parameter 2 must include the full date and time. The dispatcher computes
+to `youth_invitation` in language `sk`; template body parameter 1 is the
+recipient's first name. Both `youth_invitation` and `youth_invitation_sk` add
+`o 18:00` after parameter 2, so the admin and dispatcher always treat them as
+fixed-time templates, including for older saved settings and queued messages.
+Parameter 2 then contains `zajtra` when the message is sent the day before the
+event, or the localized date without a time otherwise. For `youth_out`, the
+admin and dispatcher keep the checkbox off and include the full date and time
+in parameter 2. The dispatcher computes
 `zajtra` when the message is actually sent, including scheduled messages.
 Email, SMS, and WhatsApp free text may include normal wording such as `zajtra`
 or `tento piatok`; the admin does not warn about or reject these phrases.

@@ -35,11 +35,12 @@ API key a device ID su iba v Supabase secrets.
 ## WhatsApp cez Meta Cloud API
 
 Kampan alebo prva sprava mimo 24-hodinoveho okna musi pouzit schvalenu Meta
-sablonu. Admin predvolene pouziva `youth_invitation_sk` (`sk`): prvy parameter
-je krstne meno kontaktu. Ak sablona obsahuje pevne `o 18:00` za `{{2}}`,
-v admine zapni prislusnu volbu. Druhy parameter potom obsahuje `zajtra` pri
+sablonu. Admin predvolene pouziva `youth_invitation` (`sk`): prvy parameter
+je krstne meno kontaktu. Sablony `youth_invitation` a `youth_invitation_sk`
+obsahuju pevne `o 18:00` za `{{2}}`; admin a odosielac tuto volbu zapnu
+automaticky aj pri starych ulozenych nastaveniach. Druhy parameter obsahuje `zajtra` pri
 odoslani den pred udalostou, inak lokalizovany datum bez casu. Pri sablonach
-bez pevneho casu, napriklad `youth_out`, volbu vypni; druhy parameter bude
+bez pevneho casu, napriklad `youth_out`, je volba automaticky vypnuta; druhy parameter bude
 obsahovat uplny datum aj cas. V messaging admine musia email, SMS a
 WhatsApp volny text mozu obsahovat bezne formulacie ako `zajtra` alebo
 `tento piatok`; admin ich automaticky neoznacuje ani neodmieta. Premenna

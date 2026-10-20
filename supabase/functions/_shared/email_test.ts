@@ -10,6 +10,30 @@ function assertEquals<T>(actual: T, expected: T) {
   }
 }
 
+Deno.test("renders an optional, prominent RSVP link safely", () => {
+  const html = renderPartyEmailHtml("Pozvánka", "Príď!", {
+    ctaUrl: 'https://example.com/register?source=email&name="test"',
+    ctaLabel: "Potvrdiť účasť",
+  });
+
+  if (
+    !html.includes('bgcolor="#2563eb"') ||
+    !html.includes("color:#ffffff") ||
+    !html.includes(
+      'href="https://example.com/register?source=email&amp;name=&quot;test&quot;"',
+    )
+  ) {
+    throw new Error("Expected a styled RSVP link with an escaped URL");
+  }
+  if (
+    renderPartyEmailHtml("Pozvánka", "Príď!", { showCta: false }).includes(
+      "Potvrdiť účasť",
+    )
+  ) {
+    throw new Error("Expected the RSVP link to be omitted when disabled");
+  }
+});
+
 Deno.test("sends the Resend idempotency key", async () => {
   const originalFetch = globalThis.fetch;
   const originalApiKey = Deno.env.get("RESEND_API_KEY");

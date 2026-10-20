@@ -87,6 +87,18 @@ export function formatEventDateWithoutTime(
   return `v ${parts.weekday} ${parts.formattedDate}`;
 }
 
+export function whatsappTemplateHasFixedTime(
+  templateName: string | null | undefined,
+  requested: unknown,
+) {
+  const name = templateName?.trim().toLowerCase();
+  if (name === "youth_invitation" || name === "youth_invitation_sk") {
+    return true;
+  }
+  if (name === "youth_out") return false;
+  return requested === true;
+}
+
 export function renderContactTemplate(
   template: string,
   contact: Record<string, unknown>,

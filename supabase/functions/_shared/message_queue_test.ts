@@ -83,6 +83,28 @@ Deno.test("does not duplicate the fixed time in a WhatsApp template", () => {
     ["Alex", "v piatok 16. októbra o 18:00"],
   );
   assertEquals(
+    whatsappBodyParameters({
+      ...parameters,
+      whatsappTemplateIncludesTime: true,
+    }, "youth_out"),
+    ["Alex", "v piatok 16. októbra o 18:00"],
+  );
+  assertEquals(
+    whatsappBodyParameters(
+      {
+        ...parameters,
+        whatsappTemplateIncludesTime: false,
+      },
+      "youth_invitation",
+      "2026-10-15T17:00:00Z",
+    ),
+    ["Alex", "zajtra"],
+  );
+  assertEquals(
+    whatsappBodyParameters(parameters.bodyParameters, "youth_invitation"),
+    ["Alex", "v piatok 16. októbra"],
+  );
+  assertEquals(
     whatsappBodyParameters(
       { bodyParameters: parameters.bodyParameters },
       "youth_invitation_sk",

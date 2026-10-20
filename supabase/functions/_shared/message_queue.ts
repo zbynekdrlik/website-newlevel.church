@@ -5,7 +5,10 @@ import {
 } from "./email.ts";
 import { sendInfobipSms } from "./infobip.ts";
 import { buildRegistrationUrl } from "./registration_url.ts";
-import { formatEventDateWithoutTime } from "./message_template.ts";
+import {
+  formatEventDateWithoutTime,
+  whatsappTemplateHasFixedTime,
+} from "./message_template.ts";
 
 type SendResult =
   | {
@@ -147,13 +150,17 @@ export function whatsappBodyParameters(
   templateName: string,
   sentAt: Date | string = new Date(),
 ) {
-  if (Array.isArray(value)) return cleanTemplateParameters(value);
   if (!value || typeof value !== "object") return [];
-  const parameters = value as Record<string, unknown>;
+  const parameters: Record<string, unknown> = Array.isArray(value)
+    ? { bodyParameters: value }
+    : value as Record<string, unknown>;
   const bodyParameters = cleanTemplateParameters(parameters.bodyParameters);
-  const timeInTemplate = parameters.whatsappTemplateIncludesTime === true ||
-    (parameters.whatsappTemplateIncludesTime === undefined &&
-      templateName === "youth_invitation_sk");
+  const timeInTemplate = whatsappTemplateHasFixedTime(
+    templateName,
+    "whatsappTemplateIncludesTime" in parameters
+      ? parameters.whatsappTemplateIncludesTime
+      : undefined,
+  );
   if (!timeInTemplate || bodyParameters.length < 2) return bodyParameters;
 
   const eventDate = typeof parameters.eventDate === "string"

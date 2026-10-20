@@ -34,6 +34,7 @@ import {
 import {
   formatEventDate,
   renderContactTemplate,
+  whatsappTemplateHasFixedTime,
 } from "../_shared/message_template.ts";
 import { audienceMatches, type AudienceType } from "../_shared/audience.ts";
 
@@ -730,10 +731,10 @@ Deno.serve(async (req) => {
       const whatsappTemplateLanguage = cleanWhatsAppTemplateLanguage(
         body.whatsappTemplateLanguage,
       );
-      const whatsappTemplateIncludesTime =
-        body.whatsappTemplateIncludesTime === true ||
-        (body.whatsappTemplateIncludesTime === undefined &&
-          whatsappTemplateName === "youth_invitation_sk");
+      const whatsappTemplateIncludesTime = whatsappTemplateHasFixedTime(
+        whatsappTemplateName,
+        body.whatsappTemplateIncludesTime,
+      );
       const message = cleanText(body.message, 1000);
       const name = cleanText(body.name, 120) ?? "Manual message";
       const subject = cleanText(body.subject, 180) ?? "New Level Youth";

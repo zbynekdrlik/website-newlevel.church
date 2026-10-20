@@ -54,9 +54,12 @@ export function renderPartyEmailHtml(
   const ctaLabel = escapeHtml(options.ctaLabel ?? "Potvrdiť účasť");
   const ctaButton = options.showCta === false
     ? ""
-    : `<p style="margin:24px 0 0;font-size:16px;line-height:1.5;">
-              <a href="${ctaUrl}" style="color:#1d4ed8;text-decoration:underline;">${ctaLabel}</a>
-            </p>`;
+    : `<table role="presentation" cellspacing="0" cellpadding="0" style="border-collapse:separate;">
+              <tr><td height="24" style="height:24px;font-size:0;line-height:24px;">&nbsp;</td></tr>
+              <tr><td bgcolor="#2563eb" style="background-color:#2563eb;border-radius:8px;">
+                <a href="${ctaUrl}" style="display:inline-block;padding:14px 24px;border-radius:8px;background-color:#2563eb;color:#ffffff;font-size:16px;font-weight:700;line-height:1.25;text-align:center;text-decoration:none;">${ctaLabel}</a>
+              </td></tr>
+            </table>`;
   const imageUrl = options.imageUrl ? escapeHtml(options.imageUrl) : "";
   const inlineImage = imageUrl
     ? `<p style="margin:24px 0 0;">

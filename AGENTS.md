@@ -3,6 +3,9 @@
 ## Product and stack
 
 - Static Astro 5 site deployed to Cloudflare Pages as `newlevel-church`.
+  Pushing `main` runs `.github/workflows/deploy.yml` with the project's
+  Cloudflare account secrets. Direct `./deploy.sh` requires credentials for
+  that same account.
 - Supabase project `kbpuhcuiljbwgxgiauku` provides the `invitation` schema and
   Deno Edge Functions.
 - The separate Buffet app keeps its database migration in this project's
@@ -71,14 +74,15 @@
   `recipient_dedupe_key` so one automation cannot send repeatedly to the same
   destination through different contact IDs.
 - Campaign WhatsApp messages must use an approved Meta template. The default is
-  `youth_invitation_sk` with language `sk`; body parameter 1 is the contact's
-  first name. Its template already adds `o 18:00` after body parameter 2, so
-  parameter 2 must contain only the day (`zajtra` when sent the day before the
-  event, otherwise the localized date). Templates without a fixed time, such as
-  `youth_out`, require the full date and time in parameter 2. The admin's
-  `whatsappTemplateIncludesTime` setting records this choice; the dispatcher
-  formats relative wording at actual send time. If Meta reports that a template
-  expects exactly one body parameter, dispatch retries with the first name only.
+  `youth_invitation` with language `sk`; body parameter 1 is the contact's
+  first name. Both `youth_invitation` and `youth_invitation_sk` add `o 18:00`
+  after body parameter 2, so the dispatcher must send only the day (`zajtra`
+  when sent the day before the event, otherwise the localized date), even when
+  a saved or queued `whatsappTemplateIncludesTime` flag is false. Templates
+  without a fixed time, such as `youth_out`, require the full date and time in
+  parameter 2, even if a saved flag is true. The dispatcher formats relative
+  wording at actual send time. If Meta reports that a template expects exactly
+  one body parameter, dispatch retries with the first name only.
 - Campaign photos are stored in the private `email-campaign-images` bucket. If
   a WhatsApp template reports that its header expects an image, dispatch signs
   that stored photo URL and retries with an image header component.
