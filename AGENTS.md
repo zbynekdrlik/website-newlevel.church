@@ -104,7 +104,9 @@
 - Provider credentials and the service-role key belong only in Supabase secrets,
   never browser code.
 - Party registrations are handled by `register-party`; it sends Discord
-  notifications directly with the `DISCORD_PARTY_WEBHOOK_URL` Supabase secret.
+  notifications with the `DISCORD_PARTY_WEBHOOK_URL` Supabase secret. The
+  registration trigger queues each alert in `invitation.party_discord_notifications`;
+  `register-party` sends immediately and `dispatch-message-cron` retries failures.
   Do not reintroduce n8n into this path.
 - The public Party food counter reads `GET register-party` so
   `invitation.party_registrations` remains the source of truth; Cloudflare KV is

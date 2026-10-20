@@ -6,105 +6,7 @@ import {
   readServiceKey,
   validateRequestBasics,
 } from "../_shared/contact.ts";
-
-type DiscordResult =
-  | { ok: true }
-  | { ok: false; error: "not_configured" | "delivery_failed" };
-
-function cleanDiscordText(value: unknown, fallback: string, maxLength = 500) {
-  if (typeof value !== "string") return fallback;
-  const cleaned = value
-    .replace(/[\u0000-\u001F\u007F]/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-  return cleaned ? cleaned.slice(0, maxLength) : fallback;
-}
-
-function discordEventDate(value: string) {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
-  return new Intl.DateTimeFormat("sk-SK", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    timeZone: "Europe/Bratislava",
-  }).format(new Date(`${value}T12:00:00Z`));
-}
-
-async function sendDiscordNotification(
-  payload: Record<string, unknown>,
-  eventDate: string,
-  registrationCount: number | null,
-): Promise<DiscordResult> {
-  const webhookUrl = Deno.env.get("DISCORD_PARTY_WEBHOOK_URL")?.trim();
-  if (!webhookUrl) return { ok: false, error: "not_configured" };
-
-  const name = cleanDiscordText(
-    payload.name ?? payload.fullName ?? payload.full_name,
-    "neuvedené",
-    120,
-  );
-  const email = cleanDiscordText(payload.email, "neuvedené", 254);
-  const phone = cleanDiscordText(payload.phone, "neuvedené", 32);
-  const message = cleanDiscordText(payload.message, "žiadna", 500);
-  const food = boolish(
-      payload.food_registration ?? payload.wantsFood ?? payload.food,
-    )
-    ? "ÁNO"
-    : "NIE";
-
-  const discordPayload = {
-    username: "New Level registrácie",
-    allowed_mentions: { parse: [] },
-    embeds: [{
-      title: "Nová registrácia na Party",
-      color: 0x9acd32,
-      fields: [
-        { name: "Meno", value: name, inline: true },
-        { name: "Telefón", value: phone, inline: true },
-        { name: "Jedlo", value: food, inline: true },
-        { name: "Email", value: email, inline: true },
-        {
-          name: "Termín",
-          value: discordEventDate(eventDate),
-          inline: true,
-        },
-        {
-          name: "Aktuálne prihlásených",
-          value: registrationCount === null
-            ? "nedostupné"
-            : String(registrationCount),
-          inline: true,
-        },
-        ...(message === "žiadna"
-          ? []
-          : [{ name: "Správa", value: message, inline: false }]),
-      ],
-      footer: { text: "Reaguj ✅ na potvrdenie registrácie." },
-      timestamp: new Date().toISOString(),
-    }],
-  };
-
-  for (let attempt = 0; attempt < 3; attempt += 1) {
-    try {
-      const response = await fetch(webhookUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(discordPayload),
-      });
-      if (response.ok) return { ok: true };
-      if (response.status < 500 && response.status !== 429) break;
-    } catch {
-      // Retry transient network failures below.
-    }
-
-    if (attempt < 2) {
-      await new Promise((resolve) => setTimeout(resolve, 300 * (attempt + 1)));
-    }
-  }
-
-  return { ok: false, error: "delivery_failed" };
-}
+import { dispatchPartyDiscordNotifications } from "../_shared/party_discord.ts";
 
 function nextFridayDate() {
   const now = new Date();
@@ -179,44 +81,27 @@ Deno.serve(async (req) => {
   const wantsFood = boolish(
     body.food_registration ?? body.wantsFood ?? body.food,
   );
-  const { error } = await (admin as any).rpc("upsert_party_registration", {
-    p_event_date: eventDate,
-    p_name: body.name ?? body.fullName ?? body.full_name ?? null,
-    p_email: body.email ?? null,
-    p_phone: body.phone ?? null,
-    p_wants_food: wantsFood,
-    p_message: typeof body.message === "string" ? body.message : null,
-    p_source: "party-registration",
-  });
+  const { data: registrationId, error } = await (admin as any).rpc(
+    "upsert_party_registration",
+    {
+      p_event_date: eventDate,
+      p_name: body.name ?? body.fullName ?? body.full_name ?? null,
+      p_email: body.email ?? null,
+      p_phone: body.phone ?? null,
+      p_wants_food: wantsFood,
+      p_message: typeof body.message === "string" ? body.message : null,
+      p_source: "party-registration",
+    },
+  );
 
   if (error) {
     return json(req, { success: false, error: "Registration failed" }, 500);
   }
 
-  const { data: registrationCountData, error: registrationCountError } =
-    await (admin as any).rpc("get_party_registration_count", {
-      p_event_date: eventDate,
-    });
-  const parsedRegistrationCount = registrationCountData == null
-    ? NaN
-    : Number(registrationCountData);
-  const registrationCount = !registrationCountError &&
-      Number.isSafeInteger(parsedRegistrationCount) &&
-      parsedRegistrationCount >= 0
-    ? parsedRegistrationCount
-    : null;
-
-  if (registrationCountError) {
-    console.error(
-      "Failed to count party registrations",
-      registrationCountError,
-    );
-  }
-
-  const discord = await sendDiscordNotification(
-    body,
-    eventDate,
-    registrationCount,
+  const discord = await dispatchPartyDiscordNotifications(
+    admin,
+    1,
+    registrationId as string,
   );
   let count: number | null = null;
   if (wantsFood) {
@@ -231,10 +116,7 @@ Deno.serve(async (req) => {
   return json(req, {
     success: true,
     eventDate,
-    discordNotification: discord.ok ? "sent" : discord.error,
-    ...(discord.ok ? {} : {
-      notificationWarning: "Registration saved, Discord notification failed",
-    }),
+    discordNotification: discord.sent > 0 ? "sent" : "queued",
     ...(count === null ? {} : { count }),
   });
 });
