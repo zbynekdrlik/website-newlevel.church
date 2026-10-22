@@ -17,6 +17,10 @@
   Do not expose `buffet` through the Data API or grant direct table access. The
   invitation Edge Function is the only component that creates seller Auth
   users; raw invite tokens and generated passwords must never be persisted.
+  Its authenticated PWA handoff action generates a one-time magic-link hash for
+  the same active invitation account after checking JWT and membership. Deploy
+  this function before the Bufet frontend; do not expose service credentials or
+  copy refresh tokens into the PWA.
   Auth passwords must fit the 72-byte limit; run
   `deno test supabase/functions/buffet-member-invite/credentials_test.ts` when
   changing invitation credentials. Production invitation checks must exercise

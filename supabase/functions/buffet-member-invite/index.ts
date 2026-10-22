@@ -2,6 +2,7 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 import { createInvitationCredentials } from "./credentials.ts";
 import {
   createAdminClient,
+  createUserClient,
   readPublishableKey,
   readServiceKey,
 } from "../_shared/contact.ts";
@@ -83,19 +84,62 @@ Deno.serve(async (req) => {
     return json(req, { error: "Invalid request" }, 400);
   }
 
+  const admin = createAdminClient(readServiceKey());
+  const publishableKey = readPublishableKey();
+  const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+  if (!admin || !publishableKey || !supabaseUrl) {
+    return json(req, { error: "Služba nie je nakonfigurovaná." }, 500);
+  }
+
+  if (body.action === "prepare-pwa") {
+    const authorization = req.headers.get("authorization") ?? "";
+    const accessToken = /^Bearer (\S+)$/i.exec(authorization)?.[1];
+    if (!accessToken) {
+      return json(req, { error: "Prihlásenie je potrebné." }, 401);
+    }
+
+    const { data: authData, error: authError } = await admin.auth.getUser(
+      accessToken,
+    );
+    const user = authData.user;
+    if (
+      authError || !user?.email ||
+      user.user_metadata?.buffet_invitation_account !== true
+    ) {
+      return json(req, { error: "Prístup nie je povolený." }, 403);
+    }
+
+    const userClient = createUserClient(publishableKey, authorization);
+    if (!userClient) {
+      return json(req, { error: "Služba nie je nakonfigurovaná." }, 500);
+    }
+    const { data: snapshot, error: snapshotError } = await userClient.rpc(
+      "buffet_snapshot",
+    );
+    if (
+      snapshotError || snapshot?.member?.user_id !== user.id ||
+      snapshot.member.active !== true
+    ) {
+      return json(req, { error: "Prístup do Bufetu nie je aktívny." }, 403);
+    }
+
+    const { data: link, error: linkError } = await admin.auth.admin
+      .generateLink({ type: "magiclink", email: user.email });
+    if (
+      linkError || link?.user.id !== user.id || !link.properties.hashed_token
+    ) {
+      console.error("Buffet PWA transfer preparation failed", linkError);
+      return json(req, { error: "Prenos prihlásenia sa nepodaril." }, 500);
+    }
+    return json(req, { tokenHash: link.properties.hashed_token });
+  }
+
   const token = typeof body.token === "string" ? body.token.trim() : "";
   const displayName = typeof body.displayName === "string"
     ? body.displayName.replace(/\p{C}/gu, "").replace(/\s+/g, " ").trim()
     : "";
   if (!TOKEN_PATTERN.test(token) || !displayName || displayName.length > 80) {
     return json(req, { error: "Pozvánka alebo meno nie sú platné." }, 400);
-  }
-
-  const admin = createAdminClient(readServiceKey());
-  const publishableKey = readPublishableKey();
-  const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
-  if (!admin || !publishableKey || !supabaseUrl) {
-    return json(req, { error: "Služba nie je nakonfigurovaná." }, 500);
   }
 
   const { data: invitationValid, error: validationError } = await admin.rpc(
