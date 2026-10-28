@@ -112,6 +112,10 @@
   registration trigger queues each alert in `invitation.party_discord_notifications`;
   `register-party` sends immediately and `dispatch-message-cron` retries failures.
   Do not reintroduce n8n into this path.
+- Youth cancellation requests use the registered email and a one-hour signed
+  link from `register-party`; confirmation deletes only the unchanged registration.
+  The Cloudflare proxy is `functions/api/cancel-registration.js`. Keep the token
+  in the URL fragment and the signing key on the server.
 - The public Party food counter reads `GET register-party` so
   `invitation.party_registrations` remains the source of truth; Cloudflare KV is
   only a legacy availability fallback.

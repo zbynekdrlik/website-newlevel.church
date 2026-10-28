@@ -615,6 +615,20 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
                 Odoslať registráciu
               </button>
             </form>
+            <div class="registration-cancellation">
+              <button type="button" id="cancel-open" class="registration-text-button" aria-expanded="false" aria-controls="cancel-request-form">Už si prihlásený? Odhlás sa</button>
+              <form id="cancel-request-form" class="cancellation-form" hidden>
+                <label for="cancel-email">Registračný e-mail</label>
+                <input type="email" id="cancel-email" name="email" required autocomplete="email" inputmode="email" placeholder="tvoj@email.sk">
+                <p>Pošleme ti odkaz na potvrdenie odhlásenia.</p>
+                <button type="submit" id="cancel-request-submit">Poslať odhlasovací odkaz</button>
+              </form>
+              <div id="cancel-confirm" class="cancellation-confirm" hidden>
+                <p>Chceš sa odhlásiť z najbližšej Youth?</p>
+                <button type="button" id="cancel-confirm-submit">Potvrdiť odhlásenie</button>
+              </div>
+              <p id="cancel-feedback" class="cancellation-feedback" role="status" aria-live="polite" hidden></p>
+            </div>
           </div>
         </div>
       </div>
@@ -945,6 +959,76 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
     cursor: wait;
     opacity: 0.72;
     transform: none;
+  }
+
+  .registration-cancellation {
+    margin-top: 1.25rem;
+    text-align: center;
+  }
+
+  .registration-text-button {
+    border: 0;
+    background: none;
+    color: var(--party-ink);
+    padding: 0.35rem;
+    font: 800 0.88rem/1.4 Inter, system-ui, sans-serif;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+    cursor: pointer;
+  }
+
+  .cancellation-form,
+  .cancellation-confirm {
+    margin-top: 1rem;
+    text-align: left;
+  }
+
+  .cancellation-form[hidden],
+  .cancellation-confirm[hidden],
+  .cancellation-feedback[hidden] {
+    display: none;
+  }
+
+  .cancellation-form label {
+    display: block;
+    margin-bottom: 0.45rem;
+    font-size: 0.76rem;
+    font-weight: 900;
+    text-transform: uppercase;
+  }
+
+  .cancellation-form input {
+    width: 100%;
+    border: 2px solid var(--party-ink);
+    background: white;
+    padding: 0.95rem 1rem;
+    font: 700 0.95rem/1.35 var(--poster-mono);
+  }
+
+  .cancellation-form p,
+  .cancellation-confirm p,
+  .cancellation-feedback {
+    font: 700 0.88rem/1.45 Inter, system-ui, sans-serif;
+  }
+
+  .cancellation-form button,
+  .cancellation-confirm button {
+    border: 2px solid var(--party-ink);
+    background: var(--party-lime);
+    color: var(--party-ink);
+    padding: 0.75rem 1rem;
+    font: 900 0.85rem/1.2 Inter, system-ui, sans-serif;
+    cursor: pointer;
+  }
+
+  .cancellation-form button:disabled,
+  .cancellation-confirm button:disabled {
+    cursor: wait;
+    opacity: 0.7;
+  }
+
+  .cancellation-feedback {
+    margin: 0.9rem 0 0;
   }
 
   @media (max-width: 900px) {
@@ -3251,7 +3335,7 @@ function prefillRegistration(){
   if(phone&&!phone.value)phone.value=linkValue("phone")||saved?.phone||"";
   if(food&&saved)food.checked=Boolean(saved.food_registration);
 
-  const openedFromInvitation=Boolean(hashParams)||queryParams.has("prefill");
+  const openedFromInvitation=!hashParams?.has("cancel")&&(Boolean(hashParams)||queryParams.has("prefill"));
   if(openedFromInvitation){
     window.history.replaceState(null,"",`${window.location.pathname}${hashPrefix}`);
     window.requestAnimationFrame(()=>{
@@ -3279,6 +3363,101 @@ function saveRegistration(fd){
 }
 
 prefillRegistration();
+
+const cancelOpen=document.getElementById("cancel-open");
+const cancelRequestForm=document.getElementById("cancel-request-form");
+const cancelEmail=document.getElementById("cancel-email");
+const cancelRequestSubmit=document.getElementById("cancel-request-submit");
+const cancelConfirm=document.getElementById("cancel-confirm");
+const cancelConfirmSubmit=document.getElementById("cancel-confirm-submit");
+const cancelFeedback=document.getElementById("cancel-feedback");
+const cancelHash=window.location.hash.startsWith("#registracia?")
+  ?new URLSearchParams(window.location.hash.slice("#registracia?".length))
+  :null;
+let cancelToken=cancelHash?.get("cancel")||"";
+
+function showCancelFeedback(message){
+  if(!cancelFeedback)return;
+  cancelFeedback.textContent=message;
+  cancelFeedback.hidden=false;
+}
+
+if(cancelToken){
+  window.history.replaceState(null,"",`${window.location.pathname}${window.location.search}#registracia`);
+  if(cancelOpen)cancelOpen.hidden=true;
+  if(cancelConfirm)cancelConfirm.hidden=false;
+  window.requestAnimationFrame(()=>{
+    document.getElementById("registracia")?.scrollIntoView({block:"start"});
+    cancelConfirmSubmit?.focus({preventScroll:true});
+  });
+}
+
+cancelOpen?.addEventListener("click",()=>{
+  if(!cancelRequestForm)return;
+  cancelRequestForm.hidden=!cancelRequestForm.hidden;
+  cancelOpen.setAttribute("aria-expanded",String(!cancelRequestForm.hidden));
+  if(!cancelRequestForm.hidden){
+    cancelEmail.value=form?.querySelector('[name="email"]')?.value||getSavedRegistration()?.email||"";
+    cancelEmail.focus();
+  }
+});
+
+cancelRequestForm?.addEventListener("submit",async(e)=>{
+  e.preventDefault();
+  cancelRequestSubmit.disabled=true;
+  cancelFeedback.hidden=true;
+  try{
+    const response=await fetch("/api/cancel-registration",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({action:"request-cancellation",email:cancelEmail.value})
+    });
+    const data=await response.json();
+    if(!response.ok||!data.success)throw new Error(data.error||"Request failed");
+    cancelRequestForm.hidden=true;
+    cancelOpen.setAttribute("aria-expanded","false");
+    showCancelFeedback("Ak je tento e-mail prihlásený na najbližšiu Youth, poslali sme naň odhlasovací odkaz. Skontroluj aj spam.");
+  }catch(error){
+    console.error("Party cancellation link failed",error);
+    showCancelFeedback("Odkaz sa nepodarilo poslať. Skús to prosím znova neskôr.");
+  }finally{
+    cancelRequestSubmit.disabled=false;
+  }
+});
+
+cancelConfirmSubmit?.addEventListener("click",async()=>{
+  if(!cancelToken)return;
+  cancelConfirmSubmit.disabled=true;
+  cancelFeedback.hidden=true;
+  try{
+    const response=await fetch("/api/cancel-registration",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({action:"cancel",token:cancelToken})
+    });
+    const data=await response.json();
+    if(!response.ok||!data.success){
+      if(response.status===410){
+        cancelConfirm.hidden=true;
+        if(cancelOpen)cancelOpen.hidden=false;
+        showCancelFeedback("Odkaz už neplatí. Požiadaj o nový odhlasovací odkaz.");
+        return;
+      }
+      throw new Error(data.error||"Cancellation failed");
+    }
+    cancelToken="";
+    cancelConfirm.hidden=true;
+    if(cancelOpen)cancelOpen.hidden=false;
+    try{localStorage.removeItem(savedRegistrationKey);}catch{}
+    showCancelFeedback("Odhlásenie je hotové. Tvoju registráciu na najbližšiu Youth sme zrušili.");
+    window.dispatchEvent(new CustomEvent("party-counter-refresh"));
+  }catch(error){
+    console.error("Party cancellation failed",error);
+    showCancelFeedback("Odhlásenie sa nepodarilo. Skús to prosím znova.");
+  }finally{
+    cancelConfirmSubmit.disabled=false;
+  }
+});
 
 form?.addEventListener("submit",async(e)=>{
   e.preventDefault();

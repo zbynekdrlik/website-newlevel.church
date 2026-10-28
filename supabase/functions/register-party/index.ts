@@ -7,6 +7,11 @@ import {
   validateRequestBasics,
 } from "../_shared/contact.ts";
 import { dispatchPartyDiscordNotifications } from "../_shared/party_discord.ts";
+import { renderPartyEmailHtml, sendEmail } from "../_shared/email.ts";
+import {
+  createCancellationToken,
+  readCancellationToken,
+} from "./cancellation.ts";
 
 function nextFridayDate() {
   const now = new Date();
@@ -74,6 +79,124 @@ Deno.serve(async (req) => {
   }
 
   const body = parsed.data;
+  if (body.action === "request-cancellation") {
+    const email = typeof body.email === "string"
+      ? body.email.trim().toLowerCase()
+      : "";
+    if (
+      email.length > 254 ||
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+    ) {
+      return json(req, { success: false, error: "Invalid email" }, 400);
+    }
+    if (!Deno.env.get("RESEND_API_KEY") || !Deno.env.get("EMAIL_FROM")) {
+      return json(req, { success: false, error: "Email is unavailable" }, 503);
+    }
+
+    const eventDate = nextFridayDate();
+    const contact = await admin.schema("invitation").from("contacts")
+      .select("id").eq("email", email).maybeSingle();
+    if (contact.error) {
+      console.error("Party cancellation lookup failed", contact.error.code);
+      return json(
+        req,
+        { success: false, error: "Cancellation request failed" },
+        500,
+      );
+    }
+    if (contact.data) {
+      const event = await admin.schema("invitation").from("party_events")
+        .select("id").eq("event_date", eventDate).maybeSingle();
+      if (event.error) {
+        console.error(
+          "Party cancellation event lookup failed",
+          event.error.code,
+        );
+        return json(req, {
+          success: false,
+          error: "Cancellation request failed",
+        }, 500);
+      }
+      if (event.data) {
+        const registration = await admin.schema("invitation")
+          .from("party_registrations").select("id,registered_at")
+          .eq("event_id", event.data.id)
+          .eq("contact_id", contact.data.id).maybeSingle();
+        if (registration.error) {
+          console.error(
+            "Party cancellation registration lookup failed",
+            registration.error.code,
+          );
+          return json(req, {
+            success: false,
+            error: "Cancellation request failed",
+          }, 500);
+        }
+        if (registration.data) {
+          const token = await createCancellationToken({
+            registrationId: registration.data.id,
+            registeredAt: registration.data.registered_at,
+            eventDate,
+          }, readServiceKey());
+          const url =
+            `https://newlevel.church/youth/#registracia?cancel=${token}`;
+          const subject = "Odhlásenie z New Level Youth";
+          const message =
+            "Ak sa chceš odhlásiť z piatkovej Youth, otvor tento odkaz a potvrď odhlásenie. Odkaz platí 1 hodinu. Ak si o odhlásenie nepožiadal(a), tento e-mail ignoruj.";
+          const sent = await sendEmail(
+            email,
+            subject,
+            `${message}\n\n${url}`,
+            renderPartyEmailHtml(subject, message, {
+              ctaUrl: url,
+              ctaLabel: "Potvrdiť odhlásenie",
+              preheader: "Odkaz na odhlásenie z Youth",
+            }),
+            { timeoutMs: 10000 },
+          );
+          if (!sent.ok) {
+            console.error("Party cancellation email failed", sent.errorCode);
+          }
+        }
+      }
+    }
+    // The response does not reveal whether an address is registered.
+    return json(req, { success: true });
+  }
+
+  if (body.action === "cancel") {
+    const token = typeof body.token === "string" ? body.token : "";
+    const claim = await readCancellationToken(token, readServiceKey());
+    if (!claim) {
+      return json(
+        req,
+        { success: false, error: "Invalid or expired link" },
+        410,
+      );
+    }
+    const deleted = await admin.schema("invitation")
+      .from("party_registrations").delete()
+      .eq("id", claim.registrationId)
+      .eq("registered_at", claim.registeredAt)
+      .select("id").maybeSingle();
+    if (deleted.error) {
+      console.error("Party cancellation delete failed", deleted.error.code);
+      return json(req, { success: false, error: "Cancellation failed" }, 500);
+    }
+    if (!deleted.data) {
+      return json(
+        req,
+        { success: false, error: "Invalid or expired link" },
+        410,
+      );
+    }
+    return json(req, { success: true, eventDate: claim.eventDate });
+  }
+
+  if (body.action !== undefined) {
+    return json(req, { success: false, error: "Invalid action" }, 400);
+  }
+
   const eventDate = typeof body.eventDate === "string" && body.eventDate
     ? body.eventDate
     : nextFridayDate();
