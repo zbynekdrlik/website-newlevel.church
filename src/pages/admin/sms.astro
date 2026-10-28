@@ -762,6 +762,7 @@
         };
         state.selected.clear();
         renderContacts();
+        updateSegmentPreview();
         const visible = state.contacts.filter((contact) => contact.matches);
         const usable = visible.filter((contact) => isContactSendable(contact));
         const notRegistered = Math.max(0, state.audienceStats.total - state.audienceStats.selectedEventRegistrations);
@@ -965,7 +966,18 @@
           month: "long",
           timeZone: "Europe/Bratislava",
         }).format(eventDate);
-        return `v ${weekday} ${formattedDate} o 18:00`;
+        const startsAt = state.event?.event_date === value && state.event?.starts_at
+          ? new Date(state.event.starts_at)
+          : null;
+        const time = startsAt && !Number.isNaN(startsAt.getTime())
+          ? new Intl.DateTimeFormat("sk-SK", {
+            hour: "2-digit",
+            minute: "2-digit",
+            hourCycle: "h23",
+            timeZone: "Europe/Bratislava",
+          }).format(startsAt)
+          : "18:00";
+        return `v ${weekday} ${formattedDate} o ${time}`;
       }
 
       function formatWhatsAppTemplateDate() {

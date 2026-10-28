@@ -1,6 +1,7 @@
 import { json, readJsonBody } from "../_shared/contact.ts";
 import { requireAdmin } from "../_shared/admin.ts";
 import { buildRegistrationUrl } from "../_shared/registration_url.ts";
+import { partyEventLocalTimestamp } from "../_shared/party_event_time.ts";
 
 type QueueBody = {
   eventDate?: string;
@@ -102,8 +103,8 @@ Deno.serve(async (req) => {
     .upsert({
       event_date: eventDate,
       title: "New Level Party",
-      starts_at: `${eventDate}T16:00:00+02:00`,
-      registration_deadline: `${eventDate}T00:00:00+02:00`,
+      starts_at: partyEventLocalTimestamp(eventDate, "16:00"),
+      registration_deadline: partyEventLocalTimestamp(eventDate, "00:00"),
       status: "open",
     }, { onConflict: "event_date" })
     .select("id")

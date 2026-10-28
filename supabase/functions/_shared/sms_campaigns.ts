@@ -4,6 +4,7 @@ import {
   smsRecipientEligibility,
 } from "./infobip.ts";
 import { renderContactTemplate } from "./message_template.ts";
+import { partyEventLocalTimestamp } from "./party_event_time.ts";
 import { audienceMatches, type AudienceType } from "./audience.ts";
 
 export type SmsAudienceType = Exclude<AudienceType, "custom_selection">;
@@ -85,8 +86,8 @@ export async function getOrCreateSmsEvent(admin: any, value: {
     .upsert({
       event_date: eventDate,
       title: "New Level Party",
-      starts_at: `${eventDate}T18:00:00+02:00`,
-      registration_deadline: `${eventDate}T00:00:00+02:00`,
+      starts_at: partyEventLocalTimestamp(eventDate, "18:00"),
+      registration_deadline: partyEventLocalTimestamp(eventDate, "00:00"),
       status: "open",
     }, { onConflict: "event_date" })
     .select("id,event_date,title,starts_at,status")

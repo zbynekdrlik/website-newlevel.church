@@ -36,6 +36,7 @@ import {
   renderContactTemplate,
   whatsappTemplateHasFixedTime,
 } from "../_shared/message_template.ts";
+import { partyEventLocalTimestamp } from "../_shared/party_event_time.ts";
 import { audienceMatches, type AudienceType } from "../_shared/audience.ts";
 
 type MessageChannel = "sms" | "whatsapp" | "email";
@@ -365,8 +366,8 @@ async function getOrCreateEvent(admin: any, body: AdminSmsBody) {
     .upsert({
       event_date: eventDate,
       title: "New Level Party",
-      starts_at: `${eventDate}T18:00:00+02:00`,
-      registration_deadline: `${eventDate}T00:00:00+02:00`,
+      starts_at: partyEventLocalTimestamp(eventDate, "18:00"),
+      registration_deadline: partyEventLocalTimestamp(eventDate, "00:00"),
       status: "open",
     }, { onConflict: "event_date" })
     .select("id,event_date,title,starts_at,status")

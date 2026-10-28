@@ -97,6 +97,9 @@
   should follow the selected event.
 - Supabase returns `starts_at` timestamps normalized to UTC. Always format their
   time with the `Europe/Bratislava` time zone; never extract the raw ISO hour.
+  When creating `party_events`, use `partyEventLocalTimestamp` so the stored
+  offset follows daylight saving time on the event date; a fixed `+02:00`
+  makes winter invitations one hour early.
 - The currently used `youth_out` Meta template has the timing line `📅 {{2}}`
   with no static time. Parameter 2 must contain the complete localized event
   timing from `formatEventDate`, such as `v piatok 2. októbra o 18:00`.

@@ -1,6 +1,7 @@
 import { json, readJsonBody } from "../_shared/contact.ts";
 import { requireAdmin } from "../_shared/admin.ts";
 import { sendTextBeeSms } from "../_shared/textbee.ts";
+import { partyEventLocalTimestamp } from "../_shared/party_event_time.ts";
 
 type DispatchMessagesBody = {
   automationId?: string;
@@ -53,8 +54,8 @@ Deno.serve(async (req) => {
     .upsert({
       event_date: eventDate,
       title: "New Level Party",
-      starts_at: `${eventDate}T16:00:00+02:00`,
-      registration_deadline: `${eventDate}T00:00:00+02:00`,
+      starts_at: partyEventLocalTimestamp(eventDate, "16:00"),
+      registration_deadline: partyEventLocalTimestamp(eventDate, "00:00"),
       status: "open",
     }, { onConflict: "event_date" })
     .select("id")
@@ -102,11 +103,15 @@ Deno.serve(async (req) => {
     return json(req, { success: false, error: "Message log load failed" }, 500);
   }
 
-  const registered = new Set(registrations.map((row) => row.contact_id));
-  const alreadySent = new Set(sentLogs.map((row) => row.contact_id));
+  const registered = new Set(
+    registrations.map((row: { contact_id: string }) => row.contact_id),
+  );
+  const alreadySent = new Set(
+    sentLogs.map((row: { contact_id: string }) => row.contact_id),
+  );
   const candidates = contacts
-    .filter((contact) => !registered.has(contact.id))
-    .filter((contact) => !alreadySent.has(contact.id));
+    .filter((contact: { id: string }) => !registered.has(contact.id))
+    .filter((contact: { id: string }) => !alreadySent.has(contact.id));
 
   const results = [];
 
