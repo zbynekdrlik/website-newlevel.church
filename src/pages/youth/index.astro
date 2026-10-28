@@ -78,7 +78,7 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
         <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.4" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
       </filter>
     </svg>
-    <!-- Section 1: Hero Poster -->
+    <!-- Hero Poster -->
     <section
       class="poster-section hero-poster"
       id="party-hero"
@@ -142,7 +142,7 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
       })();
     </script>
 
-    <!-- Section 2: Quick Info Strip -->
+    <!-- Quick Info Strip -->
     <section class="poster-section info-strip-section">
       <div class="poster-wrap">
         <div class="quick-strip">
@@ -159,7 +159,7 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
       </div>
     </section>
 
-    <!-- Section 2.5: Reels -->
+    <!-- Reels -->
     <section id="reels" class="poster-section party-reels-section" aria-labelledby="party-reels-title">
       <div class="poster-wrap party-reels-layout">
         <div class="party-reels-header">
@@ -220,25 +220,7 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
       </div>
     </section>
 
-    <!-- Section 3: Weekly Food Menu -->
-    <section id="menu" class="poster-section menu-poster-section">
-      <div class="poster-wrap menu-layout">
-        <div class="poster-heading">
-          <h2>{page.menu.title}</h2>
-          <p>{page.menu.subtitle}</p>
-        </div>
-        <div class="menu-ticket">
-          <div class="menu-emoji" set:html={page.menu.emoji}></div>
-          <div>
-            <h3>{page.menu.dish}</h3>
-            <p>{page.menu.description}</p>
-          </div>
-          <a href="#party-form" class="poster-button">Registrovať sa na jedlo</a>
-        </div>
-      </div>
-    </section>
-
-    <!-- Section 3.5: Countdown Timer & Registration Counter -->
+    <!-- Countdown Timer & Registration Counter -->
     <section class="poster-section countdown-poster-section">
       <div class="poster-wrap countdown-layout">
         <div id="countdown-section" class="countdown-poster">
@@ -294,7 +276,7 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
       </div>
     </section>
 
-    <!-- Section 4: Activities Showcase -->
+    <!-- Activities Showcase -->
     <section id="aktivity" class="poster-section activities-poster-section">
       <div class="poster-wrap activities-layout">
         <div class="poster-heading">
@@ -324,7 +306,7 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
       </div>
     </section>
 
-    <!-- Section 5: Spotify Playlist -->
+    <!-- Spotify Playlist -->
     <section id="playlist" class="poster-section spotify-poster-section" aria-labelledby="spotify-playlist-title">
       <div class="poster-wrap spotify-layout">
         <div class="spotify-header">
@@ -489,7 +471,7 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
       })();
     </script>
 
-    <!-- Section 6: Photo Gallery -->
+    <!-- Photo Gallery -->
     <section class="poster-section gallery-poster-section">
       <div class="poster-wrap">
         <div class="gallery-layout">
@@ -530,7 +512,7 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
     </div>
   </div>
 
-    <!-- Section 7: Registration Form -->
+    <!-- Registration Form -->
     <section id="registracia" class="registration-poster-section">
       <div class="registration-poster-noise" aria-hidden="true"></div>
       <div class="registration-poster-wrap">
@@ -635,7 +617,7 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
     </div>
     </section>
 
-    <!-- Section 8: CTA Banner -->
+    <!-- CTA Banner -->
     <section class="poster-section final-cta-section">
       <div class="poster-wrap final-cta-layout">
         <div>
@@ -1159,7 +1141,6 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
 
   .poster-heading h2,
   .hero-copy h1,
-  .menu-ticket h3,
   .countdown-poster h2,
   .deadline-poster h2,
   .final-cta-layout h2 {
@@ -1193,10 +1174,6 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
     line-height: 1.2;
     box-shadow: 5px 5px 0 var(--party-ink);
     transform: rotate(-1deg);
-  }
-
-  .menu-layout .poster-heading h2 {
-    max-width: 9ch;
   }
 
   .countdown-poster .poster-heading h2 {
@@ -1528,7 +1505,6 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
     line-height: 1.18;
   }
 
-  .menu-poster-section,
   .party-reels-section,
   .activities-poster-section,
   .spotify-poster-section,
@@ -1817,67 +1793,6 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
     font-size: 0.78rem;
     line-height: 1;
     white-space: nowrap;
-  }
-
-  .menu-layout {
-    display: grid;
-    grid-template-columns: minmax(260px, 0.78fr) minmax(0, 1fr);
-    gap: clamp(1.5rem, 4vw, 4rem);
-    align-items: center;
-  }
-
-  .menu-ticket {
-    position: relative;
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    gap: 1.1rem 1.4rem;
-    align-items: center;
-    border: 0;
-    background: transparent;
-    padding: 0;
-    box-shadow: none;
-    transform: none;
-  }
-
-  .menu-ticket > div {
-    min-width: 0;
-  }
-
-  .menu-ticket::after {
-    content: none;
-  }
-
-  .menu-emoji {
-    display: grid;
-    width: 3.5rem;
-    height: 3.5rem;
-    place-items: center;
-    border: 0;
-    background: transparent;
-    font-size: 2.7rem;
-  }
-
-  .menu-ticket h3 {
-    margin: 0;
-    color: var(--party-purple);
-    font-size: 5rem;
-    line-height: 1.12;
-    text-wrap: balance;
-    overflow-wrap: anywhere;
-  }
-
-  .menu-ticket p {
-    margin: 0.55rem 0 0;
-    color: var(--party-ink);
-    font-family: var(--poster-mono);
-    font-size: 1rem;
-    font-weight: 700;
-    line-height: 1.25;
-  }
-
-  .menu-ticket .poster-button {
-    grid-column: 1 / -1;
-    justify-self: start;
   }
 
   .countdown-poster-section {
@@ -2372,7 +2287,6 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
   }
 
   @media (max-width: 980px) {
-    .menu-layout,
     .countdown-layout,
     .gallery-layout,
     .final-cta-layout {
@@ -2486,11 +2400,6 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
       max-width: 6.75ch;
       font-size: 4.45rem;
       line-height: 1.02;
-    }
-
-    .menu-layout .poster-heading h2 {
-      max-width: 8.8ch;
-      font-size: 4.2rem;
     }
 
     .countdown-poster .poster-heading h2 {
@@ -2707,66 +2616,6 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
       content: none;
     }
 
-    .menu-ticket {
-      grid-template-columns: 2.75rem minmax(0, 1fr);
-      width: 100%;
-      max-width: 100%;
-      overflow: visible;
-      gap: 0.35rem 0.7rem;
-      padding: 0;
-      transform: none;
-    }
-
-    .menu-poster-section {
-      padding: 2.25rem 0;
-    }
-
-    .menu-layout {
-      gap: 1.15rem;
-    }
-
-    .menu-layout .poster-heading h2 {
-      display: inline-block;
-      max-width: none;
-      padding: 0.3rem 0.45rem;
-      background: var(--party-lime);
-      font-family: var(--poster-mono);
-      font-size: 0.78rem;
-      line-height: 1;
-      box-shadow: 4px 4px 0 var(--party-ink);
-      white-space: nowrap;
-    }
-
-    .menu-layout .poster-heading p {
-      display: none;
-    }
-
-    .menu-emoji {
-      width: 2.75rem;
-      height: 2.75rem;
-      font-size: 2.2rem;
-    }
-
-    .menu-ticket h3 {
-      max-width: 100%;
-      font-size: clamp(2rem, 9.5vw, 2.5rem);
-      line-height: 1;
-      overflow-wrap: anywhere;
-      word-break: break-word;
-    }
-
-    .menu-ticket p {
-      margin-top: 0.25rem;
-      font-size: 0.82rem;
-      line-height: 1.15;
-    }
-
-    .menu-ticket .poster-button {
-      grid-column: 1 / -1;
-      width: min(100%, 20rem);
-      margin-top: 0.45rem;
-    }
-
     .countdown-grid {
       grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 0;
@@ -2975,17 +2824,8 @@ const instagramIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 
       font-size: 3.8rem;
     }
 
-    .menu-layout .poster-heading h2 {
-      max-width: none;
-      font-size: 0.74rem;
-    }
-
     .quick-strip-item h2 {
       font-size: 1.55rem;
-    }
-
-    .menu-ticket h3 {
-      font-size: 2.1rem;
     }
 
     .countdown-poster .poster-heading h2 {
