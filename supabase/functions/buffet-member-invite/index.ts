@@ -245,12 +245,19 @@ Deno.serve(async (req) => {
     origin,
     Deno.env.get("SUPABASE_URL") ?? "",
   );
-  if (createError || !created.user || !link) {
+  if (createError || !created.user) {
     console.error("Buffet invitation user creation failed", createError);
     return json(req, {
       error:
-        "Pozvánku sa nepodarilo vytvoriť. Ak už tento e-mail má účet New Level alebo Bufet, prihláste sa e-mailom a heslom. Inak kontaktujte správcu.",
+        "Účet pre túto pozvánku sa nepodarilo vytvoriť. Kontaktujte správcu.",
     }, 400);
+  }
+  if (!link) {
+    console.error("Buffet invitation Auth redirect rejected");
+    return json(req, {
+      error:
+        "Prihlasovací odkaz nie je správne nastavený. Kontaktujte správcu.",
+    }, 500);
   }
 
   const sent = await sendAuthEmail(
