@@ -1,14 +1,29 @@
-import { createClient } from "npm:@supabase/supabase-js@2";
-import { createInvitationCredentials } from "./credentials.ts";
 import {
   createAdminClient,
   createUserClient,
   readPublishableKey,
   readServiceKey,
 } from "../_shared/contact.ts";
+import { sendEmail } from "../_shared/email.ts";
+import { actionLink } from "./auth_links.ts";
 
 const TOKEN_PATTERN = /^[0-9a-f]{64}$/;
 const MAX_BODY_BYTES = 4096;
+
+async function sendAuthEmail(
+  email: string,
+  subject: string,
+  introduction: string,
+  link: string,
+) {
+  const safeLink = link.replaceAll("&", "&amp;").replaceAll('"', "&quot;");
+  return await sendEmail(
+    email,
+    subject,
+    `${introduction}\n\n${link}\n\nOdkaz sa dá použiť iba raz.`,
+    `<p>${introduction}</p><p><a href="${safeLink}">Otvoriť Bufet</a></p><p>Odkaz sa dá použiť iba raz.</p>`,
+  );
+}
 
 function allowedOrigins() {
   return new Set([
@@ -42,14 +57,6 @@ function json(req: Request, body: unknown, status = 200) {
       "Cache-Control": "no-store",
     },
   });
-}
-
-async function deleteUser(
-  admin: NonNullable<ReturnType<typeof createAdminClient>>,
-  userId: string,
-) {
-  const { error } = await admin.auth.admin.deleteUser(userId);
-  if (error) console.error("Failed to clean up Buffet invitation user", error);
 }
 
 Deno.serve(async (req) => {
@@ -86,9 +93,65 @@ Deno.serve(async (req) => {
 
   const admin = createAdminClient(readServiceKey());
   const publishableKey = readPublishableKey();
-  const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
-  if (!admin || !publishableKey || !supabaseUrl) {
+  if (!admin || !publishableKey) {
     return json(req, { error: "Služba nie je nakonfigurovaná." }, 500);
+  }
+
+  if (body.action === "request-password-reset") {
+    const email = typeof body.email === "string"
+      ? body.email.trim().toLowerCase()
+      : "";
+    if (email.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      const { data: eligible, error: lookupError } = await admin.rpc(
+        "buffet_claim_password_reset",
+        { p_email: email },
+      );
+      if (lookupError) {
+        console.error(
+          "Buffet password reset membership lookup failed",
+          lookupError,
+        );
+        return json(
+          req,
+          { error: "Obnovu hesla sa nepodarilo pripraviť." },
+          500,
+        );
+      }
+      if (eligible === true) {
+        const { data: recovery, error: linkError } = await admin.auth.admin
+          .generateLink({
+            type: "recovery",
+            email,
+            options: { redirectTo: origin },
+          });
+        const link = actionLink(
+          recovery?.properties?.action_link,
+          "recovery",
+          origin,
+          Deno.env.get("SUPABASE_URL") ?? "",
+        );
+        if (
+          linkError || !link || recovery?.user.email?.toLowerCase() !== email
+        ) {
+          console.error("Buffet password recovery link failed", linkError);
+        } else {
+          const sent = await sendAuthEmail(
+            email,
+            "Obnova hesla do Bufetu",
+            "Požiadali ste o nové heslo do Bufetu. Otvorte odkaz a nastavte si ho.",
+            link,
+          );
+          if (!sent.ok) {
+            console.error(
+              "Buffet password recovery email failed",
+              sent.errorCode,
+              sent.errorMessage,
+            );
+          }
+        }
+      }
+    }
+    return json(req, { sent: true });
   }
 
   if (body.action === "prepare-pwa") {
@@ -138,8 +201,14 @@ Deno.serve(async (req) => {
   const displayName = typeof body.displayName === "string"
     ? body.displayName.replace(/\p{C}/gu, "").replace(/\s+/g, " ").trim()
     : "";
-  if (!TOKEN_PATTERN.test(token) || !displayName || displayName.length > 80) {
-    return json(req, { error: "Pozvánka alebo meno nie sú platné." }, 400);
+  const email = typeof body.email === "string"
+    ? body.email.trim().toLowerCase()
+    : "";
+  if (
+    !TOKEN_PATTERN.test(token) || !displayName || displayName.length > 80 ||
+    email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+  ) {
+    return json(req, { error: "Skontrolujte pozvánku, meno a e-mail." }, 400);
   }
 
   const { data: invitationValid, error: validationError } = await admin.rpc(
@@ -158,28 +227,47 @@ Deno.serve(async (req) => {
     );
   }
 
-  const { email, password } = createInvitationCredentials();
   const { data: created, error: createError } = await admin.auth.admin
-    .createUser({
+    .generateLink({
+      type: "invite",
       email,
-      password,
-      email_confirm: true,
-      user_metadata: { buffet_invitation_account: true },
+      options: {
+        redirectTo: origin,
+        data: {
+          buffet_invitation_account: true,
+          buffet_password_setup_pending: true,
+        },
+      },
     });
-  if (createError || !created.user) {
+  const link = actionLink(
+    created?.properties?.action_link,
+    "invite",
+    origin,
+    Deno.env.get("SUPABASE_URL") ?? "",
+  );
+  if (createError || !created.user || !link) {
     console.error("Buffet invitation user creation failed", createError);
-    return json(req, { error: "Účet sa nepodarilo vytvoriť." }, 500);
+    return json(req, {
+      error:
+        "Pozvánku sa nepodarilo poslať. Skontrolujte e-mail alebo kontaktujte správcu.",
+    }, 400);
   }
 
-  const userClient = createClient(supabaseUrl, publishableKey, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  });
-  const { data: signedIn, error: signInError } = await userClient.auth
-    .signInWithPassword({ email, password });
-  if (signInError || !signedIn.session) {
-    console.error("Buffet invitation sign-in failed", signInError);
-    await deleteUser(admin, created.user.id);
-    return json(req, { error: "Účet sa nepodarilo prihlásiť." }, 500);
+  const sent = await sendAuthEmail(
+    email,
+    "Pozvánka do Bufetu",
+    "Boli ste pozvaní do Bufetu. Otvorte odkaz, potvrďte svoj e-mail a nastavte si heslo.",
+    link,
+  );
+  if (!sent.ok) {
+    console.error(
+      "Buffet invitation email failed",
+      sent.errorCode,
+      sent.errorMessage,
+    );
+    return json(req, {
+      error: "E-mail sa nepodarilo odoslať. Skúste to neskôr.",
+    }, 502);
   }
 
   const { error: redeemError } = await admin.rpc(
@@ -192,7 +280,6 @@ Deno.serve(async (req) => {
   );
   if (redeemError) {
     console.error("Buffet invitation redemption failed", redeemError);
-    await deleteUser(admin, created.user.id);
     return json(
       req,
       { error: "Pozvánka už bola použitá alebo jej skončila platnosť." },
@@ -200,8 +287,5 @@ Deno.serve(async (req) => {
     );
   }
 
-  return json(req, {
-    accessToken: signedIn.session.access_token,
-    refreshToken: signedIn.session.refresh_token,
-  });
+  return json(req, { sent: true });
 });
