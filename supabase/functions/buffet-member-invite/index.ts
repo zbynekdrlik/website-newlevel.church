@@ -249,7 +249,7 @@ Deno.serve(async (req) => {
     console.error("Buffet invitation user creation failed", createError);
     return json(req, {
       error:
-        "Pozvánku sa nepodarilo poslať. Skontrolujte e-mail alebo kontaktujte správcu.",
+        "Pozvánku sa nepodarilo vytvoriť. Ak už tento e-mail má účet New Level alebo Bufet, prihláste sa e-mailom a heslom. Inak kontaktujte správcu.",
     }, 400);
   }
 
