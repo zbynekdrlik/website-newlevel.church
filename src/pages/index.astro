@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import UpcomingEvents from '../components/UpcomingEvents.astro';
 import hero from '../content/homepage/hero.json';
 import aboutPreview from '../content/homepage/about-preview.json';
 import values from '../content/homepage/values.json';
@@ -122,6 +123,8 @@ const latestVideosEmbedUrl = `https://www.youtube-nocookie.com/embed/videoseries
       </aside>
     </div>
   </section>
+
+  <UpcomingEvents />
 
   <section class="editorial-section editorial-section--black editorial-values">
     <div class="editorial-jagged editorial-jagged--black editorial-jagged--top" aria-hidden="true"></div>

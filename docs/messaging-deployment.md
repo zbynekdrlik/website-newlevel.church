@@ -12,7 +12,7 @@ supabase secrets set SUPABASE_SERVICE_ROLE_KEY="..."
 supabase secrets set SUPABASE_PUBLISHABLE_KEY="..."
 supabase secrets set ADMIN_EMAILS="admin@example.com"
 supabase secrets set ADMIN_SMS_KEY="long-random-admin-sms-key"
-supabase secrets set ALLOWED_ORIGINS="https://newlevel.church,http://localhost:4321"
+supabase secrets set ALLOWED_ORIGINS="https://newlevel.church,https://www.newlevel.church"
 supabase secrets set DEFAULT_PHONE_COUNTRY_CODE="+421"
 supabase secrets set CRON_SECRET="long-random-secret"
 supabase secrets set RESEND_API_KEY="re_..."
@@ -25,6 +25,9 @@ supabase secrets set SMS_TEST_ALLOWED_NUMBERS="+421..."
 supabase secrets set WHATSAPP_ACCESS_TOKEN="..."
 supabase secrets set WHATSAPP_PHONE_NUMBER_ID="..."
 ```
+
+Add `http://localhost:4321` to `ALLOWED_ORIGINS` only when testing browser
+requests from the local development site.
 
 Discord notifications for new Party registrations use an incoming webhook that
 targets the `PARTY registracia` thread. Configure it without writing the secret

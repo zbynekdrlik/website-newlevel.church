@@ -1,0 +1,85 @@
+---
+import upcomingEvents from '../content/homepage/upcoming-events.json';
+---
+
+<section class="editorial-section editorial-events" id="akcie" aria-labelledby="events-heading" data-upcoming-events>
+  <div class="editorial-shell">
+    <div class="editorial-events__heading">
+      <div>
+        <p class="editorial-kicker">// STRETNIME SA</p>
+        <h2 class="editorial-display editorial-section__title" id="events-heading">NAJBLIŽŠIE <span>AKCIE.</span></h2>
+      </div>
+      <p class="editorial-copy">Vyberte si stretnutie a príďte medzi nás. Tešíme sa na vás v Spišskej Novej Vsi.</p>
+    </div>
+
+    <div class="editorial-events__list" data-event-list>
+      {upcomingEvents.events.map((event) => (
+        <a class="editorial-event" href={event.url} data-weekday={event.weekday} data-time={event.time}>
+          <span class="editorial-event__date" aria-hidden="true">
+            <strong data-event-day>{event.dayLabel.slice(0, 2).toUpperCase()}</strong>
+            <span data-event-month>Každý týždeň</span>
+          </span>
+          <span class="editorial-event__content">
+            <strong class="editorial-event__title">{event.title}</strong>
+            <span class="editorial-event__description">{event.description}</span>
+          </span>
+          <span class="editorial-event__when">
+            <time data-event-datetime>{event.dayLabel} · {event.time}</time>
+            <span>Letná 31/26, SNV</span>
+          </span>
+          <span class="editorial-event__link">{event.linkLabel}<span aria-hidden="true">↗</span></span>
+        </a>
+      ))}
+    </div>
+  </div>
+</section>
+
+<script>
+  const eventsSection = document.querySelector<HTMLElement>('[data-upcoming-events]');
+  const eventsList = eventsSection?.querySelector<HTMLElement>('[data-event-list]');
+
+  function updateUpcomingEvents() {
+    if (!eventsList) return;
+
+    const nowParts = new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Europe/Bratislava',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hourCycle: 'h23',
+    }).formatToParts(new Date());
+    const part = (type: string) => Number(nowParts.find((entry) => entry.type === type)?.value);
+    const today = Date.UTC(part('year'), part('month') - 1, part('day'));
+    const weekday = new Date(today).getUTCDay();
+    const currentMinutes = part('hour') * 60 + part('minute');
+    const monthFormatter = new Intl.DateTimeFormat('sk-SK', { month: 'long', timeZone: 'UTC' });
+
+    const events = Array.from(eventsList.querySelectorAll<HTMLElement>('.editorial-event'))
+      .map((element) => {
+        const [hour, minute] = (element.dataset.time ?? '0:00').split(':').map(Number);
+        let days = (Number(element.dataset.weekday) - weekday + 7) % 7;
+        if (days === 0 && hour * 60 + minute <= currentMinutes) days = 7;
+        const date = new Date(today + days * 86_400_000);
+        return { element, date, sortTime: date.getTime() + (hour * 60 + minute) * 60_000 };
+      })
+      .sort((first, second) => first.sortTime - second.sortTime);
+
+    for (const { element, date } of events) {
+      const day = element.querySelector<HTMLElement>('[data-event-day]');
+      const month = element.querySelector<HTMLElement>('[data-event-month]');
+      const time = element.querySelector<HTMLTimeElement>('[data-event-datetime]');
+
+      if (day) day.textContent = String(date.getUTCDate()).padStart(2, '0');
+      if (month) month.textContent = monthFormatter.format(date);
+      if (time) time.dateTime = `${date.toISOString().slice(0, 10)}T${element.dataset.time}`;
+      eventsList.append(element);
+    }
+  }
+
+  updateUpcomingEvents();
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) updateUpcomingEvents();
+  });
+</script>

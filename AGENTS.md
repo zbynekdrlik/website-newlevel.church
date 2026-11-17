@@ -30,6 +30,10 @@
   independent boolean grants. Only active admins set these grants; admin access
   is implicit. RPCs and photo Storage RLS must enforce current grants and active
   membership. Existing/new sellers retain sales/meetings access by default.
+  `20261022180000_buffet_member_invite_permission.sql` adds the independent
+  `can_invite_members` grant. It allows active sellers to create one-time links
+  without access to member lists, deactivation, or permission editing; only
+  admins assign the grant. Apply it before deploying the matching Bufet UI.
   Optional inventory tracking is in `20261019160000_buffet_optional_stock.sql`:
   `products.track_stock` defaults true and `sales.stock_tracked` snapshots whether
   inventory was consumed. Reversal must use the sale's snapshot even after a
@@ -40,7 +44,23 @@
   consumed stock from `stock_tracked`, preserves restocks/audit rows, and records
   `cancelled_at`/`cancelled_by` with terminal `closed_at`. Retries are no-ops;
   closed meetings remain immutable. All reports must exclude cancelled meetings.
+  `20261022120000_buffet_stock_adjustments.sql` adds audited signed stock changes
+  through `public.buffet_adjust_stock` with the existing `can_restock` grant,
+  product row locks, nonnegative stock and UUID replay safety. Legacy restocks
+  remain positive-only. Apply it before deploying the matching Bufet stock UI.
   Regression tests live in the Bufet sibling's `tests/test_database.sh`.
+  `20261025120000_buffet_purchases.sql` groups sale lines under a purchase UUID;
+  its new record/reversal RPCs keep all lines atomic, check the displayed total,
+  and preserve safe retries. Apply this reviewed migration before the Bufet cart UI.
+  `20261112130000_buffet_snapshot_performance.sql` pages the frequently
+  refreshed Bufet snapshot by 30 complete purchase groups; member-only
+  `public.buffet_sales_page` fetches older groups with a keyset cursor. Apply it
+  only after the compatible Bufet frontend is live.
+  `20261113130000_buffet_unpaid_orders.sql` adds named unpaid purchases. Stock is
+  consumed when the order is issued, while payment is counted only on the open
+  meeting where the debt is settled. The private order table and member-only RPCs
+  keep customer names out of direct Data API access. Review and apply the migration
+  separately before using the feature in the Bufet frontend.
   Hosted Storage allows updating policy conditions, but renaming a policy on
   `storage.objects` fails with an owner error for the CLI migration role; retain
   the existing policy names when changing their conditions.
@@ -52,6 +72,10 @@
   `activityPhotosByTitle` in the page.
 - Homepage hero photos in `src/content/homepage/hero.json` fill the viewport;
   use large originals, not the 600×400 gallery thumbnails in `public/images/uploads/`.
+- The homepage upcoming-events section reads recurring meetings from
+  `src/content/homepage/upcoming-events.json`; its dates are calculated in the
+  browser in `Europe/Bratislava` so a static deployment does not go stale.
+  Keep its meeting times aligned with the contact and Youth pages.
 
 ## Messaging architecture
 
@@ -143,6 +167,9 @@
   mutations go through `supabase/functions/dishwasher-roster/index.ts` using the
   `DISHWASHER_STAFF_KEY` secret. The static page must never receive the
   service-role key.
+- Production serves both `newlevel.church` and `www.newlevel.church`. Include
+  both HTTPS origins in the Supabase `ALLOWED_ORIGINS` secret so browser requests
+  to the staff roster and other Edge Functions pass origin validation.
 - Roster tables use the `invitation.dishwasher_*` prefix. Only `pending` and
   `confirmed` assignments occupy a shift position; declined/replaced rows are
   retained as history.
