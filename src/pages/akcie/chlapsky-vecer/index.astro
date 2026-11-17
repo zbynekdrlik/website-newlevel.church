@@ -26,6 +26,7 @@ const dateLabel = date.charAt(0).toUpperCase() + date.slice(1);
         <div>
           <p class="event-page__kicker">// NEW LEVEL CHURCH · SPIŠSKÁ NOVÁ VES</p>
           <h1 class="event-page__title">CHLAPSKÝ<br /><span>VEČER.</span><small>SNV</small></h1>
+          <p class="event-page__tagline">{event.tagline}</p>
           <p class="event-page__lead">{event.description}</p>
           <p class="event-page__details"><strong>{dateLabel} o {event.time}</strong><br />{event.venue}, {event.address}</p>
 
@@ -78,7 +79,8 @@ const dateLabel = date.charAt(0).toUpperCase() + date.slice(1);
   .event-page__title { margin: 0; font-family: 'Barlow Condensed', sans-serif; font-size: clamp(4.3rem, 8vw, 8rem); font-weight: 900; letter-spacing: -0.045em; line-height: 0.85; }
   .event-page__title span { color: var(--color-primary); }
   .event-page__title small { display: block; margin-top: 0.8rem; color: #050505; font-family: 'Space Mono', monospace; font-size: 0.85rem; letter-spacing: 0.16em; line-height: 1.5; }
-  .event-page__lead { max-width: 34rem; margin: 1.7rem 0 0; font-size: clamp(1.1rem, 2vw, 1.4rem); line-height: 1.55; }
+  .event-page__tagline { margin: 1.7rem 0 0.45rem; font-size: clamp(1.3rem, 2vw, 1.6rem); font-weight: 700; line-height: 1.4; }
+  .event-page__lead { max-width: 34rem; margin: 0; font-size: clamp(1.1rem, 2vw, 1.4rem); line-height: 1.55; }
   .event-page__details { margin: 1.3rem 0 0; font-family: 'Space Mono', monospace; font-size: 0.8rem; line-height: 1.8; }
   .event-page__details strong { color: var(--color-primary); }
   .event-page__registration { margin-top: clamp(3rem, 6vw, 5rem); padding-top: 2rem; border-top: 2px solid #050505; scroll-margin-top: 7rem; }

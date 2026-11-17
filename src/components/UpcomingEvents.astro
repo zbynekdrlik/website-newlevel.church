@@ -37,11 +37,12 @@ function formatEventDate(value: string) {
               {formatEventDate(event.date)} <span aria-hidden="true">/</span> {event.time}
             </time>
             <h3 class="editorial-display editorial-event__title">{event.title}</h3>
+            <p class="editorial-event__tagline">{event.tagline}</p>
             <p class="editorial-event__description">{event.description}</p>
             <p class="editorial-event__venue"><strong>{event.venue}</strong><br />{event.address}<br /><a href={event.url}>Mapa a kontakt ↗</a></p>
             <div class="editorial-event__actions">
-              <a class="editorial-button editorial-button--dark" href={event.registrationUrl}>Prihlásiť sa <span aria-hidden="true">↗</span></a>
-              <a class="editorial-text-link" href={event.image} target="_blank" rel="noopener noreferrer">Zobraziť plagát <span aria-hidden="true">↗</span></a>
+              <a class="editorial-button editorial-button--dark" href={event.detailsUrl}>Viac o akcii <span aria-hidden="true">↗</span></a>
+              <a class="editorial-text-link" href={event.registrationUrl}>Registrovať sa <span aria-hidden="true">↗</span></a>
             </div>
           </div>
         </article>

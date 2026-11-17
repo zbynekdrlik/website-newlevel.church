@@ -571,6 +571,13 @@
   font-size: clamp(3.2rem, 6vw, 6rem);
 }
 
+.editorial-event__tagline {
+  margin: 0 0 0.45rem;
+  font-size: clamp(1.15rem, 1.8vw, 1.5rem);
+  font-weight: 700;
+  line-height: 1.35;
+}
+
 .editorial-event__description {
   max-width: 32rem;
   margin: 0;
