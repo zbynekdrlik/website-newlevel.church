@@ -23,6 +23,7 @@ function discordPayload(
   registration: Registration,
   event: SiteEvent,
   generation: number,
+  count: number | null,
 ) {
   const startsAt = new Intl.DateTimeFormat("sk-SK", {
     weekday: "long",
@@ -64,6 +65,11 @@ function discordPayload(
           inline: true,
         },
         { name: "Termín", value: startsAt, inline: true },
+        {
+          name: "Aktuálne prihlásených",
+          value: count === null ? "nedostupné" : String(count),
+          inline: true,
+        },
       ],
       timestamp: new Date().toISOString(),
     }],
@@ -109,6 +115,15 @@ export async function dispatchSiteEventDiscordNotifications(
         throw new Error("event_unavailable");
       }
 
+      const count = await admin.schema("invitation")
+        .from("site_event_registrations")
+        .select("id", { count: "exact", head: true })
+        .eq("event_id", registration.event_id);
+      const registrationCount = count.error || count.count == null ||
+          !Number.isSafeInteger(Number(count.count))
+        ? null
+        : Number(count.count);
+
       const webhookUrl = Deno.env.get("DISCORD_PARTY_WEBHOOK_URL")?.trim();
       if (!webhookUrl) throw new Error("webhook_not_configured");
 
@@ -119,6 +134,7 @@ export async function dispatchSiteEventDiscordNotifications(
           registration as Registration,
           event as SiteEvent,
           notification.generation,
+          registrationCount,
         )),
         signal: AbortSignal.timeout(10000),
       });

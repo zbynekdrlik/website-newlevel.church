@@ -82,8 +82,10 @@
   table and Discord outbox are created by
   `20261117120000_site_event_registrations.sql`; the Edge Function sends an
   immediate notification and `dispatch-message-cron` retries failures using
-  the same `DISCORD_PARTY_WEBHOOK_URL` as Youth. Apply the migration before
-  deploying both Edge Functions and then the website.
+  the same `DISCORD_PARTY_WEBHOOK_URL` as Youth. Discord shows the total number
+  of registration rows for that event, including people who declined food;
+  repeated submissions with the same email update one row. Apply the migration
+  before deploying both Edge Functions and then the website.
 
 ## Messaging architecture
 
