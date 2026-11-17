@@ -85,7 +85,10 @@
   the same `DISCORD_PARTY_WEBHOOK_URL` as Youth. Discord shows the total number
   of registration rows for that event, including people who declined food;
   repeated submissions with the same email update one row. Apply the migration
-  before deploying both Edge Functions and then the website.
+  before deploying both Edge Functions and then the website. The event's
+  registration deadline is 18 November 2026 at 20:00 Bratislava time, set by
+  `20261117190000_site_event_registration_deadline.sql` and mirrored in the
+  homepage event data for the form's closed state.
 
 ## Messaging architecture
 

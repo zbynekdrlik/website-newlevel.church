@@ -29,6 +29,7 @@ const dateLabel = date.charAt(0).toUpperCase() + date.slice(1);
           <p class="event-page__tagline">{event.tagline}</p>
           <p class="event-page__lead">{event.description}</p>
           <p class="event-page__details"><strong>{dateLabel} o {event.time}</strong><br />{event.venue}, {event.address}</p>
+          <p class="event-page__deadline">Prihlasovanie sa končí v stredu 18. novembra o 20:00.</p>
 
           <section class="event-page__registration" id="prihlaska" aria-labelledby="registration-heading">
             <h2 id="registration-heading">PRIHLÁŠKA</h2>
@@ -36,7 +37,7 @@ const dateLabel = date.charAt(0).toUpperCase() + date.slice(1);
             <p class="event-page__feedback" id="event-form-feedback" role="status" tabindex="-1" hidden></p>
             <p class="event-page__closed" id="event-form-closed" hidden>Prihlasovanie na túto akciu je ukončené.</p>
 
-            <form id="event-registration-form" data-event-slug={event.slug} data-event-date={event.date}>
+            <form id="event-registration-form" data-event-slug={event.slug} data-registration-closes-at={event.registrationClosesAt}>
               <div class="event-page__field">
                 <label for="event-name">Meno</label>
                 <input id="event-name" name="name" type="text" autocomplete="name" minlength="2" maxlength="120" required />
@@ -83,6 +84,7 @@ const dateLabel = date.charAt(0).toUpperCase() + date.slice(1);
   .event-page__lead { max-width: 34rem; margin: 0; font-size: clamp(1.1rem, 2vw, 1.4rem); line-height: 1.55; }
   .event-page__details { margin: 1.3rem 0 0; font-family: 'Space Mono', monospace; font-size: 0.8rem; line-height: 1.8; }
   .event-page__details strong { color: var(--event-accent); }
+  .event-page__deadline { margin: 1rem 0 0; font-weight: 700; }
   .event-page__registration { margin-top: clamp(3rem, 6vw, 5rem); padding-top: 2rem; border-top: 2px solid #050505; scroll-margin-top: 7rem; }
   .event-page__registration h2 { margin: 0; font-family: 'Barlow Condensed', sans-serif; font-size: clamp(2.6rem, 5vw, 4rem); font-weight: 900; line-height: 1; }
   .event-page__registration > p:not(.event-page__feedback):not(.event-page__closed) { margin: 0.7rem 0 2rem; color: #404040; }
@@ -126,18 +128,19 @@ const dateLabel = date.charAt(0).toUpperCase() + date.slice(1);
   }
 
   if (form && closed && submit) {
-    const parts = new Intl.DateTimeFormat('en-GB', {
-      timeZone: 'Europe/Bratislava',
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-    }).formatToParts(new Date());
-    const part = (type: string) => parts.find((entry) => entry.type === type)?.value ?? '';
-    const today = [part('year'), part('month'), part('day')].join('-');
-    if (today > (form.dataset.eventDate ?? '')) {
-      form.hidden = true;
-      closed.hidden = false;
+    const closesAt = Date.parse(form.dataset.registrationClosesAt ?? '');
+    const updateRegistrationAvailability = () => {
+      const isClosed = Number.isFinite(closesAt) && Date.now() >= closesAt;
+      form.hidden = isClosed;
+      closed.hidden = !isClosed;
+    };
+    updateRegistrationAvailability();
+    if (Number.isFinite(closesAt) && closesAt > Date.now()) {
+      window.setTimeout(updateRegistrationAvailability, closesAt - Date.now());
     }
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) updateRegistrationAvailability();
+    });
 
     form.addEventListener('submit', async (event) => {
       event.preventDefault();

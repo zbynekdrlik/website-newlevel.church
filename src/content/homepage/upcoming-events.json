@@ -5,6 +5,7 @@
       "slug": "chlapsky-vecer-2026-11-20",
       "date": "2026-11-20",
       "time": "18:00",
+      "registrationClosesAt": "2026-11-18T20:00:00+01:00",
       "tagline": "Posuň sa vpred!",
       "description": "Ak si muž, ktorý chce rásť vo viere a dosahovať v živote veľké veci, určite príď. Nie si na to sám.",
       "venue": "New Level Church",
@@ -13,7 +14,6 @@
       "imageWidth": 1122,
       "imageHeight": 1402,
       "imageAlt": "Plagát podujatia Chlapský večer",
-      "detailsUrl": "/akcie/chlapsky-vecer/",
       "registrationUrl": "/akcie/chlapsky-vecer/#prihlaska",
       "url": "/contact"
     }

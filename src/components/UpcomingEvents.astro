@@ -28,7 +28,7 @@ function formatEventDate(value: string) {
 
     <div class="editorial-events__list" data-event-list>
       {upcomingEvents.events.map((event) => (
-        <article class="editorial-event" data-event-date={event.date} data-event-time={event.time}>
+        <article class="editorial-event" data-event-date={event.date} data-event-time={event.time} data-registration-closes-at={event.registrationClosesAt}>
           <a class="editorial-event__poster" href={event.image} target="_blank" rel="noopener noreferrer" aria-label={'Zobraziť plagát: ' + event.title}>
             <img src={event.image} alt={event.imageAlt} width={event.imageWidth} height={event.imageHeight} loading="lazy" decoding="async" />
           </a>
@@ -41,8 +41,8 @@ function formatEventDate(value: string) {
             <p class="editorial-event__description">{event.description}</p>
             <p class="editorial-event__venue"><strong>{event.venue}</strong><br />{event.address}<br /><a href={event.url}>Mapa a kontakt ↗</a></p>
             <div class="editorial-event__actions">
-              <a class="editorial-button editorial-button--dark" href={event.detailsUrl}>Viac o akcii <span aria-hidden="true">↗</span></a>
-              <a class="editorial-text-link" href={event.registrationUrl}>Registrovať sa <span aria-hidden="true">↗</span></a>
+              <a class="editorial-button editorial-button--dark" href={event.registrationUrl} data-event-registration>Registrovať sa <span aria-hidden="true">↗</span></a>
+              <span class="editorial-event__closed" data-event-registration-closed hidden>Prihlasovanie ukončené</span>
             </div>
           </div>
         </article>
@@ -81,6 +81,12 @@ function formatEventDate(value: string) {
 
     for (const event of events) {
       event.hidden = (event.dataset.eventDate ?? '') < today;
+      const closesAt = Date.parse(event.dataset.registrationClosesAt ?? '');
+      const isRegistrationClosed = Number.isFinite(closesAt) && Date.now() >= closesAt;
+      const registrationLink = event.querySelector<HTMLElement>('[data-event-registration]');
+      const closedLabel = event.querySelector<HTMLElement>('[data-event-registration-closed]');
+      if (registrationLink) registrationLink.hidden = isRegistrationClosed;
+      if (closedLabel) closedLabel.hidden = !isRegistrationClosed;
       eventsList.append(event);
     }
 
@@ -88,6 +94,12 @@ function formatEventDate(value: string) {
   }
 
   updateUpcomingEvents();
+  const nextDeadline = Math.min(...Array.from(eventsList?.querySelectorAll<HTMLElement>('[data-registration-closes-at]') ?? [])
+    .map((event) => Date.parse(event.dataset.registrationClosesAt ?? ''))
+    .filter((value) => Number.isFinite(value) && value > Date.now()));
+  if (Number.isFinite(nextDeadline) && nextDeadline - Date.now() <= 2_147_483_647) {
+    window.setTimeout(updateUpcomingEvents, nextDeadline - Date.now());
+  }
   document.addEventListener('visibilitychange', () => {
     if (!document.hidden) updateUpcomingEvents();
   });
