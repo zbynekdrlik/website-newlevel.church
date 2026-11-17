@@ -76,6 +76,14 @@
   `src/content/homepage/upcoming-events.json`. Poster images live under
   `public/images/events/`. The browser hides past events using the
   `Europe/Bratislava` calendar date so a static deployment does not go stale.
+- The Chlapský večer share link is `/akcie/chlapsky-vecer/#prihlaska`.
+  Its form calls Cloudflare `functions/api/register-event.js`, which forwards
+  to `register-site-event`. The private `invitation.site_event_registrations`
+  table and Discord outbox are created by
+  `20261117120000_site_event_registrations.sql`; the Edge Function sends an
+  immediate notification and `dispatch-message-cron` retries failures using
+  the same `DISCORD_PARTY_WEBHOOK_URL` as Youth. Apply the migration before
+  deploying both Edge Functions and then the website.
 
 ## Messaging architecture
 

@@ -2,6 +2,7 @@
   "events": [
     {
       "title": "Chlapský večer SNV",
+      "slug": "chlapsky-vecer-2026-11-20",
       "date": "2026-11-20",
       "time": "18:00",
       "description": "Večer spoločenstva, podpory a Božieho slova.",
@@ -11,6 +12,7 @@
       "imageWidth": 1122,
       "imageHeight": 1402,
       "imageAlt": "Plagát podujatia Chlapský večer",
+      "registrationUrl": "/akcie/chlapsky-vecer/#prihlaska",
       "url": "/contact"
     }
   ]

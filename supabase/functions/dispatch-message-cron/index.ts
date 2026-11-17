@@ -6,6 +6,7 @@ import {
 } from "../_shared/contact.ts";
 import { dispatchDueMessages } from "../_shared/message_queue.ts";
 import { dispatchPartyDiscordNotifications } from "../_shared/party_discord.ts";
+import { dispatchSiteEventDiscordNotifications } from "../_shared/site_event_discord.ts";
 import {
   materializeDueSmsCampaigns,
   updateSmsCampaignStatuses,
@@ -44,6 +45,10 @@ Deno.serve(async (req) => {
   const campaigns = await materializeDueSmsCampaigns(admin, 10);
   const result = await dispatchDueMessages(admin, limit);
   const partyDiscord = await dispatchPartyDiscordNotifications(admin, 20);
+  const siteEventDiscord = await dispatchSiteEventDiscordNotifications(
+    admin,
+    20,
+  );
   await updateSmsCampaignStatuses(admin);
   if (!result.ok) {
     return json(
@@ -57,6 +62,7 @@ Deno.serve(async (req) => {
     success: true,
     campaigns,
     partyDiscord,
+    siteEventDiscord,
     processed: result.processed,
     results: result.results,
   });

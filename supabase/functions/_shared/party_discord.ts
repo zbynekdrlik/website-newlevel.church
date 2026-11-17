@@ -17,7 +17,11 @@ type Contact = {
   phone: string | null;
 };
 
-function cleanDiscordText(value: unknown, fallback: string, maxLength = 500) {
+export function cleanDiscordText(
+  value: unknown,
+  fallback: string,
+  maxLength = 500,
+) {
   if (typeof value !== "string") return fallback;
   const cleaned = value.replace(/[\u0000-\u001F\u007F]/g, " ").replace(
     /\s+/g,
@@ -86,7 +90,7 @@ function discordPayload(
   };
 }
 
-function retryDelaySeconds(attempts: number, retryAfter: string | null) {
+export function retryDelaySeconds(attempts: number, retryAfter: string | null) {
   const requested = Number(retryAfter);
   const backoff = Math.min(3600, 10 * 2 ** Math.min(attempts - 1, 9));
   return Math.max(
