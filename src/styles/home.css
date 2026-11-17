@@ -517,100 +517,104 @@
 
 .editorial-event {
   display: grid;
-  min-height: 10rem;
-  grid-template-columns: 6.5rem minmax(0, 1fr) 12rem 9rem;
+  grid-template-columns: minmax(0, 27rem) minmax(0, 1fr);
   align-items: center;
-  gap: clamp(1rem, 3vw, 3rem);
-  padding: 1.4rem 0;
+  gap: clamp(2rem, 6vw, 6rem);
+  padding-block: clamp(2rem, 4vw, 4rem);
   border-bottom: 1px solid rgba(5, 5, 5, 0.22);
-  color: inherit;
 }
 
-.editorial-event:hover .editorial-event__title,
-.editorial-event:focus-visible .editorial-event__title {
-  color: var(--color-primary);
+.editorial-event[hidden],
+.editorial-events__empty[hidden] {
+  display: none;
 }
 
-.editorial-event:focus-visible {
+.editorial-event__poster {
+  display: block;
+  width: 100%;
+  box-shadow: 0.65rem 0.65rem 0 rgba(5, 5, 5, 0.12);
+  transform: rotate(-1deg);
+  transition: transform 180ms ease;
+}
+
+.editorial-event__poster:hover,
+.editorial-event__poster:focus-visible {
+  transform: rotate(0);
+}
+
+.editorial-event__poster:focus-visible {
   outline: 3px solid var(--color-accent);
   outline-offset: 4px;
 }
 
-.editorial-event__date {
-  display: flex;
-  align-items: flex-start;
-  flex-direction: column;
+.editorial-event__poster img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.editorial-event__datetime {
   color: var(--color-primary);
-}
-
-.editorial-event__date strong {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: clamp(3.8rem, 5.5vw, 5.5rem);
-  font-weight: 900;
-  letter-spacing: -0.05em;
-  line-height: 0.82;
-}
-
-.editorial-event__date span {
-  margin-top: 0.45rem;
   font-family: 'Space Mono', monospace;
-  font-size: 0.7rem;
+  font-size: 0.8rem;
   font-weight: 700;
   text-transform: uppercase;
 }
 
-.editorial-event__content,
-.editorial-event__when {
-  display: flex;
-  align-items: flex-start;
-  flex-direction: column;
+.editorial-event__datetime span {
+  padding-inline: 0.25rem;
 }
 
 .editorial-event__title {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: clamp(2rem, 3.2vw, 3rem);
-  font-weight: 900;
-  line-height: 0.95;
-  text-transform: uppercase;
+  max-width: 10ch;
+  margin: 1.3rem 0;
+  font-size: clamp(3.2rem, 6vw, 6rem);
 }
 
 .editorial-event__description {
   max-width: 32rem;
-  margin-top: 0.55rem;
-  color: #4b4b4b;
-  font-size: 0.9rem;
-  line-height: 1.5;
+  margin: 0;
+  color: #343434;
+  font-size: clamp(1.05rem, 1.6vw, 1.3rem);
+  line-height: 1.6;
 }
 
-.editorial-event__when {
-  gap: 0.45rem;
+.editorial-event__venue {
+  margin: 2rem 0 0;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(5, 5, 5, 0.22);
+  color: #343434;
   font-family: 'Space Mono', monospace;
-  font-size: 0.75rem;
-  font-weight: 700;
-  line-height: 1.4;
+  font-size: 0.8rem;
+  line-height: 1.7;
 }
 
-.editorial-event__when span {
-  color: #666;
-  font-size: 0.65rem;
-  font-weight: 400;
-}
-
-.editorial-event__link {
-  display: inline-flex;
-  align-items: center;
-  justify-self: end;
-  gap: 0.45rem;
-  color: var(--color-primary);
-  font-family: 'Space Mono', monospace;
-  font-size: 0.7rem;
-  font-weight: 700;
-  text-align: right;
+.editorial-event__venue strong {
+  color: #050505;
   text-transform: uppercase;
 }
 
-.editorial-event__link span {
-  font-size: 1.1rem;
+.editorial-event__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.5rem;
+  margin-top: 1.75rem;
+}
+
+.editorial-events__empty {
+  max-width: 42rem;
+  margin: 2.5rem 0 0;
+  color: #343434;
+  font-size: 1.15rem;
+  line-height: 1.7;
+}
+
+.editorial-events__empty a {
+  color: var(--color-primary);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
 }
 
 .editorial-heading-row {
@@ -786,26 +790,16 @@
   }
 
   .editorial-event {
-    grid-template-columns: 5.5rem minmax(0, 1fr);
-    gap: 0.3rem 1.5rem;
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
   }
 
-  .editorial-event__date {
-    grid-row: span 3;
-    align-self: start;
-    padding-top: 0.25rem;
+  .editorial-event__poster {
+    max-width: 26rem;
   }
 
-  .editorial-event__when {
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 0.25rem 1rem;
-  }
-
-  .editorial-event__link {
-    justify-self: start;
-    margin-top: 0.5rem;
-    text-align: left;
+  .editorial-event__title {
+    font-size: clamp(3.3rem, 16vw, 5rem);
   }
 
   .editorial-values__grid,
@@ -924,6 +918,7 @@
   .hero-background,
   .editorial-button,
   .editorial-polaroid,
+  .editorial-event__poster,
   .editorial-video {
     transition: none;
   }

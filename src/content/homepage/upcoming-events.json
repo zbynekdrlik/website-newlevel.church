@@ -1,31 +1,17 @@
 {
   "events": [
     {
-      "title": "Štvrtkové stretnutie",
-      "weekday": 4,
-      "dayLabel": "Štvrtok",
-      "time": "19:00",
-      "description": "Spoločné stretnutie v New Level Church.",
-      "url": "/contact",
-      "linkLabel": "Ako nás nájsť"
-    },
-    {
-      "title": "New Level Youth",
-      "weekday": 5,
-      "dayLabel": "Piatok",
+      "title": "Chlapský večer SNV",
+      "date": "2026-11-20",
       "time": "18:00",
-      "description": "Jedlo, hry a čas s priateľmi pre mladých od 15 do 25 rokov.",
-      "url": "/youth",
-      "linkLabel": "Viac o Youth"
-    },
-    {
-      "title": "Nedeľná bohoslužba",
-      "weekday": 0,
-      "dayLabel": "Nedeľa",
-      "time": "10:00",
-      "description": "Príďte na spoločné uctievanie. Radi vás privítame.",
-      "url": "/contact",
-      "linkLabel": "Ako nás nájsť"
+      "description": "Večer spoločenstva, podpory a Božieho slova.",
+      "venue": "New Level Church",
+      "address": "Letná 26, 3. poschodie, Spišská Nová Ves",
+      "image": "/images/events/chlapsky-vecer-2026-11-20.jpg",
+      "imageWidth": 1122,
+      "imageHeight": 1402,
+      "imageAlt": "Plagát podujatia Chlapský večer",
+      "url": "/contact"
     }
   ]
 }

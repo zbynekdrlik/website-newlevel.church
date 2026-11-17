@@ -72,10 +72,10 @@
   `activityPhotosByTitle` in the page.
 - Homepage hero photos in `src/content/homepage/hero.json` fill the viewport;
   use large originals, not the 600×400 gallery thumbnails in `public/images/uploads/`.
-- The homepage upcoming-events section reads recurring meetings from
-  `src/content/homepage/upcoming-events.json`; its dates are calculated in the
-  browser in `Europe/Bratislava` so a static deployment does not go stale.
-  Keep its meeting times aligned with the contact and Youth pages.
+- The homepage upcoming-events section reads dated events from
+  `src/content/homepage/upcoming-events.json`. Poster images live under
+  `public/images/events/`. The browser hides past events using the
+  `Europe/Bratislava` calendar date so a static deployment does not go stale.
 
 ## Messaging architecture
 
